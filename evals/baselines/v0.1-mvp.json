@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "baseline_name": "v0.1-mvp-offline-eval",
+  "git_tag": "v0.1-mvp",
+  "evaluation_mode": "offline",
+  "case_count": 36,
+  "normalized_case_sha256": "0c761826f86e4c8fbf1d716b796574ec2f96230c422e1f0c1568c6ecc918e4a6",
+  "case_distribution": {
+    "by_concept_id": {
+      "mean_median": 11,
+      "variance_std": 7,
+      "sampling_standard_error": 9,
+      "confidence_interval": 9
+    },
+    "by_primary_dimension": {
+      "concept": 10,
+      "calculation": 0,
+      "python": 16,
+      "interpretation": 10
+    },
+    "by_observed_dimension": {
+      "concept": 36,
+      "calculation": 20,
+      "python": 16,
+      "interpretation": 20
+    },
+    "by_case_category": {
+      "calculation_correct_conclusion_wrong": 3,
+      "ci_probability_misinterpretation": 4,
+      "code_correct_interpretation_wrong": 3,
+      "concept_correct_code_wrong": 3,
+      "correct_after_hint": 3,
+      "fully_correct": 12,
+      "insufficient_information": 2,
+      "irrelevant": 2,
+      "pandas_syntax_error": 3,
+      "sd_se_confusion": 3
+    },
+    "notes": [
+      "知识点和主能力维度每个案例只计一次，因此各自合计等于 case_count。",
+      "主能力维度取题目 dimension_weights 中的最大权重；并列时按能力枚举顺序。",
+      "观察维度包含题目中权重大于 0 的所有维度，允许多维，因此合计可大于 case_count。",
+      "案例 category 允许多标签，因此 by_case_category 合计可能大于 case_count。"
+    ]
+  },
+  "metrics": {
+    "deterministic_grading_accuracy": {
+      "numerator": 30,
+      "denominator": 36,
+      "value": 0.8333333333333334,
+      "metric_scope": "成功生成报告的案例；系统完全正确判断与 expected_correct 严格匹配",
+      "exact_regression": true
+    },
+    "misconception_tag_accuracy": {
+      "numerator": 26,
+      "denominator": 36,
+      "value": 0.7222222222222222,
+      "metric_scope": "成功生成报告的案例；系统误区标签集合与人工标签集合完全相等",
+      "exact_regression": true
+    },
+    "recommended_action_match_rate": {
+      "numerator": 30,
+      "denominator": 36,
+      "value": 0.8333333333333334,
+      "metric_scope": "成功生成报告的案例；系统建议分类与 expected_action 完全相等",
+      "exact_regression": true
+    },
+    "level_one_hint_leak_rate": {
+      "numerator": 0,
+      "denominator": 3,
+      "value": 0.0,
+      "metric_scope": "成功生成报告且 hint_level=1 的案例；feedback 与 recommended_action 命中 forbidden_hint_tokens",
+      "exact_regression": true
+    },
+    "api_failure_rate": {
+      "numerator": 0,
+      "denominator": 36,
+      "value": 0.0,
+      "metric_scope": "全部离线案例中评测流程未生成 DiagnosticReport 的比例；不代表真实 OpenAI API 的在线可靠性",
+      "exact_regression": true
+    },
+    "average_latency_ms": {
+      "numerator": 408.7066999854869,
+      "denominator": 36,
+      "value": 11.352963888485748,
+      "unit": "milliseconds",
+      "metric_scope": "全部离线案例从提交到成功或失败结束的墙钟时间平均值；受机器负载影响，不进行跨运行精确相等比较",
+      "exact_regression": false
+    }
+  },
+  "python_version": "3.13.5",
+  "operating_system": "Windows-11-10.0.26200-SP0",
+  "generated_at": "2026-07-24T15:33:37.856089Z",
+  "known_limitations": [
+    "当前评测强制使用离线模式，不包含真实 OpenAI API 的网络、限流或提供商失败。",
+    "API 失败率实际表示离线评测流程未生成 DiagnosticReport 的比例。",
+    "平均延迟依赖机器和当时负载，只检查字段、类型与非负性，不做精确回归比较。",
+    "前三项准确率以成功生成报告的案例为分母；当前基线没有失败案例。",
+    "误区标签准确率要求标签集合完全相等，不分别报告 precision、recall 或 F1。",
+    "一级提示泄露率只检查报告 feedback 与 recommended_action，不检查 Streamlit UI 提示。",
+    "一级提示泄露率只有 3 个案例，样本量很小。",
+    "36 个案例与当前 12 道题共同开发，尚未建立独立盲测集，可能出现过拟合。",
+    "主能力维度按题目 dimension_weights 的最大值分类，因此 calculation 主维度为 0。",
+    "确定性判题主要依据 answer，推理或代码文本与答案矛盾时可能无法识别。",
+    "尚未通过真实学习者实验验证诊断或推荐是否改善学习效果。"
+  ]
+}
