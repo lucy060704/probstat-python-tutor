@@ -1,0 +1,277 @@
+schema_version: 1
+questions:
+  - id: mean_median_concept_01
+    title: 异常值出现时选择代表值
+    concept_id: mean_median
+    prerequisites: []
+    difficulty: 0.20
+    question_type: concept
+    prompt: 一组家庭月收入中有一个特别高的异常值。要描述典型家庭收入，更适合使用均值还是中位数？请说明理由。
+    dataset:
+      values: [5000, 5200, 5500, 5800, 50000]
+      unit: 元
+    expected_answer: median
+    numeric_tolerance: null
+    rubric:
+      - 选择中位数
+      - 说明中位数不容易被极端值拉动
+    misconception_tags: [mean_always_best, ignores_outlier]
+    dimension_weights:
+      concept: 0.70
+      calculation: 0.00
+      python: 0.00
+      interpretation: 0.30
+
+  - id: mean_median_python_01
+    title: 用 Pandas 计算中位数
+    concept_id: mean_median
+    prerequisites: []
+    difficulty: 0.30
+    question_type: python
+    prompt: 执行 `df["value"].median()` 会得到什么数值？
+    dataset:
+      dataframe:
+        value: [4, 6, 10, 20]
+      code: 'df["value"].median()'
+    expected_answer: 8.0
+    numeric_tolerance: 0.000000001
+    rubric:
+      - 知道 Pandas Series.median 会先按中间位置计算
+      - 偶数个数据取两个中间值的平均
+    misconception_tags: [uses_middle_without_averaging, confuses_mean_median]
+    dimension_weights:
+      concept: 0.20
+      calculation: 0.20
+      python: 0.60
+      interpretation: 0.00
+
+  - id: mean_median_interpretation_01
+    title: 解读偏态收入数据
+    concept_id: mean_median
+    prerequisites: []
+    difficulty: 0.40
+    question_type: interpretation
+    prompt: 五人的月收入均值为 10000 元，中位数为 6000 元。哪一个数更能描述大多数人的典型收入？为什么？
+    dataset:
+      values: [5000, 5000, 6000, 6000, 28000]
+      mean: 10000
+      median: 6000
+      unit: 元
+    expected_answer: median_better_represents_typical_income
+    numeric_tolerance: null
+    rubric:
+      - 选择 6000 元的中位数
+      - 指出 28000 元把均值向上拉高
+      - 不把均值解释为多数人的实际收入
+    misconception_tags: [mean_equals_typical_person, ignores_skew]
+    dimension_weights:
+      concept: 0.25
+      calculation: 0.00
+      python: 0.00
+      interpretation: 0.75
+
+  - id: variance_std_concept_01
+    title: 比较两组数据的离散程度
+    concept_id: variance_std
+    prerequisites: [mean_median]
+    difficulty: 0.30
+    question_type: concept
+    prompt: A、B 两组数据的均值都为 5。哪一组的方差和标准差更大？
+    dataset:
+      group_a: [5, 5, 5]
+      group_b: [3, 5, 7]
+    expected_answer: group_b
+    numeric_tolerance: null
+    rubric:
+      - 选择 B 组
+      - 说明 B 组数据离均值更远，而 A 组没有波动
+    misconception_tags: [same_mean_same_spread, range_ignored]
+    dimension_weights:
+      concept: 0.70
+      calculation: 0.10
+      python: 0.00
+      interpretation: 0.20
+
+  - id: variance_std_python_01
+    title: 理解 Pandas 样本标准差
+    concept_id: variance_std
+    prerequisites: [mean_median]
+    difficulty: 0.45
+    question_type: python
+    prompt: 对给定 Series 执行 `s.std()`，结果是多少？Pandas 默认使用样本标准差（ddof=1）。
+    dataset:
+      series: [2, 4, 6]
+      code: s.std()
+      ddof: 1
+    expected_answer: 2.0
+    numeric_tolerance: 0.000000001
+    rubric:
+      - 使用样本标准差口径
+      - 得到数值 2.0
+    misconception_tags: [uses_population_ddof, returns_variance]
+    dimension_weights:
+      concept: 0.20
+      calculation: 0.25
+      python: 0.55
+      interpretation: 0.00
+
+  - id: variance_std_interpretation_01
+    title: 用标准差判断成绩稳定性
+    concept_id: variance_std
+    prerequisites: [mean_median]
+    difficulty: 0.45
+    question_type: interpretation
+    prompt: 两个班平均分都是 75 分，A 班标准差为 2 分，B 班标准差为 8 分。哪个班的成绩更稳定？
+    dataset:
+      group_a: {mean: 75, standard_deviation: 2}
+      group_b: {mean: 75, standard_deviation: 8}
+      unit: 分
+    expected_answer: group_a_is_more_consistent
+    numeric_tolerance: null
+    rubric:
+      - 选择 A 班
+      - 说明更小的标准差表示成绩更集中、更稳定
+    misconception_tags: [larger_std_more_stable, compares_mean_only]
+    dimension_weights:
+      concept: 0.20
+      calculation: 0.00
+      python: 0.00
+      interpretation: 0.80
+
+  - id: sampling_standard_error_concept_01
+    title: 样本量对标准误的影响
+    concept_id: sampling_standard_error
+    prerequisites: [variance_std]
+    difficulty: 0.45
+    question_type: concept
+    prompt: 在总体标准差近似不变时，样本量从 25 增加到 100，样本均值的标准误约变为原来的多少？
+    dataset:
+      original_sample_size: 25
+      new_sample_size: 100
+      relation: standard_error_equals_s_divided_by_sqrt_n
+    expected_answer: 0.5
+    numeric_tolerance: 0.000000001
+    rubric:
+      - 使用标准误与样本量平方根成反比的关系
+      - 得出标准误约变为原来的一半
+    misconception_tags: [se_divides_by_n, larger_sample_larger_se]
+    dimension_weights:
+      concept: 0.65
+      calculation: 0.25
+      python: 0.00
+      interpretation: 0.10
+
+  - id: sampling_standard_error_python_01
+    title: 用 NumPy 计算标准误
+    concept_id: sampling_standard_error
+    prerequisites: [variance_std]
+    difficulty: 0.60
+    question_type: python
+    prompt: 根据给定代码 `np.std(sample, ddof=1) / np.sqrt(len(sample))`，计算样本均值的标准误。
+    dataset:
+      sample: [8, 10, 12, 14]
+      code: np.std(sample, ddof=1) / np.sqrt(len(sample))
+    expected_answer: 1.2909944487358056
+    numeric_tolerance: 0.000001
+    rubric:
+      - 使用 ddof=1 计算样本标准差
+      - 用样本标准差除以样本量的平方根
+      - 结果约为 1.291
+    misconception_tags: [omits_sqrt, wrong_ddof, returns_standard_deviation]
+    dimension_weights:
+      concept: 0.15
+      calculation: 0.25
+      python: 0.60
+      interpretation: 0.00
+
+  - id: sampling_standard_error_interpretation_01
+    title: 比较两个样本均值的精确度
+    concept_id: sampling_standard_error
+    prerequisites: [variance_std]
+    difficulty: 0.55
+    question_type: interpretation
+    prompt: 两项研究的样本标准差都是 10。研究 A 有 25 个观测，研究 B 有 100 个观测。哪项研究的样本均值通常更精确？
+    dataset:
+      study_a: {sample_size: 25, sample_standard_deviation: 10}
+      study_b: {sample_size: 100, sample_standard_deviation: 10}
+    expected_answer: study_b_is_more_precise
+    numeric_tolerance: null
+    rubric:
+      - 选择研究 B
+      - 说明相同标准差下，更大样本量产生更小标准误
+      - 将更小标准误解释为样本均值通常更精确
+    misconception_tags: [sample_size_does_not_matter, confuses_sd_se]
+    dimension_weights:
+      concept: 0.20
+      calculation: 0.00
+      python: 0.00
+      interpretation: 0.80
+
+  - id: confidence_interval_concept_01
+    title: 正确理解 95% 置信水平
+    concept_id: confidence_interval
+    prerequisites: [sampling_standard_error]
+    difficulty: 0.55
+    question_type: concept
+    prompt: 对同一总体重复抽样，并用同一种方法构造许多 95% 置信区间。95% 的含义是什么？
+    dataset:
+      confidence_level: 0.95
+      repeated_sampling: true
+    expected_answer: about_95_percent_of_intervals_cover_the_true_parameter
+    numeric_tolerance: null
+    rubric:
+      - 从重复抽样和长期覆盖率角度解释
+      - 不声称固定参数有 95% 概率落在本次区间中
+    misconception_tags: [parameter_has_95_percent_probability, data_coverage_confusion]
+    dimension_weights:
+      concept: 0.75
+      calculation: 0.00
+      python: 0.00
+      interpretation: 0.25
+
+  - id: confidence_interval_python_01
+    title: 用 Python 公式计算置信区间
+    concept_id: confidence_interval
+    prerequisites: [sampling_standard_error]
+    difficulty: 0.65
+    question_type: python
+    prompt: 代码使用 `mean + np.array([-1, 1]) * 1.96 * standard_error`。给定均值 50、标准误 2，返回的区间端点是什么？
+    dataset:
+      mean: 50
+      standard_error: 2
+      critical_value: 1.96
+      code: 'mean + np.array([-1, 1]) * 1.96 * standard_error'
+    expected_answer: [46.08, 53.92]
+    numeric_tolerance: 0.000001
+    rubric:
+      - 正确计算误差界限 1.96 × 2 = 3.92
+      - 得到下限 46.08 和上限 53.92
+    misconception_tags: [adds_margin_both_sides, omits_critical_value]
+    dimension_weights:
+      concept: 0.10
+      calculation: 0.30
+      python: 0.60
+      interpretation: 0.00
+
+  - id: confidence_interval_interpretation_01
+    title: 解读均值的置信区间
+    concept_id: confidence_interval
+    prerequisites: [sampling_standard_error]
+    difficulty: 0.70
+    question_type: interpretation
+    prompt: 某总体均值的 95% 置信区间为 [48, 52]。可以据此断言总体均值绝不可能小于 48 吗？请解释。
+    dataset:
+      confidence_interval: [48, 52]
+      confidence_level: 0.95
+      parameter: population_mean
+    expected_answer: no_the_interval_does_not_prove_values_outside_are_impossible
+    numeric_tolerance: null
+    rubric:
+      - 回答不能这样断言
+      - 说明区间反映抽样方法下与数据相容的估计范围，而不是绝对边界
+    misconception_tags: [outside_interval_impossible, interval_contains_data]
+    dimension_weights:
+      concept: 0.20
+      calculation: 0.00
+      python: 0.00
+      interpretation: 0.80
