@@ -42,6 +42,12 @@ REQUIRED_CATEGORIES = {
 BASELINE_NAME = "v0.1-mvp-offline-eval"
 BASELINE_GIT_TAG = "v0.1-mvp"
 EVALUATION_MODE = "offline"
+EVAL_ROOT = Path(__file__).resolve().parent
+NAMED_DATASET_PATHS = {
+    "v0.1": EVAL_ROOT / "cases.jsonl",
+    "development": EVAL_ROOT / "development" / "cases_v0.2_dev.jsonl",
+    "blind": EVAL_ROOT / "blind" / "cases_v0.2_blind.jsonl",
+}
 
 STRICT_BASELINE_METRICS = (
     "deterministic_grading_accuracy",
@@ -264,6 +270,33 @@ def load_cases(path: str | Path) -> list[EvalCase]:
     if missing:
         raise ValueError(f"评测案例缺少类别：{', '.join(sorted(missing))}")
     return cases
+
+
+def load_named_dataset(
+    dataset: Literal["v0.1", "development", "blind"],
+    *,
+    custom_cases_path: str | Path | None = None,
+) -> list[EvalCase]:
+    """Load one explicitly selected set while keeping v0.1 as the default."""
+
+    if dataset == "v0.1":
+        return load_cases(custom_cases_path or NAMED_DATASET_PATHS["v0.1"])
+    if custom_cases_path is not None:
+        raise ValueError("--cases 只能与 v0.1 数据集一起使用")
+
+    if __package__:
+        from evals.dataset import load_v2_cases
+    else:
+        from dataset import load_v2_cases
+
+    v2_cases = load_v2_cases(
+        NAMED_DATASET_PATHS[dataset],
+        expected_split=dataset,
+    )
+    return [
+        EvalCase.model_validate(case.to_legacy_payload())
+        for case in v2_cases
+    ]
 
 
 def normalized_case_sha256(cases: list[EvalCase]) -> str:
@@ -612,11 +645,18 @@ def _print_ratio(label: str, metric: Metric) -> None:
 
 
 def main() -> int:
+    """Run one explicitly selected evaluation set."""
     parser = argparse.ArgumentParser(description="运行离线诊断评测")
+    parser.add_argument(
+        "--dataset",
+        choices=("v0.1", "development", "blind"),
+        default="v0.1",
+        help="选择评测数据集；默认只加载冻结的 v0.1 案例",
+    )
     parser.add_argument(
         "--cases",
         type=Path,
-        default=Path(__file__).with_name("cases.jsonl"),
+        default=None,
         help="JSONL 评测案例路径",
     )
     parser.add_argument("--limit", type=int, default=None, help="仅运行前 N 个案例")
@@ -633,7 +673,19 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    cases = load_cases(args.cases)
+    if args.dataset != "v0.1" and args.cases is not None:
+        parser.error("--cases 只能与 --dataset v0.1 一起使用")
+    if args.dataset == "blind" and args.limit is not None:
+        parser.error("盲测集禁止使用 --limit，避免通过小样本聚合结果反推标签")
+    if args.dataset != "v0.1" and (
+        args.write_baseline is not None or args.check_baseline is not None
+    ):
+        parser.error("v0.1 基线写入和检查只能使用冻结的 v0.1 数据集")
+
+    cases = load_named_dataset(
+        args.dataset,
+        custom_cases_path=args.cases,
+    )
     if args.limit is not None:
         if args.limit <= 0:
             raise ValueError("--limit 必须大于 0")
@@ -643,6 +695,7 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory(prefix="probstat-evals-") as temporary_directory:
         summary = asyncio.run(run_evaluations(cases, Path(temporary_directory)))
+    print(f"数据集: {args.dataset}（{len(cases)} 个案例）")
     print_summary(summary)
     current_baseline = build_baseline(cases, summary)
 
