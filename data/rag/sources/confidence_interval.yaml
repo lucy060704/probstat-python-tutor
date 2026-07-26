@@ -1,0 +1,98 @@
+source_schema_version: "1.0"
+source_id: confidence_interval_core
+version: "0.1.0"
+title: 置信区间基础
+language: zh-CN
+concept_id: confidence_interval
+
+learning_objectives:
+  - 理解置信区间由点估计、不确定性尺度和临界值共同构成。
+  - 能从重复抽样和长期覆盖率角度解释置信水平。
+  - 能区分区间估计、参数概率和原始数据覆盖范围。
+
+prerequisite_knowledge:
+  - 理解样本均值、标准差和标准误。
+  - 能进行加减法、乘法并理解区间上下限。
+
+concept_explanation:
+  - >-
+    点估计用一个数概括未知参数，但单个数字没有直接展示抽样不确定性。
+    置信区间在点估计两侧加入误差范围，用一段区间表达与数据和方法相容的参数范围。
+  - >-
+    频率学派的置信水平描述构造方法的长期表现：如果在相同条件下重复抽样并重复构造区间，
+    一定比例的区间会覆盖真实参数。参数在每次研究中被视为固定而未知。
+  - >-
+    区间宽度受到标准误、置信水平、样本量和模型条件影响。
+    更高置信水平通常需要更宽区间；更大样本量在其他条件相近时通常会减小标准误。
+
+formula_explanation:
+  - name: 常见双侧置信区间结构
+    expression: "点估计 ± 临界值 × 标准误"
+    symbols:
+      point_estimate: 根据样本得到的参数估计值
+      critical_value: 由置信水平和参考分布决定的临界值
+      standard_error: 点估计的抽样波动尺度
+    meaning: 临界值与标准误的乘积形成误差范围，再从点估计向两个方向扩展。
+    assumptions:
+      - 点估计的抽样分布能够由所选参考分布合理近似。
+      - 标准误计算与抽样设计和统计模型一致。
+      - 数据收集过程满足所用区间方法的关键条件。
+    cautions:
+      - 临界值不是所有置信水平和所有问题都相同。
+      - 区间公式不能弥补严重的抽样偏差或模型设定错误。
+  - name: 置信水平的长期覆盖含义
+    expression: "覆盖率 = 长期重复过程中包含真实参数的区间比例"
+    symbols:
+      coverage_rate: 同一构造方法在重复抽样中的长期覆盖比例
+      parameter: 固定但未知的总体参数
+    meaning: 置信水平是区间构造程序的性质，而不是对单个固定参数重新赋予随机概率。
+    assumptions:
+      - 每次重复都遵循相同的数据生成和区间构造方法。
+      - 所讨论的覆盖率是长期频率意义上的比例。
+    cautions:
+      - 不能把置信区间解释成原始数据中某个比例必定位于区间内。
+      - 区间外的参数值不是逻辑上绝对不可能，只是与当前数据和方法较不相容。
+
+python_connection:
+  - library: NumPy
+    api: 数组加减法与临界值乘标准误
+    purpose: 根据已确认的点估计、临界值和标准误计算区间上下限。
+    input_expectation: 输入前应先确认标准误口径、临界值来源和上下限顺序。
+    interpretation_caution: 数组运算只完成代数步骤，不会检查抽样条件或区间方法是否合适。
+  - library: SciPy
+    api: scipy.stats 中分布的区间或分位数函数
+    purpose: 根据参考分布和置信水平获得临界值或构造区间。
+    input_expectation: 应明确使用的分布、自由度、位置参数和尺度参数。
+    interpretation_caution: 不同函数对 scale 的定义可能不同，不能把样本标准差直接当成均值标准误。
+  - library: pandas
+    api: DataFrame 或 Series 的描述性统计配合 SciPy
+    purpose: 先整理样本量、均值和标准差，再把明确的统计量传入区间计算。
+    input_expectation: 需要先处理缺失值、分组方式和数据类型。
+    interpretation_caution: 分组后每组样本量不同，标准误和区间宽度也可能不同。
+
+data_interpretation_guidance:
+  - 解释置信区间时同时说明参数对象、置信水平、区间构造方法和数据来源。
+  - 不把单次区间描述为“参数有某个概率落在里面”，应从方法的长期覆盖性质说明。
+  - 不把参数区间当作个体观测值的正常范围，也不把它当作未来单个观测的预测区间。
+  - 比较区间宽度时同时检查样本量、变异程度、置信水平和使用的方法。
+
+common_misconceptions:
+  - misconception: 置信水平表示固定参数在本次区间内的概率。
+    why_incorrect: 在频率学派框架中，参数固定而区间随样本变化；置信水平描述构造方法的长期覆盖率。
+    better_question: 如果重复进行同样的抽样和区间构造，哪些对象会随样本改变？
+  - misconception: 区间之外的参数值被证明绝对不可能。
+    why_incorrect: 区间表达当前数据和方法下相容性较高的范围，不是逻辑上的绝对边界。
+    better_question: 区间能够排除到什么程度，是否还受到模型条件和抽样误差影响？
+  - misconception: 置信区间包含的是大部分原始数据。
+    why_incorrect: 参数置信区间针对总体参数，原始观测范围和预测区间是不同问题。
+    better_question: 当前区间估计的对象是总体参数、个体观测还是未来预测值？
+
+reflective_questions:
+  - 为什么提高置信水平通常会改变区间宽度？
+  - 两项研究给出宽度不同的区间时，应检查哪些数据和方法条件？
+  - 如何向初学者区分参数置信区间与未来观测的预测区间？
+
+summary:
+  - 置信区间把点估计与抽样不确定性结合起来。
+  - 置信水平描述区间构造方法在重复抽样中的长期覆盖表现。
+  - Python 可以完成区间计算，但正确解释仍依赖参数对象、抽样条件、标准误和参考分布。

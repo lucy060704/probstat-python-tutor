@@ -1,0 +1,98 @@
+source_schema_version: "1.0"
+source_id: sampling_standard_error_core
+version: "0.1.0"
+title: 抽样与标准误基础
+language: zh-CN
+concept_id: sampling_standard_error
+
+learning_objectives:
+  - 区分样本、总体、样本统计量和抽样分布。
+  - 理解标准差描述个体差异，而标准误描述统计量的抽样波动。
+  - 能说明样本量、样本标准差与均值标准误之间的关系。
+
+prerequisite_knowledge:
+  - 理解均值、方差和样本标准差。
+  - 能进行平方根运算，并理解分母增大通常会使比值减小。
+
+concept_explanation:
+  - >-
+    抽样是从目标总体中选取一部分观测来了解总体。即使抽样方法相同，
+    不同随机样本得到的样本均值也通常不会完全相同，这种变化形成样本均值的抽样分布。
+  - >-
+    标准差描述同一个样本中个体观测值的差异。标准误描述如果重复抽样，
+    某个统计量会在不同样本之间波动多少。两者回答的问题不同。
+  - >-
+    在抽样条件和总体变异程度近似不变时，增加样本量通常会减小均值的标准误。
+    这表示样本均值作为总体均值估计值时通常更精确，但不保证样本没有偏差。
+
+formula_explanation:
+  - name: 样本均值的估计标准误
+    expression: "SE(x̄) = s / √n"
+    symbols:
+      SE_x_bar: 样本均值的估计标准误
+      s: 样本标准差
+      n: 样本量
+    meaning: 用样本标准差估计总体波动后，再除以样本量的平方根，得到样本均值的典型抽样波动尺度。
+    assumptions:
+      - 样本来自适合研究目标的抽样过程。
+      - 观测之间的依赖结构不会让简单公式失效。
+      - 样本标准差能够合理反映目标总体的变异程度。
+    cautions:
+      - 分母是样本量的平方根，不是样本量本身。
+      - 更小的标准误不代表个体观测值之间的差异更小。
+  - name: 样本量变化与标准误比例
+    expression: "在变异程度近似不变时，SE 与 1/√n 成正比"
+    symbols:
+      SE: 统计量的标准误
+      n: 样本量
+    meaning: 样本量增加会降低抽样波动，但降低速度由平方根关系决定。
+    assumptions:
+      - 比较的研究具有近似相同的变异程度和抽样条件。
+      - 使用的是同一种统计量和一致的标准误定义。
+    cautions:
+      - 不能忽略标准差同时变化的情况。
+      - 增加样本量不能自动修复选择偏差、测量偏差或混杂问题。
+
+python_connection:
+  - library: NumPy
+    api: numpy.std、numpy.sqrt 和 len
+    purpose: 先按样本口径计算标准差，再根据样本量计算均值的估计标准误。
+    input_expectation: 输入应是一维数值样本，并明确自由度、缺失值和观测独立性。
+    interpretation_caution: 代码算出的标准误只反映公式所描述的抽样波动，不会检查抽样是否有偏。
+  - library: pandas
+    api: Series.sem
+    purpose: 计算 Series 中均值的估计标准误。
+    input_expectation: 需要确认 Series 的有效观测数、缺失值规则和自由度设置。
+    interpretation_caution: 便捷函数不会替代对抽样设计和观测依赖性的判断。
+  - library: SciPy
+    api: scipy.stats.sem
+    purpose: 在科学计算流程中计算标准误，并允许明确缺失值和自由度选项。
+    input_expectation: 应检查输入数组维度以及 axis、ddof 和 nan_policy 等参数。
+    interpretation_caution: 参数设置不同会产生不同口径，报告结果时应保留这些设定。
+
+data_interpretation_guidance:
+  - 看到“更精确”时，先确认讨论的是样本统计量的重复抽样波动，而不是个体数据更集中。
+  - 比较两个标准误时，应同时检查样本量、样本标准差、抽样方法和数据依赖结构。
+  - 标准误较小表示统计量在重复抽样中通常更稳定，但不等于估计一定接近真实参数。
+  - 报告标准误时说明它对应哪个统计量，例如均值、比例或回归系数。
+
+common_misconceptions:
+  - misconception: 标准差和标准误都是“数据有多分散”，可以互换。
+    why_incorrect: 标准差描述个体观测值，标准误描述统计量在重复抽样中的波动。
+    better_question: 当前要描述的是样本内部个体差异，还是样本统计量的不确定性？
+  - misconception: 样本量扩大多少倍，标准误就按相同倍数缩小。
+    why_incorrect: 常见均值标准误公式包含样本量的平方根，变化不是简单的线性倒数。
+    better_question: 样本量变化后，它的平方根改变了多少？
+  - misconception: 标准误很小就证明研究没有偏差。
+    why_incorrect: 标准误主要描述随机抽样波动，系统性的选择偏差或测量偏差可能仍然存在。
+    better_question: 除随机误差外，抽样和测量过程还可能引入哪些系统性问题？
+
+reflective_questions:
+  - 为什么同一总体的两个随机样本可能得到不同的样本均值？
+  - 如果样本量增加但样本标准差也明显增加，能否只根据样本量判断标准误变化？
+  - 一项研究的标准误很小，还需要检查哪些抽样质量问题？
+
+summary:
+  - 标准差描述个体差异，标准误描述统计量的抽样波动。
+  - 均值标准误通常与样本标准差成正比，与样本量平方根成反比。
+  - 增大样本量可以降低随机波动，但不能自动消除抽样偏差或测量问题。

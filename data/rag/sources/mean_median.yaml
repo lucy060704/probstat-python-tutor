@@ -1,0 +1,97 @@
+source_schema_version: "1.0"
+source_id: mean_median_core
+version: "0.1.0"
+title: 均值与中位数基础
+language: zh-CN
+concept_id: mean_median
+
+learning_objectives:
+  - 理解均值和中位数分别如何描述一组数据的中心位置。
+  - 能根据数据分布、偏态和极端值选择更合适的代表值。
+  - 能说明 Python 计算结果的统计含义，而不只报告一个数字。
+
+prerequisite_knowledge:
+  - 能比较数值大小并进行加法和除法。
+  - 知道排序是把数据按从小到大或从大到小排列。
+
+concept_explanation:
+  - >-
+    均值把所有观测值相加后除以观测个数，因此每个观测值都会影响结果。
+    它适合描述分布较为对称、没有特别极端观测值的数据中心。
+  - >-
+    中位数先对数据排序，再寻找位于中间位置的值。观测个数为偶数时，
+    中位数由中间两个位置共同决定。中位数更关注位置，对少数极端值通常更稳健。
+  - >-
+    “更合适”取决于分析目的。均值适合继续进行许多代数运算，
+    中位数则常用于偏态明显或包含极端值的数据。选择统计量时应同时说明数据特征。
+
+formula_explanation:
+  - name: 算术均值
+    expression: "x̄ = (x₁ + x₂ + ... + xₙ) / n"
+    symbols:
+      x_bar: 样本中所有观测值的算术均值
+      x_i: 第 i 个观测值
+      n: 观测值个数
+    meaning: 均值是全部观测值的总和在每个观测上的平均分配结果。
+    assumptions:
+      - 每个观测值使用相同权重。
+      - 数据数值具有可进行加法和除法的含义。
+    cautions:
+      - 极端大值或极端小值可能明显拉动均值。
+      - 均值不一定等于任何一个真实观测值。
+  - name: 中位数的位置规则
+    expression: "先排序，再根据观测个数寻找中间位置"
+    symbols:
+      ordered_values: 按大小排列后的观测值
+      n: 观测值个数
+    meaning: 中位数把排序后的数据分成数量大致相等的两部分。
+    assumptions:
+      - 数据能够按大小排序。
+      - 缺失值已经按照明确规则处理。
+    cautions:
+      - 不能在未排序的数据中直接取原始顺序的中间项。
+      - 偶数个观测值时不能只随意选择一个中间位置。
+
+python_connection:
+  - library: pandas
+    api: Series.mean
+    purpose: 计算一列数值的算术均值，适合在明确缺失值处理规则后使用。
+    input_expectation: 输入应是数值型 Series，并先确认缺失值、单位和异常值处理方式。
+    interpretation_caution: 函数返回的数字不会自动说明分布是否偏斜，也不会判断均值是否具有代表性。
+  - library: pandas
+    api: Series.median
+    purpose: 计算一列数值排序后的中位数。
+    input_expectation: 输入应能转换为可排序的数值，并明确是否忽略缺失值。
+    interpretation_caution: 中位数对极端值较稳健，但不会描述数据的全部差异和离散程度。
+  - library: NumPy
+    api: numpy.mean 和 numpy.median
+    purpose: 对数组计算均值或中位数，便于在数组分析流程中使用。
+    input_expectation: 先检查数组形状、数据类型和缺失值表示方式。
+    interpretation_caution: 轴参数会改变计算方向；在二维数据中应说明是按行、按列还是整体计算。
+
+data_interpretation_guidance:
+  - 先查看数据的最小值、最大值、排序结果和分布形状，再选择代表值。
+  - 当均值和中位数相差较大时，应检查偏态、极端值和数据录入问题。
+  - 报告代表值时同时写明单位、样本范围和缺失值处理方法。
+  - 不要把均值解释为“大多数人的实际取值”，也不要把中位数解释为数据中最常出现的值。
+
+common_misconceptions:
+  - misconception: 均值使用了全部数据，所以在任何场景中都一定优于中位数。
+    why_incorrect: 使用全部数据也意味着均值会受到极端值影响；统计量是否合适取决于分布和分析目的。
+    better_question: 数据是否对称，是否存在会明显改变均值的极端观测？
+  - misconception: 中位数就是原始数据顺序中位于中间的那个数。
+    why_incorrect: 中位数的位置必须在排序后确定，原始记录顺序通常没有统计意义。
+    better_question: 数据排序后，中间位置由一个观测还是两个观测共同决定？
+  - misconception: 均值比中位数大就表示数据计算错误。
+    why_incorrect: 右偏分布中的少数较大值可能自然地把均值拉到中位数上方。
+    better_question: 两个统计量的差异能否由偏态或极端值解释？
+
+reflective_questions:
+  - 如果在一组数值中加入一个远高于其他值的新观测，均值和中位数可能分别怎样变化？
+  - 当均值与中位数接近时，还需要查看哪些信息才能判断数据是否稳定？
+  - 在向非技术读者报告“典型水平”时，你会如何说明选择均值或中位数的理由？
+
+summary:
+  - 均值利用所有数值，适合对称且没有明显极端值的数据。
+  - 中位数基于排序位置，对少数极端值通常更稳健。
+  - Python 可以完成计算，但统计量选择和数据解释仍需要结合分布、单位与分析目标。

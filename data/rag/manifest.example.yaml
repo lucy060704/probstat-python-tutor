@@ -1,0 +1,85 @@
+manifest_version: "1.0"
+sources:
+  - source_id: mean_median_core
+    title: 均值与中位数课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - mean_median
+    file_path: data/rag/sources/mean_median.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000001
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-07-26T09:00:00+08:00
+
+  - source_id: variance_std_core
+    title: 方差与标准差课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - variance_std
+    file_path: data/rag/sources/variance_std.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000002
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-07-26T09:00:00+08:00
+
+  - source_id: sampling_standard_error_core
+    title: 抽样与标准误课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - sampling_standard_error
+    file_path: data/rag/sources/sampling_standard_error.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000003
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: medium
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-07-26T09:00:00+08:00
+
+  - source_id: confidence_interval_core
+    title: 置信区间课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - confidence_interval
+    file_path: data/rag/sources/confidence_interval.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000004
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: medium
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-07-26T09:00:00+08:00

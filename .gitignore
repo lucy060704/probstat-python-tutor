@@ -36,3 +36,8 @@ data/*.sqlite3-wal
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Private RAG source files
+data/rag/private_sources/
+data/rag/normalized_private/
+data/rag/indexes/
