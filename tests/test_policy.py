@@ -54,7 +54,7 @@ def test_weakest_dimension_is_prioritized() -> None:
     decision = select_next_question(state, _questions())
 
     assert decision.target_dimension == CapabilityDimension.PYTHON
-    assert decision.question_id == "mean_median_python_01"
+    assert decision.question_id == "data_quality_python_01"
 
 
 def test_two_failures_choose_lower_difficulty_and_level_one_hint() -> None:
@@ -84,7 +84,11 @@ def test_two_successes_choose_higher_difficulty() -> None:
 
 
 def test_insufficient_prerequisite_returns_blocked_status() -> None:
-    questions = _questions()
+    questions = [
+        question
+        for question in _questions()
+        if question.concept_id in {ConceptId.MEAN_MEDIAN, ConceptId.VARIANCE_STD}
+    ]
     foundational_ids = {
         question.id for question in questions if question.concept_id == ConceptId.MEAN_MEDIAN
     }
@@ -98,7 +102,11 @@ def test_insufficient_prerequisite_returns_blocked_status() -> None:
 
 
 def test_prerequisite_at_exact_threshold_is_allowed() -> None:
-    questions = _questions()
+    questions = [
+        question
+        for question in _questions()
+        if question.concept_id in {ConceptId.MEAN_MEDIAN, ConceptId.VARIANCE_STD}
+    ]
     mastery = create_initial_state().mastery.copy()
     mastery[ConceptId.MEAN_MEDIAN] = MasteryScores(
         concept=0.6, calculation=0.6, python=0.6, interpretation=0.6
@@ -118,7 +126,11 @@ def test_prerequisite_at_exact_threshold_is_allowed() -> None:
 
 
 def test_recent_three_questions_are_not_repeated() -> None:
-    questions = _questions()
+    questions = [
+        question
+        for question in _questions()
+        if question.concept_id == ConceptId.MEAN_MEDIAN
+    ]
     state = create_initial_state()
     grade = GradeResult(score=0.0, is_correct=False)
     for question in questions[:3]:

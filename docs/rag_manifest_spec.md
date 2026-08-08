@@ -12,14 +12,14 @@ Manifest 是 RAG 课程资料的登记表。它回答以下问题：
 - 项目被允许如何使用资料；
 - 资料是否可能泄露题目答案。
 
-本规范定义资料元数据、课程正文的数据结构，以及任务 3.2 的安全加载与完整性校验。
-它仍不定义切片、Embedding、索引或检索算法。
+本规范定义资料元数据、课程正文、安全加载与完整性校验，并记录 G3.1 本地确定性检索边界。
 
 当前实现位于 `src/probstat_tutor/rag/schemas.py`，使用 Pydantic 校验。
 课程正文合同和加载器分别位于 `src/probstat_tutor/rag/source_schemas.py` 与
-`src/probstat_tutor/rag/loader.py`。`data/rag/manifest.example.yaml` 仍是无正文的
+`src/probstat_tutor/rag/loader.py`。切片、索引和检索位于
+`src/probstat_tutor/rag/retrieval.py`。`data/rag/manifest.example.yaml` 仍是无正文的
 格式示例，其中 checksum 是占位值；`data/rag/manifest.yaml` 是正式登记表，其中
-checksum 来自四份课程资料的真实文件字节。
+checksum 来自 15 份团队原创课程资料的真实文件字节。
 
 ## 2. 顶层结构
 
@@ -93,8 +93,7 @@ manifest 版本和迁移说明，不能静默改变 1.0 的含义。
 - `public-domain`
 - `permission-required`
 
-`permission-required` 表示授权尚未完成。后续摄取流程必须根据授权状态决定是否允许进入
-检索索引；本任务只保存合同，不实现该策略。
+`permission-required` 表示授权尚未完成，不能进入比赛本地检索索引。
 
 ### allowed_usage
 
@@ -184,8 +183,10 @@ checksum = "sha256:" + sha256(file_bytes).hexdigest()
 | `reflective_questions` | 不带标准答案的反思问题 |
 | `summary` | 简短复习要点 |
 
-正文禁止包含题库或评测内部字段，例如 `expected_answer`、`numeric_tolerance`、
-`rubric`、`dimension_weights`、`misconception_tags` 和任何以 `expected_` 开头的字段。
+正文禁止包含题库或评测内部字段，例如 `expected_answer`、`correct_answer`、`ground_truth`、
+`case_id`、`eval_case_id`、`numeric_tolerance`、`rubric`、`dimension_weights`、
+`grader_findings`、`misconception_tag(s)`、`recommendation_rule_id` 和任何以 `expected_`
+开头的字段。试图要求系统忽略规则、泄露答案或修改分数的资料文本也会被拒绝。
 加载器还会拒绝与当前题库完整题干完全相同的正文文本。这些检查用于维持课程资料与题库、
 评测数据之间的边界，但不能代替人工内容审查。
 
@@ -215,7 +216,7 @@ loaded = load_rag_source(manifest.sources[0], project_root)
 8. 读取真实字节并计算 SHA-256；
 9. 对照 manifest 中的 checksum；
 10. 按 UTF-8 解码并使用 `yaml.safe_load` 解析；
-11. 检查禁用字段和完整题干复制；
+11. 检查禁用字段、资料内指令注入和完整题干复制；
 12. 通过 `RagSourceDocument` schema；
 13. 双向核对 `source_id`、`version`、`concept_id` 和 `language`；
 14. 根据用途、授权和泄露风险计算切片资格；
@@ -254,22 +255,50 @@ loaded = load_rag_source(manifest.sources[0], project_root)
 `eligible_for_chunking=false` 及明确原因。`high` 或 `prohibited` 风险资料不会静默进入
 后续流程，也不会伪装成“文件加载失败”。
 
-## 10. 当前能力边界
+这是通用加载资格；比赛正式 `LocalRagIndex` 还会再次收紧为：
 
-任务 3.2 只能证明：
+- `source_type=project_authored`；
+- `license=project-owned`；
+- `answer_leakage_risk=low`；
+- `allowed_usage` 同时包含 `retrieval` 和 `quotation`；
+- 资料必须是 manifest 登记且位于受限目录内的 YAML。
+
+## 10. G3.1 当前能力与边界
+
+当前实现可以证明：
 
 - 资料格式合法；
 - manifest 与正文身份一致；
 - 文件内容与登记的 checksum 一致；
 - 路径被限制在专用资料目录内；
-- 系统能判断资料是否有资格进入未来的切片阶段。
+- 系统能判断资料是否有资格进入比赛本地索引；
+- 15 张登记知识卡可重建为 478 个稳定切片和一个稳定索引指纹；
+- 检索结果包含实际切片、来源版本、精确摘录和双层 checksum；
+- 检索遵守知识点过滤、知识节点重排、top-k、每来源上限和上下文预算；
+- 提示等级限制公式表达式、Python 连接和总结的披露时机；
+- 无匹配或索引不可用时显式降级，不编造引用，也不阻断判题与学习状态更新。
 
-本任务没有完成 RAG，没有检索能力，也没有证明误区识别或教学效果得到改善。
+当前仍没有证明 RAG 改善了误区识别或教学效果；Recall@3、引用正确率和真实学习者效果属于
+后续冻结评测与试点任务。15 张资料仍为 `pending_teacher_review`，不能写成教师已批准。
 
-## 11. 任务 3.3 接口建议
+## 11. 本地检索接口
 
-后续切片模块应只接收 `LoadedRagSource`，并在入口再次要求
-`eligibility.eligible_for_chunking is True`。建议输出独立的 `RagChunk` 模型，至少包含
-稳定的 `chunk_id`、`source_id`、`source_version`、`concept_id`、正文位置、内容、
-内容 checksum 和泄露风险。任务 3.3 不应重新绕过加载器直接读取路径，也不应在切片阶段
-引入向量数据库。
+```python
+from probstat_tutor.config import PROJECT_ROOT
+from probstat_tutor.rag import RagQuery, build_local_rag_index
+from probstat_tutor.schemas import ConceptId
+
+index = build_local_rag_index(PROJECT_ROOT)
+result = index.search(
+    RagQuery(
+        text="均值 中位数 异常值",
+        concept_id=ConceptId.MEAN_MEDIAN,
+        disclosure_level=1,
+    )
+)
+```
+
+该接口只使用标准库和已有 Pydantic/YAML 依赖，不使用 Embedding、向量数据库、网络或模型。
+`TutorAgent` 在确定性判题后从题目标题、题干、知识点和知识节点构造查询；不把标准答案、rubric、
+误区标签、规则 ID 或学习者代码放入查询。检索不是第六个模型工具，诊断中的状态和引用由服务端
+锁定。命令行演示见 `scripts/g3_local_rag_demo.py`。

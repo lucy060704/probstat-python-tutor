@@ -19,7 +19,6 @@ from probstat_tutor.config import Settings
 from probstat_tutor.curriculum import load_default_question_bank
 from probstat_tutor.schemas import (
     CapabilityDimension,
-    ConceptId,
     DiagnosticReport,
     Question,
 )
@@ -91,7 +90,7 @@ KNOWN_BASELINE_LIMITATIONS = [
     "一级提示泄露率只有 3 个案例，样本量很小。",
     "36 个案例与当前 12 道题共同开发，尚未建立独立盲测集，可能出现过拟合。",
     "主能力维度按题目 dimension_weights 的最大值分类，因此 calculation 主维度为 0。",
-    "确定性判题主要依据 answer，推理或代码文本与答案矛盾时可能无法识别。",
+    "多证据判题使用受限词组和 AST 特征；未进入规则库的同义表达或复杂否定仍可能漏判。",
     "尚未通过真实学习者实验验证诊断或推荐是否改善学习效果。",
 ]
 
@@ -352,10 +351,7 @@ def analyze_case_distribution(
         category_counts.update(case.categories)
 
     return CaseDistribution(
-        by_concept_id={
-            concept.value: concept_counts[concept.value]
-            for concept in ConceptId
-        },
+        by_concept_id=dict(sorted(concept_counts.items())),
         by_primary_dimension={
             dimension.value: primary_dimension_counts[dimension.value]
             for dimension in CapabilityDimension

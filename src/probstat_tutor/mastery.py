@@ -15,6 +15,7 @@ HINT_CONFIDENCE: dict[int, float] = {
     1: 0.90,
     2: 0.75,
     3: 0.60,
+    4: 0.45,
 }
 
 
@@ -34,7 +35,7 @@ def apply_attempt(
     """Return a new state after one graded attempt; never mutate the input state."""
 
     if hint_level not in HINT_CONFIDENCE:
-        raise ValueError("hint_level 必须是 0、1、2 或 3。")
+        raise ValueError("hint_level 必须是 0、1、2、3 或 4。")
 
     adjusted_evidence = _clip(grade.score * HINT_CONFIDENCE[hint_level])
     old_scores = state.mastery[question.concept_id]

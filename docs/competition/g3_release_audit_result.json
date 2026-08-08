@@ -1,0 +1,968 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "g1_g3_local_engineering",
+  "metrics": {
+    "deep_unit_count": 8,
+    "question_count": 33,
+    "knowledge_node_count": 33,
+    "knowledge_edge_count": 46,
+    "textbook_chapter_mapping_count": 22,
+    "rag_source_count": 15,
+    "rag_chunk_count": 478,
+    "rag_index_fingerprint": "sha256:5b301d0c26f277080db8ca92a8036cf0e011eead0020a5860cd42779e3c3343e"
+  },
+  "checks": [
+    {
+      "check_id": "g2_eight_deep_units",
+      "status": "pass",
+      "evidence": "Pydantic 课程目录加载成功，深度单元=8"
+    },
+    {
+      "check_id": "g2_verifiable_question_bank",
+      "status": "pass",
+      "evidence": "题目总数=33；每单元题数=data_quality:3,descriptive_statistics:6,probability_simulation:3,common_distributions:3,joint_correlation:3,sampling_inference:5,estimation_confidence_interval:5,hypothesis_testing:5；每单元均覆盖 concept/python/interpretation"
+    },
+    {
+      "check_id": "g2_knowledge_graph_and_textbook_directory",
+      "status": "pass",
+      "evidence": "知识节点=33，边=46，教材目录映射=8+14 章（目录目标，不宣称全部深度实现）"
+    },
+    {
+      "check_id": "teacher_review_status_not_overclaimed",
+      "status": "pass",
+      "evidence": "8 个单元及其正式题目保持 pending_teacher_review，未伪造教师批准"
+    },
+    {
+      "check_id": "g3_local_rag_rebuild",
+      "status": "pass",
+      "evidence": "原创来源=15，切片=478，fingerprint=sha256:5b301d0c26f277080db8ca92a8036cf0e011eead0020a5860cd42779e3c3343e"
+    },
+    {
+      "check_id": "g3_2_frozen_retriever_and_evaluator",
+      "status": "pass",
+      "evidence": "retrieval.py=5e0d2f01c151204cdfe7d3e31c3754f201ae6f9fae4d550c8431e8dca9805371；rag_eval.py=9a59205a1a1adf7ae2fbf29e1790ab8acc46ea24d7e0f20113fbea07f0d5cd7a"
+    },
+    {
+      "check_id": "g3_public_demo_artifacts",
+      "status": "pass",
+      "evidence": "docs/competition/g3_3_demo_result.json=pass；docs/competition/g3_4_api_contract_result.json=pass；docs/competition/g3_5_reliability_result.json=pass"
+    },
+    {
+      "check_id": "g3_student_teacher_visual_evidence",
+      "status": "pass",
+      "evidence": "G3.3 学生/教师旅程截图=11"
+    },
+    {
+      "check_id": "g1_g3_phase_evidence_complete",
+      "status": "pass",
+      "evidence": "阶段证据齐全"
+    },
+    {
+      "check_id": "learner_code_never_executed",
+      "status": "pass",
+      "evidence": "运行时代码未发现 eval/exec/compile/os.system 调用"
+    },
+    {
+      "check_id": "platform_independent_runtime",
+      "status": "pass",
+      "evidence": "app/src/scripts/pyproject 未绑定 ADP 或赛事域名"
+    },
+    {
+      "check_id": "release_allowlist_excludes_private_state_and_blind_data",
+      "status": "pass",
+      "evidence": "交付清单排除 PDF、SQLite、日志、缓存、private、blind 与 holdout"
+    },
+    {
+      "check_id": "release_text_has_no_key_material",
+      "status": "pass",
+      "evidence": "交付文本未匹配私钥、OpenAI 风格密钥或腾讯 SecretId"
+    }
+  ],
+  "release_artifacts": [
+    {
+      "path": ".env.example",
+      "size_bytes": 445,
+      "sha256": "3523294eea5d1b4e0c6624fe5f87b5926e7a0bdd7319a777be520efe1de43005"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 678,
+      "sha256": "678ddecd9a78d9a3e2cf23fe1ffdd2dfa10a2cb8e2c9ab90c356ffcee682fafd"
+    },
+    {
+      "path": "AGENTS.md",
+      "size_bytes": 2102,
+      "sha256": "e0c9d2673c5e083a378b2ea251e3b772c165bd39b4bd159aba214b84ec0ee7e1"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 14977,
+      "sha256": "ec29da719da705b7d02e97d7fadc284cfd893e965a48ce81c1a590a782fbd02f"
+    },
+    {
+      "path": "app.py",
+      "size_bytes": 14420,
+      "sha256": "b337e39384b33c8ee8c697bb0935bb4954353703a91755e2b168c5dd635c545e"
+    },
+    {
+      "path": "data/curriculum_catalog.yaml",
+      "size_bytes": 35468,
+      "sha256": "ce8247fdbde6a4ae31b129efb74c3ae3bf902598cc1d43975daf15680aa94806"
+    },
+    {
+      "path": "data/questions.yaml",
+      "size_bytes": 207720,
+      "sha256": "02c0a14426b021f83504d15c5f8457a59ed7fdae831e6243824c390d4604a81c"
+    },
+    {
+      "path": "data/rag/manifest.example.yaml",
+      "size_bytes": 7789,
+      "sha256": "ddceff1b3e926af359ad13f372a547abcb4ce3ed0e99786beb2ca6a4adfca18f"
+    },
+    {
+      "path": "data/rag/manifest.yaml",
+      "size_bytes": 13131,
+      "sha256": "9f2ca350b27a75de5aaf271a2a4b08b27646cc3f2476d9fdbffb58f28e4733b1"
+    },
+    {
+      "path": "data/rag/sources/ab_experiment_analysis.yaml",
+      "size_bytes": 6000,
+      "sha256": "0da74d059952945eec32190dbde783abb1a51b6c22ebd37a1af208437b8b5731"
+    },
+    {
+      "path": "data/rag/sources/confidence_interval.yaml",
+      "size_bytes": 8207,
+      "sha256": "3f4a6ae3e9c2811a7f9723e79b1069de990d5139c5b8089dc040ea1d4db27516"
+    },
+    {
+      "path": "data/rag/sources/continuous_distributions.yaml",
+      "size_bytes": 5198,
+      "sha256": "5900c161dc5bdb8a7062af6add094f43ea050f5b45353e08ffc4e1e46e905076"
+    },
+    {
+      "path": "data/rag/sources/correlation_groupby.yaml",
+      "size_bytes": 5768,
+      "sha256": "4eea6662d9d51d9e7fa58de80f4aa07cde31ec6e9fe6cd71177296ce8ef694ae"
+    },
+    {
+      "path": "data/rag/sources/data_quality.yaml",
+      "size_bytes": 7552,
+      "sha256": "b39114eca8c770f27a1afee0f878e2419d49f0e29b627b71d887cf6989c12f9f"
+    },
+    {
+      "path": "data/rag/sources/discrete_distributions.yaml",
+      "size_bytes": 5804,
+      "sha256": "1a438e9bec4ca0203b180f3b3a3d4494cf81b39ec08f5f4b525490bad61fb8a8"
+    },
+    {
+      "path": "data/rag/sources/hypothesis_testing_decisions.yaml",
+      "size_bytes": 5603,
+      "sha256": "e55358f2ce0a1fa019a8a5140bdad6f701bc0340c2c3f94adb97dba4159497db"
+    },
+    {
+      "path": "data/rag/sources/joint_conditionals_covariance.yaml",
+      "size_bytes": 6258,
+      "sha256": "a48f2e4ccaa9f63ebcfae3542d5e3509e75faf68ed98a4dde82c6054cd728207"
+    },
+    {
+      "path": "data/rag/sources/mean_median.yaml",
+      "size_bytes": 5354,
+      "sha256": "ede5e94d9f5894a10c90c9541275aade720e73f1bf99d7e3eac4da20f2691ca7"
+    },
+    {
+      "path": "data/rag/sources/numpy_random_simulation.yaml",
+      "size_bytes": 6183,
+      "sha256": "58aef312c6e94b6eef049a84304c1a9bbab284bbc579af23e7606301d26c393d"
+    },
+    {
+      "path": "data/rag/sources/point_estimation_bias_variability.yaml",
+      "size_bytes": 5795,
+      "sha256": "20326651a1d478b4921fb064acf25f9b8c2a497d67cdaf93e319ccba53c82cc5"
+    },
+    {
+      "path": "data/rag/sources/probability_rules_independence.yaml",
+      "size_bytes": 4580,
+      "sha256": "b1d952d0f2bed8e4f61d7fa9f72fd3f34c694a8eed5ec552ad9db19f7a71e400"
+    },
+    {
+      "path": "data/rag/sources/sampling_distribution_clt.yaml",
+      "size_bytes": 7653,
+      "sha256": "d3b9e3710d489af972be04595d254cad68309b26fa9a84fdd11536b2b14ad43e"
+    },
+    {
+      "path": "data/rag/sources/sampling_standard_error.yaml",
+      "size_bytes": 7443,
+      "sha256": "d1ee23613c8ffe54d5e31c8c58a024945348fe207d1fea42f7313d15931ba566"
+    },
+    {
+      "path": "data/rag/sources/variance_std.yaml",
+      "size_bytes": 4945,
+      "sha256": "a448eb3c936d7268acef9201006953e1aaf469d6a0f4928d2a081d911d3891c3"
+    },
+    {
+      "path": "data/synthetic/ab_session_duration.csv",
+      "size_bytes": 254,
+      "sha256": "6c90d59f2d1e5f59d584e330ff9dd4fa88b21093aeabea8737e656e023fcec4b"
+    },
+    {
+      "path": "data/synthetic/ab_session_duration.metadata.yaml",
+      "size_bytes": 1084,
+      "sha256": "af582737cc2fcbce1ffbe5c91d61426ea4357b36453dc701de949125d9e71bc2"
+    },
+    {
+      "path": "docs/api/openapi.json",
+      "size_bytes": 37520,
+      "sha256": "aff89d3afed2df3fece6adf5ad5b649c355054eb6de865f4d9a85c195306da4b"
+    },
+    {
+      "path": "docs/api_contract.md",
+      "size_bytes": 6494,
+      "sha256": "6401c9d1598d1e976660bf2b349d934e32ab4a36cb6aef2c6685bd306873685c"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/01-before-start-viewport.jpg",
+      "size_bytes": 69450,
+      "sha256": "875652c5e5a573e6fe0f2b58d1909366a1f0a208f4e3cd48c4383a1cde6df404"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/02-before-hint.jpg",
+      "size_bytes": 40882,
+      "sha256": "35bf923302787154835036ca497036735e8600207e3db5315ecb238de020f886"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/03-before-report.jpg",
+      "size_bytes": 71362,
+      "sha256": "251cecfc5ece29da857bfd677e39cab2e2420b974da5238490c8223a739cbded"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/04-before-next-question.jpg",
+      "size_bytes": 38429,
+      "sha256": "0824fb0824eaa3864b5cae06faffacbfe21e863209f024450dea0483276af80f"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/05-after-student-start.jpg",
+      "size_bytes": 75100,
+      "sha256": "9e6a7a4b3c9d1f25550c464326e3d45922c757f24ff5398fd97b04aa1e8ec69d"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/06-after-wrong-auto-hint.jpg",
+      "size_bytes": 49824,
+      "sha256": "b582aec7af68b36152f1586b172baf2f0c99a41cdde415aeb32a3fd1efbe5e26"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/07-after-correction-citations.jpg",
+      "size_bytes": 69701,
+      "sha256": "6adb315a8d255289e46b1df3d97bdd3eecf8464f8bc6fe10cce472f3b94890d2"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/08-after-next-question.jpg",
+      "size_bytes": 32994,
+      "sha256": "7cb2bca91837b989c54520b98998ff4979e341b9a1067a2230a3400b0819f10f"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/09-after-teacher-aggregate.jpg",
+      "size_bytes": 60955,
+      "sha256": "d11462f9c6b85e6f235814b966603eaad38e83cfc20cbe9c0c244a6b0e1ddd2b"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/10-final-student-start.jpg",
+      "size_bytes": 75942,
+      "sha256": "9fbf2042f3c135ec17df45fd8664086cec3861d204928dba1fd16e63175d4290"
+    },
+    {
+      "path": "docs/competition/assets/g3_3/11-final-correction-citations.jpg",
+      "size_bytes": 64719,
+      "sha256": "c5513ef98a9c30ae4c79ac4ce2136b31f97f13591d50b3b5f0012af7586a84bf"
+    },
+    {
+      "path": "docs/competition/g13_multi_evidence_eval.md",
+      "size_bytes": 3434,
+      "sha256": "dd7c9ee3fd056875a8bca874a156fa2a8a08c1132b0bda7ce75038dcfd0b53dc"
+    },
+    {
+      "path": "docs/competition/g14_misconception_recommendation_eval.md",
+      "size_bytes": 3938,
+      "sha256": "e6229f6f10a8958eb6ae013e42194ebb492d7810c17c041ce587c44c212b6e00"
+    },
+    {
+      "path": "docs/competition/g1_exit_report.md",
+      "size_bytes": 4270,
+      "sha256": "5647318936c5eb4852c1a8d6617244264f63828632a9d2647bf650399156fc9d"
+    },
+    {
+      "path": "docs/competition/g1_teacher_review_form.md",
+      "size_bytes": 3322,
+      "sha256": "274e3a830d4feb4ddaa2175621b6c5fd5086a41c63833ae00d0e66d227d2ed21"
+    },
+    {
+      "path": "docs/competition/g1_teacher_review_system_key.md",
+      "size_bytes": 1943,
+      "sha256": "7caea22b3adc5dda92464ae91f597f616479486d3cd68346d5c4521c097076c6"
+    },
+    {
+      "path": "docs/competition/g2_1_exit_report.md",
+      "size_bytes": 4859,
+      "sha256": "2dc867bb4a29044075e9ef74dc37825056902a393692e401209cbea30ff2ba71"
+    },
+    {
+      "path": "docs/competition/g2_1_teacher_review_form.md",
+      "size_bytes": 4090,
+      "sha256": "962c56ea7d2cf3f7eb1c22f16863e7dd9982cbba1fed46735b62623d57df4812"
+    },
+    {
+      "path": "docs/competition/g2_2_exit_report.md",
+      "size_bytes": 4876,
+      "sha256": "84bc1a7d15a6557bca9ef1f92d32724b7447928f7fcbe81f6676a2cc38e76a2d"
+    },
+    {
+      "path": "docs/competition/g2_2_teacher_review_form.md",
+      "size_bytes": 5051,
+      "sha256": "851faa0f30ad25bcd944842d339414dc1e6146ad1cfb8ac1dbf2b54e43479533"
+    },
+    {
+      "path": "docs/competition/g2_3_exit_report.md",
+      "size_bytes": 5400,
+      "sha256": "557917975cdabce39ba0aae795df4a9fd089d434ba05d0a79bbba734c37779c7"
+    },
+    {
+      "path": "docs/competition/g2_3_teacher_review_form.md",
+      "size_bytes": 4240,
+      "sha256": "702e304b7b2d7950be730f97e5b40b74eca25461e85b4015b664a752adfc6e03"
+    },
+    {
+      "path": "docs/competition/g2_4_exit_report.md",
+      "size_bytes": 5512,
+      "sha256": "fa7049c7fe78dfd58bd635795c0cfd10446ebcb000ed0f2985b9ac58308f713d"
+    },
+    {
+      "path": "docs/competition/g2_4_teacher_review_form.md",
+      "size_bytes": 4304,
+      "sha256": "615babc3322a410fdd06a759e61fbafa4bcb77c1f59b3dec6913c90ad77c179f"
+    },
+    {
+      "path": "docs/competition/g2_5_exit_report.md",
+      "size_bytes": 5490,
+      "sha256": "1893bd9da019a879cddcf92cbda74f5f41c4d7199876d3fce7b0573e68c18ab6"
+    },
+    {
+      "path": "docs/competition/g2_5_teacher_review_form.md",
+      "size_bytes": 4853,
+      "sha256": "4be886c334ac36ee20c033c60ff604dc90587d4f13fb1d0e69338f2b18bf3a59"
+    },
+    {
+      "path": "docs/competition/g2_6_exit_report.md",
+      "size_bytes": 5598,
+      "sha256": "fc2edd789faca5e13aa9f19f91ac0d0a1dab609cbb7eee1276a2259efd65ec98"
+    },
+    {
+      "path": "docs/competition/g2_6_teacher_review_form.md",
+      "size_bytes": 6259,
+      "sha256": "8ce619de6359fb937dc4cdbb3583fa73f10cf4c3d329fb565eeaa749ceed026b"
+    },
+    {
+      "path": "docs/competition/g2_7_exit_report.md",
+      "size_bytes": 5425,
+      "sha256": "40fa7bda55278f4b1201db8da73504876030f4e814f7ec04fcba1c8e705d0349"
+    },
+    {
+      "path": "docs/competition/g2_7_teacher_review_form.md",
+      "size_bytes": 6332,
+      "sha256": "33b6ed421023406df288368ac335fcc4082213d54b1e9588121b89269c2e23a0"
+    },
+    {
+      "path": "docs/competition/g2_8_exit_report.md",
+      "size_bytes": 5025,
+      "sha256": "96ed8496db5449a6acfc765f4e663836a5792dd8299b49cbeec1e1cca6a4f96c"
+    },
+    {
+      "path": "docs/competition/g2_8_teacher_review_form.md",
+      "size_bytes": 5809,
+      "sha256": "a38e4e90d7fac630ba0ae1da59bafe17060eec1026e2d89c6924b885878df4b0"
+    },
+    {
+      "path": "docs/competition/g3_1_exit_report.md",
+      "size_bytes": 5022,
+      "sha256": "cb21589a5e67ba2891b214415924ab6a39de7c7fe8c2a28c2d65914044b86fc2"
+    },
+    {
+      "path": "docs/competition/g3_2_exit_report.md",
+      "size_bytes": 5777,
+      "sha256": "b0e86574c8b0dba8f18f0adafe0078b9a0aea03fefb562448f751630bb234727"
+    },
+    {
+      "path": "docs/competition/g3_3_demo_result.json",
+      "size_bytes": 1819,
+      "sha256": "b8571cf0933d506ae8c685ea9bc288f7904fcf611e6608fe334993e57e77b55d"
+    },
+    {
+      "path": "docs/competition/g3_3_exit_report.md",
+      "size_bytes": 7488,
+      "sha256": "8d2c8474af3d0ab662372e27d1d870d95493f761f5ab508b199b1438c1be9401"
+    },
+    {
+      "path": "docs/competition/g3_4_api_contract_result.json",
+      "size_bytes": 402,
+      "sha256": "741e2b6d77f03417617a80aa864a905af78f244e8b996f20ea1b2bc894e70be8"
+    },
+    {
+      "path": "docs/competition/g3_4_exit_report.md",
+      "size_bytes": 7358,
+      "sha256": "5759d7b4a804e0c3650f9c23eff88668b70601c5c1c912b62fd87c16329afa79"
+    },
+    {
+      "path": "docs/competition/g3_5_exit_report.md",
+      "size_bytes": 8156,
+      "sha256": "5d5b4581d9fa20d77ebf9c3d9cb8fd84c7cb22e472d9607636d1666cc137ce43"
+    },
+    {
+      "path": "docs/competition/g3_5_reliability_result.json",
+      "size_bytes": 1097,
+      "sha256": "1a0fbe917cb7455f68bbcd530debe35f45fd4b27a4fdeabe7e8c8b17920ca069"
+    },
+    {
+      "path": "docs/competition/g3_delivery_checklist.md",
+      "size_bytes": 3920,
+      "sha256": "58ffd6110d3573d575f8f6bb9bf87708a803965e855e49a0b470b6f430b9ff49"
+    },
+    {
+      "path": "docs/competition/g3_exit_report.md",
+      "size_bytes": 8531,
+      "sha256": "5c7d85a7b9427e80bc4ade6fba936b860371216cbb96fda667938325d6435ee3"
+    },
+    {
+      "path": "docs/competition/g3_local_demo_runbook.md",
+      "size_bytes": 5495,
+      "sha256": "5c9f009c7fd4d95dcff1d4e7ae03631d6e526ff4c81cf08c979746cede6b5499"
+    },
+    {
+      "path": "docs/competition/g3_requirements_traceability.md",
+      "size_bytes": 5068,
+      "sha256": "4e25bfa119bdd6052497f3a7cd07322675d84fb283c9a28a257e1c5c4d08dbca"
+    },
+    {
+      "path": "docs/learner_code_sandbox.md",
+      "size_bytes": 22058,
+      "sha256": "10496b407c1261db00b62d87a335bab8a61252c753554ec0aaadf2064a176504"
+    },
+    {
+      "path": "docs/product_spec.md",
+      "size_bytes": 33310,
+      "sha256": "c724fb700cbb81f275e91969d27cc23eb160b469d774878c53af990ac96983e1"
+    },
+    {
+      "path": "docs/rag_eval_spec.md",
+      "size_bytes": 7519,
+      "sha256": "ff8de5a32ac79aa6e664986b1ff692a61df99afc13aa8c28351abac768070292"
+    },
+    {
+      "path": "docs/rag_manifest_spec.md",
+      "size_bytes": 12258,
+      "sha256": "7c2832a68d957c720a50a2efb5c4c4b1d8a5bd9b44bda77e89beb1c9bb12f0fb"
+    },
+    {
+      "path": "docs/reliability.md",
+      "size_bytes": 4420,
+      "sha256": "be1e4a85b9627ac3c2745d57210f985f7a0d277e9d3847e1866310eeda483b34"
+    },
+    {
+      "path": "evals/baselines/v0.1-mvp.json",
+      "size_bytes": 4525,
+      "sha256": "c8f0e95f486f845d8e3902e4342e62b72b3124726e59a67cb51444254ab07e55"
+    },
+    {
+      "path": "evals/cases.jsonl",
+      "size_bytes": 14165,
+      "sha256": "d918d53afae138b21446792a8d2ece9d0def7dfdaaf90f30c0f777916810fd7f"
+    },
+    {
+      "path": "evals/dataset.py",
+      "size_bytes": 10334,
+      "sha256": "1f946b944fe778754dd3036630c09d85e6d06e93eabd976144cb867e6f0094ec"
+    },
+    {
+      "path": "evals/development/cases_v0.2_dev.jsonl",
+      "size_bytes": 26880,
+      "sha256": "79bde2ada7e9c02b24350444873a7a1e5e8d9cd627859e5e16afdec9f34370a2"
+    },
+    {
+      "path": "evals/rag/development.jsonl",
+      "size_bytes": 68427,
+      "sha256": "cc661b669edb9c24da504362eb339c69dccc0c7499ced7979e6607b03e317325"
+    },
+    {
+      "path": "evals/rag/development_manifest.json",
+      "size_bytes": 4931,
+      "sha256": "0b807b75196d8163deb3c0def651648e00bcf5a83adefe8d7f6e8e1ff48104f2"
+    },
+    {
+      "path": "evals/rag_eval.py",
+      "size_bytes": 47710,
+      "sha256": "9a59205a1a1adf7ae2fbf29e1790ab8acc46ea24d7e0f20113fbea07f0d5cd7a"
+    },
+    {
+      "path": "evals/run_evals.py",
+      "size_bytes": 26111,
+      "sha256": "f081d6f4406f4765dfb5acd52fb1836a70fff3953565932701fed1c90fe9f0d0"
+    },
+    {
+      "path": "pyproject.toml",
+      "size_bytes": 903,
+      "sha256": "76c9b737d534ce2f286e8aaed97b08d3a919e2e18a87a0d112f5097c3e983bff"
+    },
+    {
+      "path": "scripts/export_api_contract.py",
+      "size_bytes": 1209,
+      "sha256": "efb4dd4171456fa56903df9ebeeef9077ae8fdd2502e08973252fb8a309cb843"
+    },
+    {
+      "path": "scripts/g1_offline_demo.py",
+      "size_bytes": 595,
+      "sha256": "967ef59a956634b9c9cdd25faea81c72571d350d01b47fa34f1eef526a6aa6ce"
+    },
+    {
+      "path": "scripts/g3_api_contract_demo.py",
+      "size_bytes": 7685,
+      "sha256": "ee9dce0d8c00e058ef1e219c43d0189475baf633a6a9734ca18f811414336165"
+    },
+    {
+      "path": "scripts/g3_local_rag_demo.py",
+      "size_bytes": 1520,
+      "sha256": "fdca5b051afce541415c87fd55691fe1921f51302cc367e94d771172fde0eafc"
+    },
+    {
+      "path": "scripts/g3_product_demo.py",
+      "size_bytes": 7459,
+      "sha256": "b08e26861cdc8b7c033776985fef5bb8f34d8da5c454ded5a20d4b24ce8267bd"
+    },
+    {
+      "path": "scripts/g3_release_audit.py",
+      "size_bytes": 20566,
+      "sha256": "acf29ff3729c5c428fd019f4059caa2414e7ac72041a01d0e5688fd00795300a"
+    },
+    {
+      "path": "scripts/g3_reliability_demo.py",
+      "size_bytes": 16255,
+      "sha256": "39e541e01757e33d10aef721800c6cb18717fc9e45d449f3ac4289e80a895772"
+    },
+    {
+      "path": "scripts/g3_verify_rebuilt_release.py",
+      "size_bytes": 11368,
+      "sha256": "50b101f5985da695d6cc63d66aa7e273aac3d3c54798eb646351c3cd0a3bca1f"
+    },
+    {
+      "path": "scripts/run_local_api.py",
+      "size_bytes": 1220,
+      "sha256": "df3734c6003bcf78af90441402751447fb0ae7455b55b01e702d608c2cb5a5b9"
+    },
+    {
+      "path": "scripts/run_release_tests.py",
+      "size_bytes": 2570,
+      "sha256": "5f9f82d1c290ae3783027f1cbcfbc8e7c5665cbda6a59d43e787ddfeec27d35c"
+    },
+    {
+      "path": "scripts/start_macos.command",
+      "size_bytes": 572,
+      "sha256": "537f97432e25b7842edb1e83e723cb9dc8dba27316d486448f613ad68a2c9213"
+    },
+    {
+      "path": "scripts/start_windows.cmd",
+      "size_bytes": 555,
+      "sha256": "acd497049a96235721ee3ef33838980ed4e39276b657825e5168ad8326a1845b"
+    },
+    {
+      "path": "src/probstat_tutor/__init__.py",
+      "size_bytes": 83,
+      "sha256": "c28e0d3b6a42762e69e69fdfe79b690533d4c1499f9c2e561151d46a86691aa8"
+    },
+    {
+      "path": "src/probstat_tutor/analytics.py",
+      "size_bytes": 6965,
+      "sha256": "73ea2ea73a57d941e98f1adb619c2be7aa1b788db90df4ac657274a1d4e85edd"
+    },
+    {
+      "path": "src/probstat_tutor/api/__init__.py",
+      "size_bytes": 150,
+      "sha256": "338aa1977e157cccb5003c67ec2810f04136b4303205f5188f98ea13f21a5e7f"
+    },
+    {
+      "path": "src/probstat_tutor/api/adapter.py",
+      "size_bytes": 5747,
+      "sha256": "b0699b8b317492b62df6fa2535f73751ab70969d0514d332d376de8777eb2a78"
+    },
+    {
+      "path": "src/probstat_tutor/api/app.py",
+      "size_bytes": 7011,
+      "sha256": "789ca22e3a5bb8a77f925b743266bf76794759dfc2f6ade6a536b54edd4277b7"
+    },
+    {
+      "path": "src/probstat_tutor/api/openapi.py",
+      "size_bytes": 5033,
+      "sha256": "9319f50a0c025d19e3f4a41d29fdc42bd655e3d7d8de6eeed0bb4ad2f8687866"
+    },
+    {
+      "path": "src/probstat_tutor/api/retry.py",
+      "size_bytes": 2158,
+      "sha256": "dc5ee433961194796f75d236e60cd8fb515fea3c79800207c3d475cb8b582950"
+    },
+    {
+      "path": "src/probstat_tutor/api/schemas.py",
+      "size_bytes": 4963,
+      "sha256": "d8f108f010fe0765af8c3288e0add20d62bbb56a69a29c5e7d51f676d97e3485"
+    },
+    {
+      "path": "src/probstat_tutor/config.py",
+      "size_bytes": 2754,
+      "sha256": "c5be678ed23e8e91190c0bd9c49856c67de8205943f48fe7681cba5224283c96"
+    },
+    {
+      "path": "src/probstat_tutor/curriculum.py",
+      "size_bytes": 1586,
+      "sha256": "651e2ace5a37b60306a6fdc254a36ff8254db7fde7c79b527987ff702a9a6801"
+    },
+    {
+      "path": "src/probstat_tutor/curriculum_graph.py",
+      "size_bytes": 12792,
+      "sha256": "9cb8c21c18e89d1960af1e980e36662ad5245e37deb837f8247fd29677d26e29"
+    },
+    {
+      "path": "src/probstat_tutor/demo.py",
+      "size_bytes": 4353,
+      "sha256": "cb98ce05b775bcc8dbca21f0a31d7141e0dff360e11cf6c247267b1ad19bb73b"
+    },
+    {
+      "path": "src/probstat_tutor/graders.py",
+      "size_bytes": 101363,
+      "sha256": "5ff646cdbaac1e46db6a9f730710057a3cc2953c4df118ad0704399d52408340"
+    },
+    {
+      "path": "src/probstat_tutor/mastery.py",
+      "size_bytes": 2721,
+      "sha256": "81d5578a5280c3ae736711bceb531811c086d503dfb4a211063734878038114a"
+    },
+    {
+      "path": "src/probstat_tutor/observability.py",
+      "size_bytes": 2919,
+      "sha256": "be7d02c66b004c191cdd9a09e70cc05be316cdc36b504d4d9589c69935609f9c"
+    },
+    {
+      "path": "src/probstat_tutor/policy.py",
+      "size_bytes": 3504,
+      "sha256": "c8acab82c519b4bc7b26159b85be6e2c03eba2fc91d83f4a4c1a9b497016b659"
+    },
+    {
+      "path": "src/probstat_tutor/rag/__init__.py",
+      "size_bytes": 2330,
+      "sha256": "a497bc81493d8e46ee866701d42f8ef355f641e3e6edc91a68fe6b6879d7edd4"
+    },
+    {
+      "path": "src/probstat_tutor/rag/loader.py",
+      "size_bytes": 17151,
+      "sha256": "310fbf33897f4f59afd1203fd5275b7a76330cdad415f05b43c321672841faa3"
+    },
+    {
+      "path": "src/probstat_tutor/rag/retrieval.py",
+      "size_bytes": 44110,
+      "sha256": "5e0d2f01c151204cdfe7d3e31c3754f201ae6f9fae4d550c8431e8dca9805371"
+    },
+    {
+      "path": "src/probstat_tutor/rag/schemas.py",
+      "size_bytes": 8953,
+      "sha256": "52ce791c734be8736fc37c5166d1b29cafcf9c6b9031b667dfb3ae590d1a60df"
+    },
+    {
+      "path": "src/probstat_tutor/rag/source_schemas.py",
+      "size_bytes": 7036,
+      "sha256": "6c78f371a68e4d89c6f4c219b1478632017f4b23aa3c32de8b97a4c23baee337"
+    },
+    {
+      "path": "src/probstat_tutor/recommendations.py",
+      "size_bytes": 6598,
+      "sha256": "1b1e574b2b01615367f8191c636f3048a84b0dea45b324dc01e80a26dd7db45a"
+    },
+    {
+      "path": "src/probstat_tutor/reliability.py",
+      "size_bytes": 6048,
+      "sha256": "719538843585e8cf55feaeb967506f83e9e092330a680d45aea50189e3907243"
+    },
+    {
+      "path": "src/probstat_tutor/schemas.py",
+      "size_bytes": 25783,
+      "sha256": "4d6e0c04f07f14123dfa307e3d001af8dd91ecdba0f6d2c10a1a2ced7b5bce44"
+    },
+    {
+      "path": "src/probstat_tutor/service.py",
+      "size_bytes": 12015,
+      "sha256": "93e4461cf969dfd4cd13920145b98b499b4dcbdbee71b713aa49c9891ac958c9"
+    },
+    {
+      "path": "src/probstat_tutor/storage.py",
+      "size_bytes": 9610,
+      "sha256": "e1c5cfc6ee75e6354b832a7b3d047643a795399db51e7e2525880aebfa4e6c53"
+    },
+    {
+      "path": "src/probstat_tutor/tutor_agent.py",
+      "size_bytes": 24415,
+      "sha256": "9079309fd52f035c301a9e4caf6d554ace25b34baa8a410b3a46cce5483fd362"
+    },
+    {
+      "path": "tests/test_api_contract.py",
+      "size_bytes": 17725,
+      "sha256": "6a269d6f0ca468dd319ca81555a950fc2db605f3da3677c2fc5f66383c68ae01"
+    },
+    {
+      "path": "tests/test_api_retry.py",
+      "size_bytes": 2525,
+      "sha256": "d4926de42e021a3bbeab4ac50ddf8b10aa87fb7a0755ae6f94660c94be3c96ec"
+    },
+    {
+      "path": "tests/test_app.py",
+      "size_bytes": 3255,
+      "sha256": "88e57387691a3ec2f878dd3acb2467ff68b9158231562e233b48e0aa4debad2a"
+    },
+    {
+      "path": "tests/test_curriculum.py",
+      "size_bytes": 3185,
+      "sha256": "e3708d2d40636a6d4742b506ec1cda1114991a83cbbb2ceed4189ac2a19841e0"
+    },
+    {
+      "path": "tests/test_curriculum_graph.py",
+      "size_bytes": 4142,
+      "sha256": "ef14649b1d9772b18f729f8318b7ca70fcdd92b5989555ee1b795849c09bd55f"
+    },
+    {
+      "path": "tests/test_eval_baseline.py",
+      "size_bytes": 5947,
+      "sha256": "07b8f2bd595e36b3290afe80d79e3ff3b0b3fd276469a40afc638d0904e5bf60"
+    },
+    {
+      "path": "tests/test_evals.py",
+      "size_bytes": 1216,
+      "sha256": "3bc1e3e8835569a4bdc323ee8e00e626f2b29e616e7456955b75bbfb9a3a2561"
+    },
+    {
+      "path": "tests/test_g1_demo.py",
+      "size_bytes": 907,
+      "sha256": "9dbcc02977495be955e6ab3082ee7fd613cfe5b3665c5d330492a1613bf54334"
+    },
+    {
+      "path": "tests/test_g2_common_distributions.py",
+      "size_bytes": 25338,
+      "sha256": "3a5a320f95e75716e7e0e85ea602608c25abb15a9ed5ded07da42d8863ca6bdd"
+    },
+    {
+      "path": "tests/test_g2_data_quality.py",
+      "size_bytes": 7587,
+      "sha256": "a12172857882ca267d52fd0bdeeec5f9cd9e2ccc6a0d9e5e951d4e6aad3ed256"
+    },
+    {
+      "path": "tests/test_g2_descriptive_statistics.py",
+      "size_bytes": 7317,
+      "sha256": "35fbdb335d4b0ac2a48ff7deed8a20810647704df9cbddca224617149c6b16ce"
+    },
+    {
+      "path": "tests/test_g2_estimation_confidence.py",
+      "size_bytes": 34060,
+      "sha256": "10458803409f02897c842b53664c6c05b487776bf9f777abd038b8763453b9bf"
+    },
+    {
+      "path": "tests/test_g2_hypothesis_testing.py",
+      "size_bytes": 33137,
+      "sha256": "02e02ee8778915a9663fef6b44733c7fd7ef9fa8aaa85d58c3b736513d343bd9"
+    },
+    {
+      "path": "tests/test_g2_joint_correlation.py",
+      "size_bytes": 28203,
+      "sha256": "6709e05f34f0ed5506b4cd96593cb238853937c1c6394b477eaccff1a9dfdc2e"
+    },
+    {
+      "path": "tests/test_g2_probability_simulation.py",
+      "size_bytes": 18190,
+      "sha256": "885d7c707d9d53f231c49936e71b14ba1643b02c6325bd39a3e54926231a0a89"
+    },
+    {
+      "path": "tests/test_g2_sampling_inference.py",
+      "size_bytes": 31063,
+      "sha256": "3c6937c33bb48743b8762d2527353dfa959c597ab6e4d3ced6a25beb63aa465b"
+    },
+    {
+      "path": "tests/test_g3_api_contract_demo.py",
+      "size_bytes": 934,
+      "sha256": "e758e9382e8f6e33f3f8a31c9d19947f513de43f68202943b21aa28e42c03a53"
+    },
+    {
+      "path": "tests/test_g3_local_rag.py",
+      "size_bytes": 29217,
+      "sha256": "c99a690ab68507a11046b663a986e946e9c9a76c07ecab344dfb43f89a0be501"
+    },
+    {
+      "path": "tests/test_g3_product_demo.py",
+      "size_bytes": 785,
+      "sha256": "f3a48bd7dbe3ecfa6f85d36b6b6e16c069c29a35ccb7a72372c97dbde44bc80d"
+    },
+    {
+      "path": "tests/test_g3_rag_eval.py",
+      "size_bytes": 19756,
+      "sha256": "c0430b26dde0ec53bf85fad2f02313147b1264fc5091a43c7d2665856be21094"
+    },
+    {
+      "path": "tests/test_g3_release_audit.py",
+      "size_bytes": 5565,
+      "sha256": "c193668f56156cb668579a92a79bbbc6cfeee436b9467cbe8e93aeea3769009e"
+    },
+    {
+      "path": "tests/test_g3_reliability_demo.py",
+      "size_bytes": 1704,
+      "sha256": "33dbd8b500313014fef2b5c12db1b39216288f14e76103366f5fdccb9e61d59b"
+    },
+    {
+      "path": "tests/test_graders.py",
+      "size_bytes": 5812,
+      "sha256": "6e5a0e3b50314b2d3904e184580d31a12c9b5e17878516f5506087bb803e24c8"
+    },
+    {
+      "path": "tests/test_launchers.py",
+      "size_bytes": 1462,
+      "sha256": "0fb55b8af7c3a8a680461bf3e15ab0231b97ca553a746b03e7ce83c09b950a03"
+    },
+    {
+      "path": "tests/test_mastery.py",
+      "size_bytes": 3989,
+      "sha256": "35c4d1e6ffaad6331be26c3c6a51ad89b9a40a139587ddc757f6894479b2cabf"
+    },
+    {
+      "path": "tests/test_multi_evidence_grader.py",
+      "size_bytes": 16623,
+      "sha256": "4284e2f67336fd2aa87d2b10e355428d437197577f3e35d93fc3231c105657d5"
+    },
+    {
+      "path": "tests/test_observability.py",
+      "size_bytes": 1601,
+      "sha256": "63151393d07d4bbd5ed21a7128ac2941ee9988a082d628bc4293bbf8c684900c"
+    },
+    {
+      "path": "tests/test_policy.py",
+      "size_bytes": 5163,
+      "sha256": "2fe649309ee972d6c341a25ec5a7311649c74e1fcd8aff8581e6c2e7852336ab"
+    },
+    {
+      "path": "tests/test_python_static_analysis.py",
+      "size_bytes": 14930,
+      "sha256": "3620f471b578834e381c1bfd6b343b7920ffce8f656359d40c3d94a1933ee70f"
+    },
+    {
+      "path": "tests/test_rag_schemas.py",
+      "size_bytes": 7757,
+      "sha256": "8eb7bd4b8078d8da3e569444dab504db73e15636db66d72b011dce9e3bf41303"
+    },
+    {
+      "path": "tests/test_rag_sources.py",
+      "size_bytes": 17569,
+      "sha256": "17e3b7a66364fe18da0fc56d43cf000933ecfbe45d14e0a022b4d8b4a838e84f"
+    },
+    {
+      "path": "tests/test_recommendations.py",
+      "size_bytes": 3399,
+      "sha256": "5814041cfffe9778f6572cb196887f1e2c0c0f65ad607dd4809ae4d73eeeff3b"
+    },
+    {
+      "path": "tests/test_reliability.py",
+      "size_bytes": 5844,
+      "sha256": "19c70d1901af04e80c382718e141071d4b25afd7b2e3b06e89ecca5364abcf20"
+    },
+    {
+      "path": "tests/test_service.py",
+      "size_bytes": 20808,
+      "sha256": "618cfe9e8a445b9fd205d5300a1f6ee8f3cbf25cbe2946d16b6abebb369f79af"
+    },
+    {
+      "path": "tests/test_storage.py",
+      "size_bytes": 11083,
+      "sha256": "1316dd6d7d9f4bf941eb5be3446f353c164a8a9a73fadc8385133ae064c5daa7"
+    },
+    {
+      "path": "tests/test_submission_schema.py",
+      "size_bytes": 2648,
+      "sha256": "f3fe3eeb12c2599fa3f1e552a7249eede51d06c64b43fccabb261e33018c681c"
+    },
+    {
+      "path": "tests/test_teacher_dashboard.py",
+      "size_bytes": 3981,
+      "sha256": "c43b8d159f109a17c9a8a77452e23db5cabc9c9b6d9cbac06c81b22cdc3887a5"
+    },
+    {
+      "path": "tests/test_tutor_agent.py",
+      "size_bytes": 7238,
+      "sha256": "aeac9a58e4ce206baa9b20713b1eda2feeef47cf1e735f7f0b49071ab92dd044"
+    }
+  ],
+  "release_manifest_sha256": "9207e8d4c8cc42150230949f5b3002118dcef848a469730c0a60f887478d24ab",
+  "verification_commands": [
+    ".venv/bin/python scripts/g3_local_rag_demo.py '均值 中位数 异常值' --concept mean_median",
+    ".venv/bin/python -m evals.rag_eval --split development",
+    ".venv/bin/python scripts/g3_product_demo.py --output docs/competition/g3_3_demo_result.json",
+    ".venv/bin/python scripts/g3_api_contract_demo.py --output docs/competition/g3_4_api_contract_result.json",
+    ".venv/bin/python scripts/g3_reliability_demo.py --output docs/competition/g3_5_reliability_result.json",
+    ".venv/bin/python scripts/run_release_tests.py",
+    "scripts/start_macos.command --check",
+    ".venv/bin/python -m ruff check .",
+    ".venv/bin/python scripts/g3_verify_rebuilt_release.py --output docs/competition/g3_rebuilt_release_result.json"
+  ],
+  "pending_human_actions": [
+    {
+      "action_id": "teacher_signed_review",
+      "title_zh": "教师逐单元签字审核",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "teacher_permission_archive",
+      "title_zh": "归档教师教材使用许可证明",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "anonymous_student_pilot",
+      "title_zh": "10–15 名学生知情同意匿名试点",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "windows11_physical_replay",
+      "title_zh": "Windows 11 实机双击启动与完整旅程复验",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "registration_form",
+      "title_zh": "填写并复核参赛申报表",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "design_specification",
+      "title_zh": "完成比赛版设计说明书",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "five_minute_video",
+      "title_zh": "录制并复核不超过 5 分钟视频",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "adp_adaptation",
+      "title_zh": "本地工程冻结后再做赛事平台适配",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    },
+    {
+      "action_id": "final_publish_and_submit",
+      "title_zh": "用户确认正式发布与最终提交",
+      "status": "pending_human_action",
+      "blocks_competition_submission": true
+    }
+  ],
+  "engineering_gate_passed": true,
+  "competition_submission_ready": false
+}

@@ -180,7 +180,7 @@ def test_example_manifest_passes_validation_without_course_content() -> None:
     manifest = load_rag_manifest(EXAMPLE_MANIFEST_PATH)
 
     assert manifest.manifest_version == "1.0"
-    assert len(manifest.sources) == 4
+    assert len(manifest.sources) == 12
     assert {concept for source in manifest.sources for concept in source.concept_ids} == set(
         ConceptId
     )

@@ -1,0 +1,110 @@
+source_schema_version: "1.0"
+source_id: discrete_distributions_core
+version: "0.1.0"
+title: 离散分布、参数与支持集
+language: zh-CN
+concept_id: common_distributions
+
+learning_objectives:
+  - 根据随机变量记录的是单次结果还是固定次数成功总数，区分伯努利与二项分布。
+  - 用模型条件、参数和支持集检查离散分布是否适用。
+  - 区分 PMF、CDF 和随机抽样 API 的输出含义。
+
+prerequisite_knowledge:
+  - 理解事件概率、独立性和成功/失败二分类结果。
+  - 能区分一次随机结果与重复试验中的成功总数。
+
+concept_explanation:
+  - >-
+    离散随机变量的可能值可以逐个列出。支持集是概率模型允许的全部取值，
+    不是当前样本中碰巧出现的取值列表，也不保证每个允许取值都已被观察到。
+  - >-
+    伯努利分布描述一次成功或失败结果，通常用 1 和 0 表示，参数 p 是成功概率。
+    二项分布描述固定 n 次独立、同成功概率、二分类试验中的成功总数，支持集为
+    从 0 到 n 的所有整数。
+  - >-
+    泊松分布可用于固定暴露范围内的事件计数，支持集为非负整数；是否适用还需检查
+    事件机制和模型假设，不能仅因变量是计数就自动选择泊松或二项分布。
+  - >-
+    二项分布的期望 np 可以不是整数。期望描述长期重复下的平均位置，
+    不要求成为某一次离散随机变量的实际取值。
+
+formula_explanation:
+  - name: 二项分布点概率
+    expression: "P(X=k) = C(n,k) p^k (1-p)^(n-k)"
+    symbols:
+      X: 固定次数试验中的成功总数
+      k: 目标成功次数，必须是支持集中的整数
+      n: 固定试验总次数
+      p: 每次试验相同的成功概率
+    meaning: 在二项模型条件成立时，给出成功总数恰好等于 k 的概率。
+    assumptions:
+      - 试验次数 n 固定。
+      - 每次试验只有成功和失败两类结果。
+      - 每次成功概率相同，且模型中各次试验相互独立。
+    cautions:
+      - k 和 n 的参数角色不能互换。
+  - name: 二项分布数字特征
+    expression: "E(X)=np, Var(X)=np(1-p)"
+    symbols:
+      expectation: 成功总数的长期平均位置
+      variance: 成功总数围绕期望的波动尺度平方
+    meaning: 参数 n 和 p 同时决定成功总数的中心和波动。
+    assumptions:
+      - X 遵循给定参数的二项模型。
+    cautions:
+      - 非整数期望不代表模型无效，也不代表单次可能观察到小数个成功。
+  - name: 离散累计概率
+    expression: "F(k)=P(X≤k)=Σ P(X=j)"
+    symbols:
+      F: 累积分布函数
+      j: 从支持集下界到 k 的离散取值
+    meaning: CDF 累加不超过 k 的点概率，PMF 只给出某一个取值的概率。
+    assumptions:
+      - 累加范围使用同一离散分布和参数。
+    cautions:
+      - “恰好等于”和“不超过”对应不同问题。
+
+python_connection:
+  - library: SciPy
+    api: scipy.stats.binom.pmf
+    purpose: 计算二项分布中成功次数恰好等于 k 的理论点概率。
+    input_expectation: 明确 k、n、p 的角色，且参数满足支持集和概率范围。
+    interpretation_caution: 返回的是概率，不是成功次数，也不是一次随机模拟结果。
+  - library: SciPy
+    api: scipy.stats.binom.cdf
+    purpose: 计算成功次数不超过 k 的累计概率。
+    input_expectation: 先确认问题中的不等号方向和端点是否包含。
+    interpretation_caution: CDF 不能直接替代恰好等于 k 的 PMF。
+  - library: SciPy
+    api: scipy.stats 中离散分布的 rvs
+    purpose: 按给定模型随机生成样本，用于模拟或检查程序流程。
+    input_expectation: 记录参数、样本量和随机状态。
+    interpretation_caution: 一次随机样本不等于理论概率，也不能证明模型适合现实数据。
+
+data_interpretation_guidance:
+  - 建模前先写清随机变量、分析单位、固定试验次数和成功定义。
+  - 选择二项分布时逐项核对二分类、同概率和独立性，而不是只看变量是否为整数。
+  - 报告期望时说明它是长期平均位置，不把它写成下一次必然出现的计数。
+  - 使用 PMF 或 CDF 后仍需保留模型假设，程序输出本身不验证现实适配性。
+
+common_misconceptions:
+  - misconception: 每次试验是伯努利结果，所以多次试验的成功总数仍是伯努利变量。
+    why_incorrect: 伯努利变量只描述一次 0/1 结果，固定多次成功总数通常需检查二项模型。
+    better_question: 我的随机变量记录一次结果，还是 n 次结果中成功了多少次？
+  - misconception: 离散分布的期望必须属于它的支持集。
+    why_incorrect: 期望是加权平均位置，可以不是任何一次实际可取的整数值。
+    better_question: 我是在描述单次可能值，还是长期重复的平均位置？
+  - misconception: PMF、CDF 和随机抽样都返回同一种概率。
+    why_incorrect: PMF 是点概率，CDF 是累计概率，随机抽样返回随机取值。
+    better_question: 题目问“恰好”“不超过”，还是要求生成一个随机样本？
+
+reflective_questions:
+  - 哪些条件缺失时，即使变量是成功总数也不能直接采用二项分布？
+  - 为什么离散成功总数的期望可能是小数？
+  - 如何从题目用语判断应使用 PMF、CDF 还是随机抽样？
+
+summary:
+  - 伯努利描述单次二分类结果，二项描述固定次数独立同概率试验的成功总数。
+  - 参数决定支持集和数字特征，期望不要求是单次可观察值。
+  - PMF、CDF 和随机抽样分别回答点概率、累计概率和随机生成问题。

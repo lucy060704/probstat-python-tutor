@@ -1,0 +1,119 @@
+source_schema_version: "1.0"
+source_id: joint_conditionals_covariance_core
+version: "0.1.0"
+title: 联合、条件关系与协方差
+language: zh-CN
+concept_id: joint_correlation
+
+learning_objectives:
+  - 区分联合分布、边缘分布和条件分布所使用的样本空间与分母。
+  - 使用概率关系判断独立性，并说明判断所需的可观察证据。
+  - 解释协方差的方向、缩放、量纲和与独立性的边界。
+
+prerequisite_knowledge:
+  - 理解事件、随机变量、期望、方差和条件概率。
+  - 能从二维列联表读取交集计数与边缘计数。
+
+concept_explanation:
+  - >-
+    二维随机变量同时记录同一分析单位上的两个结果。离散联合概率质量函数必须非负，
+    对所有可能取值求和为 1；连续联合密度需要在区域上积分后才得到概率。
+  - >-
+    边缘分布通过对另一个变量的所有可能取值求和或积分得到。条件分布则先把样本空间
+    限定到条件事件，因此条件概率的分母是条件事件本身，并要求该条件事件概率大于 0。
+  - >-
+    两事件独立要求联合概率等于两个边缘概率的乘积；在条件概率有定义时，也可比较
+    条件概率和对应边缘概率。仅知道两个事件都出现过，或只看到两个边缘比例，不能证明独立。
+  - >-
+    协方差描述两个数值变量相对各自中心共同变化的方向。正值表示偏大值倾向共同出现，
+    负值表示一个偏大时另一个倾向偏小，但其数值大小同时受两个变量的单位和缩放影响。
+  - >-
+    独立且有关矩存在通常推出协方差为零；反过来，零协方差一般只排除线性共同变化，
+    不能据此断言独立或不存在非线性关系。
+
+formula_explanation:
+  - name: 条件概率
+    expression: "P(B|A)=P(A∩B)/P(A)"
+    symbols:
+      A: 已知发生的条件事件
+      B: 条件下关注的目标事件
+      intersection: 两事件同时发生
+    meaning: 在 A 已发生形成的新样本空间中，B 所占的概率。
+    assumptions:
+      - P(A)>0，条件概率才有定义。
+    cautions:
+      - P(B|A) 与 P(A|B) 的分母不同，不能互换。
+  - name: 离散联合分布的边缘化
+    expression: "p_X(x)=Σ_y p_XY(x,y)"
+    symbols:
+      p_XY: X 与 Y 的联合概率质量函数
+      p_X: X 的边缘概率质量函数
+      y: Y 支持集中的所有可能取值
+    meaning: 固定 X 的取值后，把 Y 的所有可能情况加总。
+    assumptions:
+      - 联合概率来自同一总体和同一分析单位。
+    cautions:
+      - 边缘化会保留一个变量并消去另一个变量，不是随意改变分母。
+  - name: 协方差
+    expression: "Cov(X,Y)=E[(X-E(X))(Y-E(Y))]=E(XY)-E(X)E(Y)"
+    symbols:
+      X: 第一个数值随机变量
+      Y: 第二个数值随机变量
+      E: 概率模型下的期望算子
+    meaning: 衡量两个变量相对各自中心的线性共同变化方向。
+    assumptions:
+      - 表达式中涉及的期望和二阶矩存在。
+    cautions:
+      - 样本协方差课程口径通常使用成对观测并以 n-1 为分母，不能与总体协方差混用。
+  - name: 协方差缩放
+    expression: "Cov(aX+b,cY+d)=ac Cov(X,Y)"
+    symbols:
+      a: X 的尺度因子
+      b: X 的平移常数
+      c: Y 的尺度因子
+      d: Y 的平移常数
+    meaning: 平移不改变协方差，缩放会按两个尺度因子的乘积改变协方差。
+    assumptions:
+      - 变量及其变换具有有限的相关矩。
+    cautions:
+      - 协方差的单位是两个变量单位的乘积，不能跨不同尺度直接比较大小。
+
+python_connection:
+  - library: pandas
+    api: pandas.crosstab
+    purpose: 从两个分类变量形成列联计数，辅助核对联合、边缘和条件比例。
+    input_expectation: 两列必须来自同一分析单位，并明确缺失值处理口径。
+    interpretation_caution: 列联表只提供样本中的计数关系，不自动证明独立或因果。
+  - library: pandas
+    api: DataFrame.cov
+    purpose: 对数值列的成对有效观测计算样本协方差矩阵。
+    input_expectation: 核对变量单位、缺失处理和有效成对样本量。
+    interpretation_caution: 输出大小受单位影响，不能仅凭绝对值给出统一强弱等级。
+
+data_interpretation_guidance:
+  - 写联合概率时先确认分子是交集计数，分母是完整样本空间。
+  - 写条件概率时明确条件事件和目标事件，避免把条件方向反转。
+  - 判断独立时展示联合与边缘乘积或条件与边缘的实际比较，不凭直觉下结论。
+  - 报告协方差时同时给出变量定义、单位、样本口径和符号解释。
+  - 不把零协方差解释为独立，也不把观察到的共同变化直接解释为因果作用。
+
+common_misconceptions:
+  - misconception: 联合概率和条件概率使用同一个分母。
+    why_incorrect: 联合概率相对于完整样本空间，条件概率相对于条件事件形成的子空间。
+    better_question: 当前分母应代表全体结果，还是已经满足条件的结果？
+  - misconception: P(B|A) 与 P(A|B) 可以互换。
+    why_incorrect: 两者条件事件不同，分母和实际含义都不同。
+    better_question: 题目已经告诉我哪个事件发生，我是在这个事件中寻找谁？
+  - misconception: 协方差为零就说明两个变量独立。
+    why_incorrect: 零协方差只排除特定的线性共同变化，非线性依赖仍可能存在。
+    better_question: 除了协方差，我是否检查了完整联合分布或其他关系形式？
+
+reflective_questions:
+  - 从一张二维列联表中，联合比例、两个方向的条件比例和边缘比例分别怎样取分母？
+  - 哪些可观察比较能够支持独立或不独立的判断？
+  - 为什么把一个变量换单位后，协方差数值会改变而关系方向未必改变？
+
+summary:
+  - 联合、边缘和条件信息使用不同的计数范围，条件方向决定分母。
+  - 独立性必须通过概率关系核对，不能由事件共存或单个比例推断。
+  - 协方差带乘积单位并随尺度变化，零协方差一般不等于独立。

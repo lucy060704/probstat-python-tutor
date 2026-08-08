@@ -298,4 +298,8 @@ def _enum_counts(
     enum_type: type[StrEnum],
 ) -> dict[str, int]:
     counter = Counter(getattr(case, field_name).value for case in cases)
-    return {member.value: counter[member.value] for member in enum_type}
+    return {
+        member.value: counter[member.value]
+        for member in enum_type
+        if counter[member.value] > 0
+    }

@@ -1,0 +1,105 @@
+source_schema_version: "1.0"
+source_id: correlation_groupby_core
+version: "0.1.0"
+title: 相关系数、因果边界与 pandas 分组分析
+language: zh-CN
+concept_id: joint_correlation
+
+learning_objectives:
+  - 解释相关系数的方向、标准化强度、量纲和单位换算性质。
+  - 区分线性关联、个体规律和因果结论。
+  - 用 pandas 命名聚合同时报告分组统计量、有效样本量和缺失口径。
+
+prerequisite_knowledge:
+  - 理解均值、标准差、协方差、缺失值和 DataFrame 列。
+  - 能区分分类分组键与被聚合的数值列。
+
+concept_explanation:
+  - >-
+    相关系数用两个变量的标准差对协方差进行标准化，因此没有单位，取值范围为 -1 到 1。
+    符号表示线性关系方向，绝对值表示标准化的线性关联程度，但不能跨情境机械套用强弱标签。
+  - >-
+    对一个变量做正比例单位换算时，协方差和该变量的标准差同时按相同比例改变，相关系数不变；
+    负比例变换会翻转相关系数符号。平移不改变协方差或相关系数。
+  - >-
+    相关系数为零不表示两个变量完全没有关系，它们仍可能存在非线性结构。
+    样本相关只描述样本整体的线性模式，不保证每一个个体都沿同一方向变化。
+  - >-
+    观察相关不能单独证明因果。共同原因、反向关系、选择机制、测量误差和分组构成差异
+    都可能产生或改变观察到的相关关系；因果判断需要研究设计和额外证据。
+  - >-
+    pandas 分组聚合遵循拆分、应用、合并思路。命名聚合同时指定输出列名、原始列和聚合函数，
+    能把统计口径保留在代码中，便于复核和教学诊断。
+
+formula_explanation:
+  - name: 相关系数
+    expression: "ρ=Cov(X,Y)/(σ_X σ_Y)"
+    symbols:
+      covariance: X 与 Y 的协方差
+      sigma_x: X 的正标准差
+      sigma_y: Y 的正标准差
+    meaning: 通过两个变量的尺度标准化协方差，描述线性方向和标准化程度。
+    assumptions:
+      - 两个变量的标准差都大于 0，且所需矩存在。
+    cautions:
+      - 相关系数不是概率、决定比例或因果效应大小。
+  - name: 正比例换算下的相关
+    expression: "Corr(aX+b,Y)=Corr(X,Y), a>0"
+    symbols:
+      a: 正的单位换算比例
+      b: 平移常数
+      X: 被换算单位的变量
+      Y: 另一个变量
+    meaning: 正比例缩放和平移不改变标准化后的线性相关系数。
+    assumptions:
+      - 变换后两个变量仍有正标准差。
+    cautions:
+      - 若 a<0，相关系数符号会翻转。
+
+python_connection:
+  - library: pandas
+    api: DataFrame.groupby.agg
+    purpose: >-
+      按分类键拆分数据，并以命名聚合生成清晰的汇总列；通用结构可写为
+      df.groupby("category").agg(mean_value=("value", "mean"),
+      valid_n=("value", "count"))。
+    input_expectation: 明确分组键、原始数值列、输出列名和每个聚合函数。
+    interpretation_caution: 分组键默认可成为索引；行顺序、分类变量设置和缺失分组键需要单独核对。
+  - library: pandas
+    api: GroupBy.count
+    purpose: 统计每组目标列中的非缺失值数量，说明均值等统计量的有效分母。
+    input_expectation: count 的对象必须是需要核对缺失口径的目标列。
+    interpretation_caution: count 排除目标列缺失值，而 size 统计组内行数，两者可能不同。
+  - library: pandas
+    api: DataFrame.corr
+    purpose: 对数值列的成对有效观测计算样本相关矩阵。
+    input_expectation: 先核对数值类型、常数列、缺失处理、异常值和有效成对样本量。
+    interpretation_caution: 程序输出是描述性样本证据，不是因果结论。
+
+data_interpretation_guidance:
+  - 报告相关系数时说明变量、样本、线性关系方向和研究设计，不把它解释成概率。
+  - 单位转换后分别核对协方差的单位与相关系数的无量纲性质。
+  - 分组均值应同时报告每组有效样本量和缺失规则，防止分母差异被隐藏。
+  - 比较 count 与 size 时说明前者排除目标列缺失、后者统计组内全部行。
+  - 分组差异可能受组内构成和聚合层级影响，不能直接推广为个体规律或因果效应。
+
+common_misconceptions:
+  - misconception: 换单位后相关系数也按同一比例缩放。
+    why_incorrect: 相关公式的分子与分母同时缩放，正比例因子会抵消。
+    better_question: 协方差和标准差分别怎样随单位换算变化？
+  - misconception: 正相关证明一个变量导致另一个变量增加。
+    why_incorrect: 观察相关可能来自混杂、反向关系、选择机制或测量过程。
+    better_question: 当前数据来自随机实验还是观察记录，还有哪些替代解释？
+  - misconception: GroupBy 的 count 与 size 永远相同。
+    why_incorrect: count 排除目标列中的缺失值，size 统计该组所有行。
+    better_question: 我需要的是组内总行数，还是实际参与这个统计量计算的有效值数量？
+
+reflective_questions:
+  - 为什么正比例换算会改变协方差却不改变相关系数？
+  - 一个较大的样本相关系数仍可能有哪些非因果解释？
+  - 在分组均值表中，为什么有效样本量和缺失口径必须一起报告？
+
+summary:
+  - 相关系数无量纲，正比例单位换算不改变其数值，但它只刻画线性样本关联。
+  - 观察相关不能证明因果，也不能保证每个个体都遵循同一关系。
+  - pandas 命名聚合应明确输出名、原列和函数，并用 count 说明非缺失有效分母。
