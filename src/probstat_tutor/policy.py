@@ -4,6 +4,7 @@ from collections.abc import Sequence
 
 from probstat_tutor.mastery import concept_mastery, weakest_dimension
 from probstat_tutor.schemas import (
+    CAPABILITY_LABELS_ZH,
     LearningState,
     NextQuestionDecision,
     PolicyStatus,
@@ -70,7 +71,7 @@ def select_next_question(
         reason = "最近连续两次答对，因此适当提高目标难度。"
     else:
         reason = (
-            f"优先练习当前较弱的 {target_dimension.value} 维度，"
+            f"优先练习当前较弱的“{CAPABILITY_LABELS_ZH[target_dimension]}”维度，"
             "并选择难度接近当前掌握度的题目。"
         )
 

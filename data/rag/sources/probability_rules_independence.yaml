@@ -1,0 +1,92 @@
+source_schema_version: "1.0"
+source_id: probability_rules_independence_core
+version: "0.1.0"
+title: 条件概率、互斥与独立
+language: zh-CN
+concept_id: probability_simulation
+
+learning_objectives:
+  - 用交集、并集和补集表示事件关系。
+  - 选择正确的条件事件作为条件概率分母。
+  - 分别检查互斥和独立，避免把两者混为一谈。
+
+prerequisite_knowledge:
+  - 能够计算比例和分数。
+  - 理解“同时发生”和“至少一个发生”的日常含义。
+
+concept_explanation:
+  - >-
+    样本空间是一次随机试验所有可能结果的集合，事件是其中一部分结果。
+    A∩B 表示两事件同时发生，A∪B 表示至少一个发生。
+  - >-
+    条件概率 P(B|A) 先把参照范围限定在 A 已发生的结果中，再查看其中有多少同时属于 B。
+    因此分母是 P(A)，不是仍然使用全部样本空间，也不是使用 P(B)。
+  - >-
+    互斥回答“能不能同时发生”：交集概率为 0 时互斥。
+    独立回答“一个事件是否改变另一个事件的概率”：需检查 P(A∩B)=P(A)P(B)。
+    对两个概率都大于 0 的事件，互斥反而意味着它们不独立。
+
+formula_explanation:
+  - name: 概率加法规则
+    expression: "P(A∪B) = P(A) + P(B) - P(A∩B)"
+    symbols:
+      union: A∪B 表示至少一个事件发生
+      intersection: A∩B 表示两事件同时发生
+    meaning: 两个边缘概率中重复计数了交集，所以需减去一次交集概率。
+    assumptions:
+      - A 和 B 都定义在同一样本空间上。
+    cautions:
+      - 只有在交集为空时才能省略交集项。
+  - name: 条件概率
+    expression: "P(B|A) = P(A∩B) / P(A)"
+    symbols:
+      condition: A 是已知发生的条件事件
+      target: B 是条件范围内要查看的目标事件
+    meaning: 在 A 已经发生的子空间中，同时属于 B 的比例。
+    assumptions:
+      - P(A) 必须大于 0。
+    cautions:
+      - P(B|A) 和 P(A|B) 的分母不同，一般不相等。
+  - name: 独立性检查
+    expression: "P(A∩B) = P(A)P(B)"
+    symbols:
+      left_side: 两事件实际同时发生的概率
+      right_side: 假设独立时两个边缘概率的乘积
+    meaning: 等式成立时，在该概率模型下可判定 A 与 B 独立。
+    assumptions:
+      - 边缘概率和交集概率使用同一总体或样本空间口径。
+    cautions:
+      - 不能仅因事件名称不同、可同时发生或看起来无关就宣称独立。
+
+python_connection:
+  - library: pandas
+    api: crosstab 和布尔条件计数
+    purpose: 在已核对分类口径的数据中计算边缘人数、交集人数和条件比例。
+    input_expectation: 每行对应一个分析单位，事件定义、缺失处理和总分母一致。
+    interpretation_caution: 程序计数不会自动证明事件独立，也不会把概率关系变成因果关系。
+
+data_interpretation_guidance:
+  - 先用文字写清条件事件和目标事件，再确定条件概率分母。
+  - 判断互斥时查交集；判断独立时检查乘法等式或对应条件概率。
+  - 从观察数据得到的事件关系需说明样本、缺失和分类规则，不能自动外推或解释为因果。
+
+common_misconceptions:
+  - misconception: 已经给定条件事件后，分母仍是原来的全部结果数。
+    why_incorrect: 条件发生后参照空间已缩小，分母应是条件事件的概率或计数。
+    better_question: 我已知哪个事件发生，现在应在哪个子空间中计数？
+  - misconception: 两个事件可以同时发生，所以它们独立。
+    why_incorrect: 可以同时发生只说明不互斥，独立必须另外检查概率乘法等式。
+    better_question: 实际交集概率是否等于两个边缘概率的乘积？
+  - misconception: 互斥事件互不影响，所以互斥就是独立。
+    why_incorrect: 对两个正概率事件，一个互斥事件发生会使另一个事件不可能发生，这是强烈的依赖。
+    better_question: 如果 P(A∩B)=0 而 P(A)P(B)>0，独立等式还可能成立吗？
+
+reflective_questions:
+  - 为什么 P(B|A) 和 P(A|B) 一般不相等？
+  - 一对事件不互斥时，还需要哪些数值才能判断独立？
+  - 从样本计数估计概率关系时，哪些数据质量问题会影响结论？
+
+summary:
+  - 条件概率把参照空间缩小到已知发生的事件。
+  - 互斥由交集是否为空决定，独立由概率乘法等式决定。
+  - 概率关系和程序计数本身都不自动构成因果解释。

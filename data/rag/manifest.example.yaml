@@ -1,5 +1,26 @@
 manifest_version: "1.0"
 sources:
+  - source_id: data_quality_core
+    title: 数据质量课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - data_quality
+    file_path: data/rag/sources/data_quality.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000005
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-07T18:00:00+08:00
+
   - source_id: mean_median_core
     title: 均值与中位数课程资料（待编写）
     source_type: project_authored
@@ -63,6 +84,48 @@ sources:
       contains_course_content: false
     updated_at: 2026-07-26T09:00:00+08:00
 
+  - source_id: sampling_distribution_clt_core
+    title: 抽样分布与中心极限定理课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - sampling_standard_error
+    file_path: data/rag/sources/sampling_distribution_clt.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000009
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-08T12:00:00+08:00
+
+  - source_id: point_estimation_bias_variability_core
+    title: 点估计、偏差、方差与均方误差课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - confidence_interval
+    file_path: data/rag/sources/point_estimation_bias_variability.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000010
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-08T16:00:00+08:00
+
   - source_id: confidence_interval_core
     title: 置信区间课程资料（待编写）
     source_type: project_authored
@@ -83,3 +146,108 @@ sources:
       placeholder: true
       contains_course_content: false
     updated_at: 2026-07-26T09:00:00+08:00
+
+  - source_id: probability_simulation_core
+    title: 概率规则与随机模拟课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - probability_simulation
+    file_path: data/rag/sources/probability_rules_independence.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000006
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-07T23:00:00+08:00
+
+  - source_id: common_distributions_core
+    title: 常用分布课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - common_distributions
+    file_path: data/rag/sources/discrete_distributions.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000007
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-07T23:50:00+08:00
+
+  - source_id: joint_correlation_core
+    title: 联合分布、相关与分组分析课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - joint_correlation
+    file_path: data/rag/sources/joint_conditionals_covariance.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000008
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-08T10:00:00+08:00
+
+  - source_id: hypothesis_testing_decisions_core
+    title: 假设检验与检验决策课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - hypothesis_testing
+    file_path: data/rag/sources/hypothesis_testing_decisions.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000011
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-08T18:00:00+08:00
+
+  - source_id: ab_experiment_analysis_core
+    title: A/B 实验分析课程资料（待编写）
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - hypothesis_testing
+    file_path: data/rag/sources/ab_experiment_analysis.yaml
+    checksum: sha256:0000000000000000000000000000000000000000000000000000000000000012
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: planned
+      placeholder: true
+      contains_course_content: false
+    updated_at: 2026-08-08T18:00:00+08:00

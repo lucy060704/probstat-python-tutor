@@ -1,0 +1,101 @@
+source_schema_version: "1.0"
+source_id: numpy_random_simulation_core
+version: "0.1.0"
+title: NumPy 随机生成与蒙特卡洛误差
+language: zh-CN
+concept_id: probability_simulation
+
+learning_objectives:
+  - 用 default_rng 和受审的分布 API 表达重复随机试验。
+  - 解释随机种子的复现作用，不把种子误解为准确性保证。
+  - 区分理论概率与有限模拟比例，说明重复次数与模拟波动的关系。
+
+prerequisite_knowledge:
+  - 理解 0/1 可以表示一次伯努利试验的失败和成功。
+  - 能够计算成功次数除以总试验次数。
+
+concept_explanation:
+  - >-
+    numpy.random.default_rng(seed) 创建一个独立的随机生成器对象。在一段重复模拟中，
+    应初始化生成器一次后持续从同一随机流取样，而不是在每次试验前重置相同种子。
+  - >-
+    随机种子使相同程序和软件环境中的随机流可复现，方便测试和沟通。
+    它不会让模拟更接近理论值，不会消除随机误差，也不会证明概率模型正确。
+  - >-
+    Generator.binomial(n=1, p, size=m) 可生成 m 个 0/1 伯努利结果。其中 n=1 描述每个结果只有一次成功机会，
+    p 是单次成功概率，size 是要生成的重复结果个数。
+  - >-
+    对 0/1 结果求均值等于成功次数除以试验次数，它是一次有限模拟的比例。
+    重复次数增加时，该比例通常更稳定，但不保证每一个更大的单次模拟都比前一次更接近理论值。
+
+formula_explanation:
+  - name: 模拟成功比例
+    expression: "p_hat = 成功次数 / 试验次数"
+    symbols:
+      p_hat: 一次有限模拟得到的经验成功比例
+      successes: 0/1 结果中 1 的个数
+      repetitions: 生成的独立重复结果数
+    meaning: 对 0/1 数组求和再除以数组长度，与直接求数组均值等价。
+    assumptions:
+      - 每个结果使用一致的成功定义和概率模型。
+      - 重复生成过程没有在每次试验前重置同一随机流。
+    cautions:
+      - p_hat 是有随机波动的模拟结果，不是修改后的理论概率。
+  - name: 伯努利比例的典型模拟波动
+    expression: "simulation_sd ≈ √(p(1-p)/m)"
+    symbols:
+      p: 概率模型给定的单次成功概率
+      m: 独立重复试验次数
+      simulation_sd: 重复运行有限模拟时成功比例的典型波动尺度
+    meaning: 重复次数增加时，模拟比例的典型波动按平方根速度缩小。
+    assumptions:
+      - 重复试验遵循相同的伯努利概率并在模型中相互独立。
+    cautions:
+      - 这是波动尺度，不是对某一次随机运行误差的确定上界。
+
+python_connection:
+  - library: NumPy
+    api: numpy.random.default_rng
+    purpose: 创建局部随机生成器，可通过显式种子支持受控复现。
+    input_expectation: 在一段模拟开始时初始化一次，并记录种子、NumPy 版本和模拟参数。
+    interpretation_caution: 种子只服务于复现，不会保证结果准确或模型正确。
+  - library: NumPy
+    api: Generator.binomial
+    purpose: 生成伯努利或二项计数结果，其参数 n、p 和 size 具有不同语义。
+    input_expectation: 根据实验单位明确每个输出是单次 0/1 结果还是多次试验的成功计数。
+    interpretation_caution: n 是每个二项输出中的试验数，size 是输出形状或重复结果数，不能互换。
+  - library: NumPy
+    api: ndarray.mean 和 ndarray.sum
+    purpose: 对 0/1 结果求经验比例或成功次数。
+    input_expectation: 输入应是与目标试验相连的 0/1 数组，且分母与实际重复数一致。
+    interpretation_caution: sum 返回计数，mean 才直接返回比例；sum 用作比例时必须除以正确重复数。
+
+data_interpretation_guidance:
+  - 模拟前同时记录理论模型、随机生成参数、种子和重复次数。
+  - 报告模拟比例时说明它是一次有限运行的结果，不把它写成新的理论概率。
+  - 比较不同重复次数时，用“通常更稳定”描述趋势，不声称误差在每一次运行中必然单调下降。
+  - 模拟只会在所给模型和程序下生成结果，不会验证模型与现实是否匹配。
+
+common_misconceptions:
+  - misconception: 在每次试验前重新使用同一种子，可以获得很多独立重复结果。
+    why_incorrect: 每次重置到同一随机流起点往往会反复获得相同的首个伪随机结果，破坏目标重复过程。
+    better_question: 我能否只创建一个生成器，再让它连续生成所有需要的结果？
+  - misconception: 固定种子后，模拟比例就会精确等于理论概率。
+    why_incorrect: 种子只选定一条可复现的伪随机序列，有限比例仍会与理论概率存在随机差异。
+    better_question: 这个种子帮助我复现了什么，它是否真的改变了随机误差？
+  - misconception: 只要增加重复次数，下一次模拟就必然比本次更接近理论值。
+    why_incorrect: 重复次数决定的是模拟比例的典型波动尺度，不决定某一条具体随机路径的逐次误差顺序。
+    better_question: 我是在说很多次重复运行的总体趋势，还是对下一次单独运行做保证？
+  - misconception: binomial 中的 n 和 size 都表示模拟次数，可以随意互换。
+    why_incorrect: n 决定每个输出计数中包含的伯努利试验数，size 决定要生成多少个输出。
+    better_question: 我需要一个“多次试验的成功总数”，还是很多个单次 0/1 结果？
+
+reflective_questions:
+  - 为什么对 0/1 结果求均值等于成功比例？
+  - 随机种子、重复次数和概率参数分别控制模拟的什么特征？
+  - 一次模拟比例与理论值很接近，是否足以证明模型与现实完全匹配？
+
+summary:
+  - 在一段模拟中初始化一个 default_rng 生成器，种子只用于复现。
+  - binomial 的 n、p 和 size 承担不同参数角色，0/1 数组均值是模拟成功比例。
+  - 增加重复次数通常减小模拟波动，但不保证每次单调接近，也不会改写理论概率。

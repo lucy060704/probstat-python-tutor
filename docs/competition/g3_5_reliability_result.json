@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "transport": "asgi_in_process_no_external_network",
+  "environment": {
+    "python_version": "3.11.15",
+    "operating_system": "Darwin",
+    "machine": "arm64",
+    "logical_cpu_count": 10
+  },
+  "exact_replay_status": 200,
+  "changed_body_conflict_status": 409,
+  "history_after_conflict": 1,
+  "transient_retry_attempt_count": 2,
+  "transient_retry_final_status": 200,
+  "transient_retry_history_count": 1,
+  "transient_retry_internal_detail_hidden": true,
+  "atomic_rollback_status": 503,
+  "atomic_rollback_history_count": 0,
+  "model_timeout_attempt_count": 4,
+  "model_fallback_report_count": 3,
+  "model_circuit_state": "open",
+  "model_health_status": "degraded",
+  "fault_codes": [
+    "model_timeout",
+    "model_timeout",
+    "model_circuit_open"
+  ],
+  "performance_sample_size": 24,
+  "performance_concurrency": 6,
+  "performance_success_count": 24,
+  "performance_history_count": 24,
+  "diagnose_p50_ms": 1.604,
+  "diagnose_p95_ms": 2.01,
+  "diagnose_max_ms": 2.141,
+  "diagnose_p95_limit_ms": 3000.0,
+  "serious_fault_count": 0,
+  "passed": true
+}

@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "transport": "asgi_in_process_no_external_network",
+  "health_ok": true,
+  "offline_core_available": true,
+  "recommendation_ok": true,
+  "level_one_safe": true,
+  "level_four_complete": true,
+  "diagnosis_correct": true,
+  "idempotent_history_count": 1,
+  "invalid_request_status": 422,
+  "unavailable_status": 503,
+  "unavailable_retryable": true,
+  "passed": true
+}

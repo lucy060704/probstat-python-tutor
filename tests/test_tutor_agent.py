@@ -7,7 +7,13 @@ from unittest.mock import patch
 import pytest
 
 from probstat_tutor.config import Settings
-from probstat_tutor.schemas import DiagnosticReport, PolicyStatus
+from probstat_tutor.schemas import (
+    DiagnosticReport,
+    LearnerSubmission,
+    PolicyStatus,
+    RecommendationKind,
+    SubmissionField,
+)
 from probstat_tutor.storage import LearningStateStore
 from probstat_tutor.tutor_agent import (
     TUTOR_TOOLS,
@@ -61,6 +67,28 @@ def test_model_name_comes_from_openai_model_environment(
     assert tutor.offline_mode is True
 
 
+def test_model_reliability_limits_come_from_bounded_environment_settings(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("MODEL_TIMEOUT_SECONDS", "1.5")
+    monkeypatch.setenv("MODEL_MAX_ATTEMPTS", "3")
+    monkeypatch.setenv("MODEL_RETRY_BASE_DELAY_SECONDS", "0.2")
+    monkeypatch.setenv("MODEL_CIRCUIT_FAILURE_THRESHOLD", "4")
+    monkeypatch.setenv("MODEL_CIRCUIT_OPEN_SECONDS", "12")
+    settings = Settings(
+        session_db_path=tmp_path / "sessions.sqlite3",
+        learning_state_db_path=tmp_path / "learning.sqlite3",
+    )
+    tutor = TutorAgent(settings=settings)
+
+    assert tutor.model_reliability.timeout_seconds == 1.5
+    assert tutor.model_reliability.max_attempts == 3
+    assert tutor.model_reliability.retry_base_delay_seconds == 0.2
+    assert tutor.model_reliability.failure_threshold == 4
+    assert tutor.model_reliability.open_seconds == 12.0
+
+
 def test_current_question_hides_answer_and_grading_rules(tutor: TutorAgent) -> None:
     context = tutor.create_context(learner_id="learner", session_id="session")
 
@@ -71,22 +99,27 @@ def test_current_question_hides_answer_and_grading_rules(tutor: TutorAgent) -> N
     assert "rubric" not in question
 
 
-def test_tools_grade_then_persist_state_and_select_next(tutor: TutorAgent) -> None:
+def test_tools_grade_then_stage_state_without_persisting(tutor: TutorAgent) -> None:
     context = tutor.create_context(
         learner_id="learner",
         session_id="session",
         current_question_id="mean_median_python_01",
     )
 
-    grade = grade_submission(context, "8")
+    grade = grade_submission(
+        context,
+        LearnerSubmission(answer="8", python_code='df["value"].median()'),
+    )
     updated = update_learner_state(context, hint_level=0)
-    loaded = get_learner_state(context)
+    staged = get_learner_state(context)
+    persisted = tutor.store.load("learner")
     decision = select_next_question(context)
 
     assert grade.is_correct is True
-    assert updated == loaded
-    assert "mean_median_python_01" in loaded.completed_question_ids
-    assert loaded.history[-1].score == grade.score
+    assert updated == staged
+    assert persisted.history == ()
+    assert "mean_median_python_01" in staged.completed_question_ids
+    assert staged.history[-1].score == grade.score
     assert decision.status in {PolicyStatus.QUESTION, PolicyStatus.BLOCKED}
 
 
@@ -103,13 +136,17 @@ def test_repeated_update_is_idempotent(tutor: TutorAgent) -> None:
         session_id="session",
         current_question_id="mean_median_python_01",
     )
-    grade_submission(context, "8")
+    grade_submission(
+        context,
+        LearnerSubmission(answer="8", python_code='df["value"].median()'),
+    )
 
     first = update_learner_state(context, hint_level=0)
     second = update_learner_state(context, hint_level=0)
 
     assert first == second
     assert len(second.history) == 1
+    assert tutor.store.load("learner").history == ()
 
 
 def test_offline_mode_never_calls_runner_and_returns_locked_report(tutor: TutorAgent) -> None:
@@ -123,33 +160,52 @@ def test_offline_mode_never_calls_runner_and_returns_locked_report(tutor: TutorA
         "probstat_tutor.tutor_agent.Runner.run",
         side_effect=AssertionError("离线模式不应调用模型"),
     ):
-        report = asyncio.run(tutor.diagnose(context, "mean", hint_level=0))
+        prepared = asyncio.run(
+            tutor.diagnose(
+                context,
+                LearnerSubmission(
+                    answer="mean",
+                    reasoning="我认为平均数就是中位数。",
+                    python_code='df["value"].mean()',
+                ),
+                hint_level=0,
+            )
+        )
+    report = prepared.report
 
     assert report.question_id == "mean_median_concept_01"
     assert report.overall_correctness == 0.0
     assert any("学习者答案：mean" == evidence for evidence in report.evidence)
+    assert [(item.source, item.quote) for item in report.learner_evidence] == [
+        (SubmissionField.ANSWER, "mean"),
+        (SubmissionField.REASONING, "我认为平均数就是中位数。"),
+        (SubmissionField.PYTHON_CODE, 'df["value"].mean()'),
+    ]
     assert "?" in report.feedback or "？" in report.feedback
     assert "median" not in report.feedback.casefold()
     assert report.uncertainty.startswith("不确定")
-    assert get_learner_state(context).history[-1].score == report.overall_correctness
+    assert report.recommendation_kind == RecommendationKind.RETRY_INSUFFICIENT
+    assert report.recommendation_rule_id is not None
+    assert report.next_question_id is None
+    assert prepared.updated_state.history[-1].score == report.overall_correctness
+    assert tutor.store.load("offline-learner").history == ()
 
 
-def test_offline_mode_persists_sdk_sqlite_session(tutor: TutorAgent) -> None:
+def test_diagnose_does_not_create_sdk_session_database(tutor: TutorAgent) -> None:
+    session_path = Path(tutor.settings.session_db_path)
     context = tutor.create_context(
         learner_id="offline-learner",
         session_id="persisted-session",
         current_question_id="mean_median_python_01",
     )
-    asyncio.run(tutor.diagnose(context, "8", hint_level=0))
+    assert not session_path.exists()
 
-    async def read_session() -> list[dict[str, object]]:
-        session = tutor.create_session("persisted-session")
-        try:
-            return await session.get_items()
-        finally:
-            session.close()
+    asyncio.run(
+        tutor.diagnose(
+            context,
+            LearnerSubmission(answer="8"),
+            hint_level=0,
+        )
+    )
 
-    items = asyncio.run(read_session())
-
-    assert [item["role"] for item in items] == ["user", "assistant"]
-    assert items[0]["content"] == "8"
+    assert not session_path.exists()

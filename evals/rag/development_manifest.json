@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "retrieval_contract_version": "g3.2-v1",
+  "split": "development",
+  "frozen_on": "2026-08-08",
+  "case_count": 64,
+  "matched_case_count": 56,
+  "no_match_case_count": 8,
+  "cases_sha256": "sha256:b84486116e74d50e4e9152ab65af8893c51f56d3bdb53013ffe2c0285f69490a",
+  "index_fingerprint": "sha256:5b301d0c26f277080db8ca92a8036cf0e011eead0020a5860cd42779e3c3343e",
+  "retriever_fingerprint": "sha256:5e0d2f01c151204cdfe7d3e31c3754f201ae6f9fae4d550c8431e8dca9805371",
+  "evaluator_fingerprint": "sha256:9a59205a1a1adf7ae2fbf29e1790ab8acc46ea24d7e0f20113fbea07f0d5cd7a",
+  "label_policy_version": "manual-source-section-review-v1",
+  "distribution": {
+    "matched_per_unit": 7,
+    "metadata_assisted": 48,
+    "query_only": 16,
+    "query_only_matched": 8,
+    "protected_level_one": 8,
+    "purpose": {
+      "diagnostic": 37,
+      "hint": 11,
+      "knowledge_search": 16
+    },
+    "query_style": {
+      "learner_paraphrase": 32,
+      "formula_request": 6,
+      "python_request": 10,
+      "summary_request": 8,
+      "out_of_domain": 8
+    },
+    "disclosure_level": {
+      "1": 24,
+      "2": 21,
+      "3": 11,
+      "4": 8
+    }
+  },
+  "quality_gates": {
+    "target_recall_at_1_minimum": 0.75,
+    "target_recall_at_3_minimum": 0.90,
+    "per_unit_target_recall_at_3_minimum": 0.80,
+    "query_only_target_recall_at_3_minimum": 0.75,
+    "mean_reciprocal_rank_minimum": 0.80,
+    "citation_correctness_minimum": 0.95,
+    "citation_integrity_required": 1.0,
+    "no_result_accuracy_required": 1.0,
+    "disclosure_violation_rate_required": 0.0,
+    "level_one_leakage_rate_required": 0.0,
+    "protected_level_one_minimum": 8,
+    "purpose_minimum_each": 8,
+    "replay_stability_required": 1.0,
+    "evaluation_failure_rate_required": 0.0
+  },
+  "development_baseline": {
+    "target_recall_at_1": "46/56",
+    "target_recall_at_3": "56/56",
+    "query_only_target_recall_at_3": "8/8",
+    "mean_reciprocal_rank": 0.9107142857142857,
+    "citation_correctness": "164/165",
+    "citation_integrity": "165/165",
+    "no_result_accuracy": "8/8",
+    "disclosure_violations": "0/64",
+    "level_one_leakages": "0/24",
+    "stable_three_replays": "64/64",
+    "evaluation_failures": "0/64"
+  },
+  "source_snapshot": [
+    {"source_id": "data_quality_core", "version": "0.1.0", "checksum": "sha256:b39114eca8c770f27a1afee0f878e2419d49f0e29b627b71d887cf6989c12f9f"},
+    {"source_id": "mean_median_core", "version": "0.1.0", "checksum": "sha256:ede5e94d9f5894a10c90c9541275aade720e73f1bf99d7e3eac4da20f2691ca7"},
+    {"source_id": "variance_std_core", "version": "0.1.0", "checksum": "sha256:a448eb3c936d7268acef9201006953e1aaf469d6a0f4928d2a081d911d3891c3"},
+    {"source_id": "probability_rules_independence_core", "version": "0.1.0", "checksum": "sha256:b1d952d0f2bed8e4f61d7fa9f72fd3f34c694a8eed5ec552ad9db19f7a71e400"},
+    {"source_id": "numpy_random_simulation_core", "version": "0.1.0", "checksum": "sha256:58aef312c6e94b6eef049a84304c1a9bbab284bbc579af23e7606301d26c393d"},
+    {"source_id": "discrete_distributions_core", "version": "0.1.0", "checksum": "sha256:1a438e9bec4ca0203b180f3b3a3d4494cf81b39ec08f5f4b525490bad61fb8a8"},
+    {"source_id": "continuous_distributions_core", "version": "0.1.0", "checksum": "sha256:5900c161dc5bdb8a7062af6add094f43ea050f5b45353e08ffc4e1e46e905076"},
+    {"source_id": "joint_conditionals_covariance_core", "version": "0.1.0", "checksum": "sha256:a48f2e4ccaa9f63ebcfae3542d5e3509e75faf68ed98a4dde82c6054cd728207"},
+    {"source_id": "correlation_groupby_core", "version": "0.1.0", "checksum": "sha256:4eea6662d9d51d9e7fa58de80f4aa07cde31ec6e9fe6cd71177296ce8ef694ae"},
+    {"source_id": "sampling_standard_error_core", "version": "0.2.0", "checksum": "sha256:d1ee23613c8ffe54d5e31c8c58a024945348fe207d1fea42f7313d15931ba566"},
+    {"source_id": "sampling_distribution_clt_core", "version": "0.1.0", "checksum": "sha256:d3b9e3710d489af972be04595d254cad68309b26fa9a84fdd11536b2b14ad43e"},
+    {"source_id": "point_estimation_bias_variability_core", "version": "0.1.0", "checksum": "sha256:20326651a1d478b4921fb064acf25f9b8c2a497d67cdaf93e319ccba53c82cc5"},
+    {"source_id": "confidence_interval_core", "version": "0.2.0", "checksum": "sha256:3f4a6ae3e9c2811a7f9723e79b1069de990d5139c5b8089dc040ea1d4db27516"},
+    {"source_id": "hypothesis_testing_decisions_core", "version": "0.1.0", "checksum": "sha256:e55358f2ce0a1fa019a8a5140bdad6f701bc0340c2c3f94adb97dba4159497db"},
+    {"source_id": "ab_experiment_analysis_core", "version": "0.1.0", "checksum": "sha256:0da74d059952945eec32190dbde783abb1a51b6c22ebd37a1af208437b8b5731"}
+  ],
+  "holdout_policy": {
+    "minimum_case_count": 48,
+    "minimum_matched_per_unit": 5,
+    "minimum_no_match_count": 8,
+    "minimum_query_only_matched_count": 8,
+    "origin": "independent_judge",
+    "main_agent_may_read_case_content": false,
+    "allowed_return": "aggregate_metrics_and_failure_buckets_only"
+  }
+}

@@ -1,5 +1,35 @@
 manifest_version: "1.0"
 sources:
+  - source_id: data_quality_core
+    title: 数据加载、缺失值与数据质量原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - data_quality
+    file_path: data/rag/sources/data_quality.yaml
+    checksum: sha256:b39114eca8c770f27a1afee0f878e2419d49f0e29b627b71d887cf6989c12f9f
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: data_quality
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - dq_field_rules
+        - dq_missing_values
+        - dq_python_audit
+        - dq_missingness_bias
+        - dq_decision_log
+    updated_at: 2026-08-07T18:00:00+08:00
+
   - source_id: mean_median_core
     title: 均值与中位数基础课程资料
     source_type: project_authored
@@ -16,10 +46,17 @@ sources:
       - evaluation
     answer_leakage_risk: low
     metadata:
-      content_status: reviewed_draft
+      content_status: pending_teacher_review
       placeholder: false
       contains_course_content: true
-    updated_at: 2026-07-26T09:00:00+08:00
+      unit_id: descriptive_statistics
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ds_center
+        - ds_outlier_robustness
+        - ds_context_interpretation
+    updated_at: 2026-08-07T20:00:00+08:00
 
   - source_id: variance_std_core
     title: 方差与标准差基础课程资料
@@ -37,49 +74,343 @@ sources:
       - evaluation
     answer_leakage_risk: low
     metadata:
-      content_status: reviewed_draft
+      content_status: pending_teacher_review
       placeholder: false
       contains_course_content: true
-    updated_at: 2026-07-26T09:00:00+08:00
+      unit_id: descriptive_statistics
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ds_spread
+        - ds_outlier_robustness
+        - ds_context_interpretation
+    updated_at: 2026-08-07T20:00:00+08:00
+
+  - source_id: probability_rules_independence_core
+    title: 条件概率、互斥与独立原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - probability_simulation
+    file_path: data/rag/sources/probability_rules_independence.yaml
+    checksum: sha256:b1d952d0f2bed8e4f61d7fa9f72fd3f34c694a8eed5ec552ad9db19f7a71e400
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: probability_simulation
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ps_probability_rules
+        - ps_independence
+    updated_at: 2026-08-07T23:00:00+08:00
+
+  - source_id: numpy_random_simulation_core
+    title: NumPy 随机生成与蒙特卡洛误差原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - probability_simulation
+    file_path: data/rag/sources/numpy_random_simulation.yaml
+    checksum: sha256:58aef312c6e94b6eef049a84304c1a9bbab284bbc579af23e7606301d26c393d
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: probability_simulation
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ps_random_generation
+        - ps_monte_carlo_error
+    updated_at: 2026-08-07T23:00:00+08:00
+
+  - source_id: discrete_distributions_core
+    title: 离散分布、参数与支持集原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - common_distributions
+    file_path: data/rag/sources/discrete_distributions.yaml
+    checksum: sha256:1a438e9bec4ca0203b180f3b3a3d4494cf81b39ec08f5f4b525490bad61fb8a8
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: common_distributions
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - cd_discrete
+        - cd_parameters_support
+        - cd_python_representation
+    updated_at: 2026-08-07T23:50:00+08:00
+
+  - source_id: continuous_distributions_core
+    title: 连续分布、密度与累计概率原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - common_distributions
+    file_path: data/rag/sources/continuous_distributions.yaml
+    checksum: sha256:5900c161dc5bdb8a7062af6add094f43ea050f5b45353e08ffc4e1e46e905076
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: common_distributions
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - cd_continuous
+        - cd_parameters_support
+        - cd_python_representation
+    updated_at: 2026-08-07T23:50:00+08:00
+
+  - source_id: joint_conditionals_covariance_core
+    title: 联合、条件关系与协方差原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - joint_correlation
+    file_path: data/rag/sources/joint_conditionals_covariance.yaml
+    checksum: sha256:a48f2e4ccaa9f63ebcfae3542d5e3509e75faf68ed98a4dde82c6054cd728207
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: joint_correlation
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - jc_joint_conditionals
+        - jc_covariance
+    updated_at: 2026-08-08T10:00:00+08:00
+
+  - source_id: correlation_groupby_core
+    title: 相关系数、因果边界与 pandas 分组分析原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - joint_correlation
+    file_path: data/rag/sources/correlation_groupby.yaml
+    checksum: sha256:4eea6662d9d51d9e7fa58de80f4aa07cde31ec6e9fe6cd71177296ce8ef694ae
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: joint_correlation
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - jc_correlation_causation
+        - jc_grouping
+    updated_at: 2026-08-08T10:00:00+08:00
 
   - source_id: sampling_standard_error_core
-    title: 抽样与标准误基础课程资料
+    title: 标准误、精度与偏差边界课程资料
+    source_type: project_authored
+    version: "0.2.0"
+    language: zh-CN
+    concept_ids:
+      - sampling_standard_error
+    file_path: data/rag/sources/sampling_standard_error.yaml
+    checksum: sha256:d1ee23613c8ffe54d5e31c8c58a024945348fe207d1fea42f7313d15931ba566
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: sampling_inference
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - si_population_sample
+        - si_standard_error
+    updated_at: 2026-08-08T12:00:00+08:00
+
+  - source_id: sampling_distribution_clt_core
+    title: 抽样分布与中心极限定理课程资料
     source_type: project_authored
     version: "0.1.0"
     language: zh-CN
     concept_ids:
       - sampling_standard_error
-    file_path: data/rag/sources/sampling_standard_error.yaml
-    checksum: sha256:3812e19eb2998ab0a3cfd044829311e7ae8756e629b2012a09878f5e05aa8bd3
+    file_path: data/rag/sources/sampling_distribution_clt.yaml
+    checksum: sha256:d3b9e3710d489af972be04595d254cad68309b26fa9a84fdd11536b2b14ad43e
     license: project-owned
     allowed_usage:
       - retrieval
       - quotation
       - evaluation
-    answer_leakage_risk: medium
+    answer_leakage_risk: low
     metadata:
-      content_status: reviewed_draft
+      content_status: pending_teacher_review
       placeholder: false
       contains_course_content: true
-    updated_at: 2026-07-26T09:00:00+08:00
+      unit_id: sampling_inference
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - si_population_sample
+        - si_sampling_distribution
+        - si_clt
+    updated_at: 2026-08-08T12:00:00+08:00
 
-  - source_id: confidence_interval_core
-    title: 置信区间基础课程资料
+  - source_id: point_estimation_bias_variability_core
+    title: 点估计、偏差、方差与均方误差原创课程资料
     source_type: project_authored
     version: "0.1.0"
     language: zh-CN
     concept_ids:
       - confidence_interval
-    file_path: data/rag/sources/confidence_interval.yaml
-    checksum: sha256:298483b045bdb61b502f8dbc96976f29020884812ebb054e5f54b05c28d7806b
+    file_path: data/rag/sources/point_estimation_bias_variability.yaml
+    checksum: sha256:20326651a1d478b4921fb064acf25f9b8c2a497d67cdaf93e319ccba53c82cc5
     license: project-owned
     allowed_usage:
       - retrieval
       - quotation
       - evaluation
-    answer_leakage_risk: medium
+    answer_leakage_risk: low
     metadata:
-      content_status: reviewed_draft
+      content_status: pending_teacher_review
       placeholder: false
       contains_course_content: true
-    updated_at: 2026-07-26T09:00:00+08:00
+      unit_id: estimation_confidence_interval
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ec_point_estimation
+        - ec_bias_variability
+    updated_at: 2026-08-08T16:00:00+08:00
+
+  - source_id: confidence_interval_core
+    title: 置信区间构造、长期覆盖与解释边界原创课程资料
+    source_type: project_authored
+    version: "0.2.0"
+    language: zh-CN
+    concept_ids:
+      - confidence_interval
+    file_path: data/rag/sources/confidence_interval.yaml
+    checksum: sha256:3f4a6ae3e9c2811a7f9723e79b1069de990d5139c5b8089dc040ea1d4db27516
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: estimation_confidence_interval
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ec_interval_construction
+        - ec_interval_interpretation
+    updated_at: 2026-08-08T16:00:00+08:00
+
+  - source_id: hypothesis_testing_decisions_core
+    title: 假设检验、p 值、两类错误与功效原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - hypothesis_testing
+    file_path: data/rag/sources/hypothesis_testing_decisions.yaml
+    checksum: sha256:e55358f2ce0a1fa019a8a5140bdad6f701bc0340c2c3f94adb97dba4159497db
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: hypothesis_testing
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ht_hypotheses
+        - ht_p_value
+        - ht_errors_power
+    updated_at: 2026-08-08T18:00:00+08:00
+
+  - source_id: ab_experiment_analysis_core
+    title: A/B 实验设计、效应解释与有效性审计原创课程资料
+    source_type: project_authored
+    version: "0.1.0"
+    language: zh-CN
+    concept_ids:
+      - hypothesis_testing
+    file_path: data/rag/sources/ab_experiment_analysis.yaml
+    checksum: sha256:0da74d059952945eec32190dbde783abb1a51b6c22ebd37a1af208437b8b5731
+    license: project-owned
+    allowed_usage:
+      - retrieval
+      - quotation
+      - evaluation
+    answer_leakage_risk: low
+    metadata:
+      content_status: pending_teacher_review
+      placeholder: false
+      contains_course_content: true
+      unit_id: hypothesis_testing
+      author_role: student_team
+      reviewer_role: course_teacher
+      knowledge_node_ids:
+        - ht_p_value
+        - ht_errors_power
+        - ht_ab_design
+    updated_at: 2026-08-08T18:00:00+08:00

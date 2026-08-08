@@ -17,12 +17,19 @@ from probstat_tutor.schemas import ConceptId
 SUPPORTED_SOURCE_SCHEMA_VERSION = "1.0"
 
 FORBIDDEN_SOURCE_KEYS = {
+    "case_id",
+    "correct_answer",
     "dataset",
     "dimension_weights",
+    "eval_case_id",
     "expected_answer",
+    "grader_findings",
+    "ground_truth",
+    "misconception_tag",
     "misconception_tags",
     "numeric_tolerance",
     "question_id",
+    "recommendation_rule_id",
     "rubric",
 }
 

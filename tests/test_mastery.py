@@ -26,6 +26,21 @@ def test_new_learner_starts_neutral_in_every_cell() -> None:
             assert getattr(state.mastery[concept], dimension.value) == 0.5
 
 
+def test_legacy_state_adds_new_concept_without_losing_existing_scores() -> None:
+    raw_state = create_initial_state().model_dump(mode="json")
+    mastery = raw_state["mastery"]
+    assert isinstance(mastery, dict)
+    mastery.pop(ConceptId.DATA_QUALITY.value)
+    mean_scores = mastery[ConceptId.MEAN_MEDIAN.value]
+    assert isinstance(mean_scores, dict)
+    mean_scores["concept"] = 0.8
+
+    migrated = create_initial_state().model_validate(raw_state)
+
+    assert migrated.mastery[ConceptId.DATA_QUALITY].concept == 0.5
+    assert migrated.mastery[ConceptId.MEAN_MEDIAN].concept == 0.8
+
+
 def test_attempt_uses_formula_and_does_not_mutate_input() -> None:
     state = create_initial_state()
     question = _question("mean_median_concept_01")
@@ -49,7 +64,7 @@ def test_higher_hint_level_reduces_adjusted_evidence() -> None:
         resulting_scores.append(updated.mastery[ConceptId.MEAN_MEDIAN].concept)
 
     assert resulting_scores == sorted(resulting_scores, reverse=True)
-    assert len(set(resulting_scores)) == 4
+    assert len(set(resulting_scores)) == 5
 
 
 def test_two_correct_attempts_raise_mastery_and_record_streak() -> None:
@@ -80,10 +95,10 @@ def test_two_wrong_attempts_lower_mastery_and_do_not_mark_complete() -> None:
 
 
 def test_invalid_hint_level_has_clear_error() -> None:
-    with pytest.raises(ValueError, match="0、1、2 或 3"):
+    with pytest.raises(ValueError, match="0、1、2、3 或 4"):
         apply_attempt(
             create_initial_state(),
             _question("mean_median_concept_01"),
             _grade(correct=True),
-            hint_level=4,
+            hint_level=5,
         )

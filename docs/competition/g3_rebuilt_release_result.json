@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0.0",
+  "transport": "temporary_allowlist_copy_verified_environment_no_external_network",
+  "python_version": "3.11.15",
+  "operating_system": "Darwin",
+  "source_manifest_sha256": "9207e8d4c8cc42150230949f5b3002118dcef848a469730c0a60f887478d24ab",
+  "copied_artifact_count": 163,
+  "blind_or_holdout_artifact_count": 0,
+  "commands": [
+    {
+      "name": "allowlist_import_probe",
+      "return_code": 0,
+      "duration_seconds": 0.016,
+      "output_tail": [
+        "<release_bundle>/src/probstat_tutor/__init__.py"
+      ],
+      "passed": true
+    },
+    {
+      "name": "g1_demo",
+      "return_code": 0,
+      "duration_seconds": 2.491,
+      "output_tail": [
+        "      \"selected_question_id\": \"mean_median_concept_01\",",
+        "      \"hint_is_progressive\": true,",
+        "      \"wrong_answer_is_rejected\": true,",
+        "      \"wrong_answer_hides_next_question\": true,",
+        "      \"correction_is_accepted\": true,",
+        "      \"correction_has_next_question\": true,",
+        "      \"duplicate_is_idempotent\": true,",
+        "      \"history_count\": 2,",
+        "      \"passed\": true",
+        "    }",
+        "  ]",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "rag_demo",
+      "return_code": 0,
+      "duration_seconds": 1.541,
+      "output_tail": [
+        "      }",
+        "    }",
+        "  ],",
+        "  \"message_zh\": \"已从本地原创知识库检索到 2 条可引用依据。\",",
+        "  \"query_fingerprint\": \"sha256:0fb43ed6b50680f3fdf15ee83c642992f86c1cdf6c4263c15a9d7d31cf90fe91\",",
+        "  \"index_fingerprint\": \"sha256:5b301d0c26f277080db8ca92a8036cf0e011eead0020a5860cd42779e3c3343e\"",
+        "}",
+        "{",
+        "  \"indexed_sources\": 15,",
+        "  \"indexed_chunks\": 478,",
+        "  \"index_fingerprint\": \"sha256:5b301d0c26f277080db8ca92a8036cf0e011eead0020a5860cd42779e3c3343e\"",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "rag_public_development",
+      "return_code": 0,
+      "duration_seconds": 2.187,
+      "output_tail": [
+        "    \"query_only_target_recall_at_3_ge_0_75\": true,",
+        "    \"mean_reciprocal_rank_ge_0_80\": true,",
+        "    \"citation_correctness_ge_0_95\": true,",
+        "    \"citation_integrity_eq_1\": true,",
+        "    \"no_result_accuracy_eq_1\": true,",
+        "    \"disclosure_violation_rate_eq_0\": true,",
+        "    \"level_one_leakage_rate_eq_0\": true,",
+        "    \"replay_stability_eq_1\": true,",
+        "    \"evaluation_failure_rate_eq_0\": true",
+        "  },",
+        "  \"all_gates_pass\": true",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "product_demo",
+      "return_code": 0,
+      "duration_seconds": 2.654,
+      "output_tail": [
+        "      \"history_count\": 2",
+        "    }",
+        "  ],",
+        "  \"teacher_status\": \"ready\",",
+        "  \"teacher_profile_count\": 5,",
+        "  \"teacher_attempt_count\": 10,",
+        "  \"teacher_raw_answer_fields_present\": false,",
+        "  \"offline_core_available\": true,",
+        "  \"model_failure_fallback_verified\": true,",
+        "  \"fault_event_count\": 1,",
+        "  \"passed\": true",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "api_demo",
+      "return_code": 0,
+      "duration_seconds": 2.604,
+      "output_tail": [
+        "  \"health_ok\": true,",
+        "  \"offline_core_available\": true,",
+        "  \"recommendation_ok\": true,",
+        "  \"level_one_safe\": true,",
+        "  \"level_four_complete\": true,",
+        "  \"diagnosis_correct\": true,",
+        "  \"idempotent_history_count\": 1,",
+        "  \"invalid_request_status\": 422,",
+        "  \"unavailable_status\": 503,",
+        "  \"unavailable_retryable\": true,",
+        "  \"passed\": true",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "reliability_demo",
+      "return_code": 0,
+      "duration_seconds": 2.927,
+      "output_tail": [
+        "  ],",
+        "  \"performance_sample_size\": 24,",
+        "  \"performance_concurrency\": 6,",
+        "  \"performance_success_count\": 24,",
+        "  \"performance_history_count\": 24,",
+        "  \"diagnose_p50_ms\": 1.573,",
+        "  \"diagnose_p95_ms\": 1.887,",
+        "  \"diagnose_max_ms\": 2.23,",
+        "  \"diagnose_p95_limit_ms\": 3000.0,",
+        "  \"serious_fault_count\": 0,",
+        "  \"passed\": true",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "macos_preflight",
+      "return_code": 0,
+      "duration_seconds": 0.609,
+      "output_tail": [
+        "macOS 启动检查通过"
+      ],
+      "passed": true
+    },
+    {
+      "name": "openapi_contract",
+      "return_code": 0,
+      "duration_seconds": 0.796,
+      "output_tail": [
+        "OpenAPI 契约与 Pydantic schema 一致。"
+      ],
+      "passed": true
+    },
+    {
+      "name": "public_pytest",
+      "return_code": 0,
+      "duration_seconds": 79.237,
+      "output_tail": [
+        "........................................................................ [ 10%]",
+        "........................................................................ [ 21%]",
+        "........................................................................ [ 32%]",
+        "........................................................................ [ 43%]",
+        "........................................................................ [ 54%]",
+        "........................................................................ [ 65%]",
+        "........................................................................ [ 76%]",
+        "........................................................................ [ 87%]",
+        "........................................................................ [ 98%]",
+        "..........                                                               [100%]",
+        "658 passed in 78.80s (0:01:18)"
+      ],
+      "passed": true
+    },
+    {
+      "name": "ruff",
+      "return_code": 0,
+      "duration_seconds": 0.088,
+      "output_tail": [
+        "All checks passed!"
+      ],
+      "passed": true
+    },
+    {
+      "name": "pip_check",
+      "return_code": 0,
+      "duration_seconds": 0.169,
+      "output_tail": [
+        "No broken requirements found.",
+        "",
+        "WARNING: The directory '<user_home>/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag."
+      ],
+      "passed": true
+    },
+    {
+      "name": "release_audit",
+      "return_code": 0,
+      "duration_seconds": 1.727,
+      "output_tail": [
+        "      \"blocks_competition_submission\": true",
+        "    },",
+        "    {",
+        "      \"action_id\": \"final_publish_and_submit\",",
+        "      \"title_zh\": \"用户确认正式发布与最终提交\",",
+        "      \"status\": \"pending_human_action\",",
+        "      \"blocks_competition_submission\": true",
+        "    }",
+        "  ],",
+        "  \"engineering_gate_passed\": true,",
+        "  \"competition_submission_ready\": false",
+        "}"
+      ],
+      "passed": true
+    },
+    {
+      "name": "rebuilt_audit_exact_match",
+      "return_code": 0,
+      "duration_seconds": 0.0,
+      "output_tail": [
+        "重建审计与源审计逐字段完全一致"
+      ],
+      "passed": true
+    }
+  ],
+  "all_passed": true
+}

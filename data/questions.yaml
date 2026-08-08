@@ -1,8 +1,1815 @@
-schema_version: 1
+schema_version: 2
 questions:
+  - id: data_quality_concept_01
+    title: 区分缺失值与合法的零
+    unit_id: data_quality
+    concept_id: data_quality
+    knowledge_node_ids: [dq_missing_values, dq_field_rules]
+    prerequisites: []
+    difficulty: 0.25
+    question_type: concept
+    prompt: >-
+      score 的合法范围是 0–100，空白单元格加载为缺失。数据为
+      [80, 缺失, 0, 100, 缺失, 70]。共有几个缺失值？答案栏只写数字，并说明 0 是否计入。
+    dataset:
+      column_name: score
+      valid_range: [0, 100]
+      values: [80, null, 0, 100, null, 70]
+    expected_answer: 2
+    numeric_tolerance: 0
+    rubric:
+      - 只把两个空白位置计为缺失
+      - 根据字段规则说明 0 是已观察到的合法分数
+      - 不在核验前擅自填补或删除记录
+    misconception_tags: [zero_treated_as_missing, missing_replaced_without_context]
+    dimension_weights:
+      concept: 0.65
+      calculation: 0.20
+      python: 0.00
+      interpretation: 0.15
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_any: [0 是合法, 0是合法, 合法范围, 空白才是缺失, 两个空白, 第 2 和第 5]
+      reasoning_insufficient_rule:
+        rule_id: zero_validity_unexplained
+        message_zh: 数量可能正确，但理由尚未说明为什么记录为 0 的位置不属于缺失。
+        misconception_tag: zero_validity_unexplained
+      relevance_terms: [缺失, 空白, "0", 合法范围, 两个]
+      text_rules:
+        - rule_id: valid_zero_counted_as_missing
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [0 也是缺失, 0也算缺失, 0 也算缺失, 零值就是缺失, 0 表示没有记录]
+          negation_guards: [不能, 不是, 不应]
+          message_zh: 题目已说明 0 位于合法范围且被实际记录，不能把它当作空白缺失。
+          misconception_tag: zero_treated_as_missing
+        - rule_id: missing_replaced_before_context_check
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [先把缺失都填成 0, 空白直接填 0, 缺失一律补零]
+          negation_guards: [不能, 不是, 不应]
+          message_zh: 缺失处理需要情境依据，不能在核验原因前一律填成 0。
+          misconception_tag: missing_replaced_without_context
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：没有记录和明确记录为 0，是同一种数据状态吗？
+      method_cue: 方法提示：按照题目给出的字段规则，只标记真正为空的单元格。
+      partial_step: 步骤提示：第 2、5 个位置为空；第 3 个位置记录了一个位于合法范围内的数值。
+      complete_explanation:
+        concept: 缺失表示没有观察到值；0 是题设允许且已经观察到的成绩，两者不能混为一谈。
+        calculation: 空白出现在第 2、5 个位置，所以缺失值数量为 2，分母仍要按分析目的说明。
+        python: 可用 Series.isna() 生成缺失掩码，再用 sum() 计数；它不会把合法的 0 标为缺失。
+        interpretation: 后续报告应注明两条缺失及处理规则，不能未经依据把空白补成 0。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: hypothesis_p_value_concept_01
+    title: 从原假设正确解释 p 值与检验决策
+    unit_id: hypothesis_testing
+    concept_id: hypothesis_testing
+    knowledge_node_ids: [ht_hypotheses, ht_p_value]
+    prerequisites: [confidence_interval]
+    difficulty: 0.68
+    question_type: concept
+    prompt: >-
+      一项随机分组的 A/B 实验比较两版转化率，双侧检验设
+      H0: p_B-p_A=0，H1: p_B-p_A≠0，预先设定 α=0.05，得到 p=0.032。哪项正确？
+      A. 在 H0 和检验条件成立时，得到当前这么极端或更极端结果的概率为 0.032；
+      因 p<α 而拒绝 H0，但不能说 H0 为真的概率是 3.2%，也不能仅凭 p 值说效应很大。
+      B. p=0.032 表示 H0 为真的概率是 3.2%。
+      C. p=0.032 表示 B 比 A 好的概率是 96.8%。
+      D. 因为 0.032>0.05，所以不拒绝 H0。
+      答案栏选一项，并说明假设、p 值的条件语境、阈值比较和结论边界。
+    dataset:
+      design: randomized_two_group_ab
+      parameter: conversion_rate_difference
+      null_hypothesis: p_b_minus_p_a_equals_0
+      alternative_hypothesis: p_b_minus_p_a_not_equals_0
+      alternative: two_sided
+      alpha: 0.05
+      p_value: 0.032
+    expected_answer: A
+    accepted_answers: [a, 选项A, 拒绝H0但p值不是H0为真的概率]
+    numeric_tolerance: null
+    rubric:
+      - 写清 H0 是转化率差为 0，H1 是双侧不为 0
+      - 在 H0 与检验条件成立的前提下解释当前或更极端数据的概率
+      - 比较 0.032<0.05 并得出拒绝 H0
+      - 不把 p 值当作 H0 为真、备择为真或效应很大的概率
+    misconception_tags:
+      - p_value_is_probability_null_true
+      - p_value_is_probability_treatment_better
+      - alpha_p_value_comparison_reversed
+      - statistical_significance_proves_large_effect
+      - p_value_context_unexplained
+    dimension_weights: {concept: 0.55, calculation: 0.15, python: 0.00, interpretation: 0.30}
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [H0是两组总体转化率相等, H0是p_B-p_A=0, 原假设是转化率差为0, H0说两个版本的总体转化没有差别, 零假设规定总体差等于零]
+        - [H1是双侧不相等, H1是p_B-p_A不为0, 备择假设是双侧差异, 双侧H1则说差值不为零, 双边备择允许正负差异]
+        - [观察到当前或更极端结果的尾部概率为0.032, 假定原假设为真时观察到至少这么极端数据的概率是3.2%, p值是H0下当前或更极端的尾部概率, 像本次或更偏离零的统计量出现机会是0.032, 统计量达到样本所见或更极端的尾部面积是3.2%]
+        - [0.032<0.05, p值小于alpha, p<α, 它低于alpha=.05, 3.2%比事先5%的门槛低]
+        - [所以拒绝H0, 因而拒绝原假设, 故拒绝H0, 达到统计显著, 故否定H0, 按方案驳回零假设]
+        - [p值不是H0为真的概率, 不能说H0为真概率是3.2%, p值不等于B更好的概率, 统计显著不说明效应很大, 还要看效应量与置信区间, 仍需效应量和CI, 显著也不量化差异幅度]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: p_value_context_unexplained
+        message_zh: 还需写清原/备择假设、p 值在 H0 下的条件语境、阈值比较和结论边界。
+        misconception_tag: p_value_context_unexplained
+      relevance_terms: [原假设, 备择假设, H0, H1, p值, "0.032", "0.05", 拒绝]
+      text_rules:
+        - rule_id: p_value_is_probability_null_true
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [p值就是H0为真的概率, H0为真的概率是3.2%, 原假设只有3.2%概率为真, H0的可信度只剩3.2%, 原假设正确的可信度只剩3.2%, p本质上就是零假设的后验可信度]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: p 值是 H0 与检验条件下数据的尾部概率，不是 H0 为真的概率。
+          misconception_tag: p_value_is_probability_null_true
+        - rule_id: p_value_is_probability_treatment_better
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [B更好的概率是96.8%, 备择假设为真概率是96.8%, 1-p就是B有效的概率, 新版获胜的把握达到96.8%]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 频率学派 p 值不直接给出备择假设或 B 更好的后验概率。
+          misconception_tag: p_value_is_probability_treatment_better
+        - rule_id: alpha_p_value_comparison_reversed
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [0.032大于0.05, p值大于alpha所以不拒绝, 0.032>0.05]
+          negation_guards: [不是, 并非, 不对, 错误]
+          message_zh: 0.032 小于预先设定的 0.05，本题决策是拒绝 H0。
+          misconception_tag: alpha_p_value_comparison_reversed
+        - rule_id: statistical_significance_proves_large_effect
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [p值很小所以效应一定很大, 统计显著就代表实际收益很大, 显著即效果强, 显著便说明收益必然可观]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: p 值不表示效应大小；还需报告效应量、置信区间和实际阈值。
+          misconception_tag: statistical_significance_proves_large_effect
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：p 值的概率语句是从“假设”到“数据”，还是从“数据”到“假设”？
+      method_cue: 方法提示：先写出参数差的原/备择假设，再于 H0 前提下解释尾部概率，最后将 p 值与预设阈值比较。
+      partial_step: 步骤提示：本题是双侧差异问题；把 0.032 放在数轴上与 0.05 比较，但不要把这个数改写成假设为真的概率。
+      complete_explanation:
+        concept: H0 规定转化率差为 0，H1 规定双侧差异；p 值是假定 H0 与检验条件成立时数据的尾部概率。
+        calculation: 0.032<0.05，因此按预设决策规则拒绝 H0。
+        python: 受审分析可用 SciPy 计算检验结果；本题不要求也不执行学习者代码。
+        interpretation: 选 A。结果在 5% 阈值下统计显著，但 p 值不是 H0 为真或 B 更好的概率，也不表示效应大小。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: ab_welch_ttest_python_01
+    title: 用 SciPy Welch t 检验分析合成 A/B 指标
+    unit_id: hypothesis_testing
+    concept_id: hypothesis_testing
+    knowledge_node_ids: [ht_p_value, ht_ab_design]
+    prerequisites: [confidence_interval]
+    difficulty: 0.76
+    question_type: python
+    prompt: >-
+      合成数据 `data/synthetic/ab_session_duration.csv` 来自两个独立随机组。系统已按组提供
+      `variant_a` 和 `variant_b` 两个时长数组。使用 `stats.ttest_ind` 做不假设方差相等的双侧 Welch
+      独立样本 t 检验，最终表达式只取 `.pvalue`。答案栏填 p 值，代码栏写表达式；
+      说明两组均值差、p 值与 0.05 的比较，以及结论不能超过随机分组和合成样本的边界。
+      学习者代码只做 AST 静态检查，绝不执行。
+    dataset:
+      source_path: data/synthetic/ab_session_duration.csv
+      metric: session_duration_minutes
+      variant_a: [70, 72, 68, 75, 69, 71, 73, 70]
+      variant_b: [74, 76, 72, 78, 73, 75, 77, 74]
+      design: independent_random_assignment
+      test: welch_two_sided_independent_ttest
+      alpha: 0.05
+      mean_a: 71.0
+      mean_b: 74.875
+      mean_difference_b_minus_a: 3.875
+    expected_answer: 0.002948258250101697
+    numeric_tolerance: 0.000000001
+    rubric:
+      - 使用两个系统数组作为独立样本，不合并或复用同一组
+      - 显式设定 equal_var=False 和 alternative=two-sided
+      - 最终结果连通到 ttest_ind 的 pvalue 属性
+      - 核对 A 均值 71、B 均值 74.875、差 3.875 和 p≈0.002948
+      - 在 0.05 阈值下拒绝均值相等原假设，但不把合成小样本外推为无条件的现实因果结论
+    misconception_tags:
+      - pooled_ttest_used_when_welch_required
+      - one_sided_test_used_for_two_sided_question
+      - ttest_same_group_twice
+      - ttest_result_not_pvalue
+      - p_value_is_probability_null_true
+      - welch_test_boundary_unexplained
+      - welch_ttest_structure_mismatch
+      - unsafe_code_execution_request
+    dimension_weights: {concept: 0.10, calculation: 0.20, python: 0.55, interpretation: 0.15}
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [A组均值是71而B组是74.875, mean_a=71mean_b=74.875, B比A高3.875, 均值差为3.875, 后者多出3.875分钟]
+        - [p值约0.002948, p=0.002948258250101697, p值小于0.05, 0.002948<0.05, 概率值约.002948]
+        - [拒绝两组均值相等的H0, 在0.05阈值下拒绝H0, 该双侧差异达到统计显著, 所以否定均值相同]
+        - [不能超出随机分组与合成样本边界, 合成小样本不能代表所有现实用户, 因果解释依赖随机化和实验执行, 还需报告效应量与置信区间, 这只能演示当前随机化设定]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: welch_test_boundary_unexplained
+        message_zh: 还需核对两组均值与差、p 值和决策，并限定合成随机样本的解释边界。
+        misconception_tag: welch_test_boundary_unexplained
+      relevance_terms: [Welch, ttest_ind, equal_var, two-sided, pvalue, "3.875", "0.002948", 随机分组]
+      text_rules:
+        - rule_id: p_value_is_probability_null_true
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [p值就是H0为真的概率, 原假设为真的概率是0.2948%, 0.002948是均值相等的概率, 均值相等的可信度就是0.2948%]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: p 值是 H0 下数据的尾部概率，不是均值相等假设为真的概率。
+          misconception_tag: p_value_is_probability_null_true
+      python_static_spec:
+        structure_kind: direct_welch_ttest_pvalue
+        variants:
+          - required_calls: [stats.ttest_ind]
+            required_names: [variant_a, variant_b]
+            allowed_root_kinds: [Attribute]
+            required_constants: ["false", two-sided]
+          - required_calls: [scipy.stats.ttest_ind]
+            required_names: [variant_a, variant_b]
+            allowed_root_kinds: [Attribute]
+            required_constants: ["false", two-sided]
+        mismatch_rules:
+          - rule_id: pooled_ttest_used_when_welch_required
+            kind: pooled_ttest_for_welch_question
+            message_zh: 本题指定 Welch 检验，必须显式使用 equal_var=False。
+            misconception_tag: pooled_ttest_used_when_welch_required
+          - rule_id: one_sided_test_used_for_two_sided_question
+            kind: one_sided_ttest_for_two_sided_question
+            message_zh: 本题的备择假设是双侧，不能改成 less 或 greater 单侧检验。
+            misconception_tag: one_sided_test_used_for_two_sided_question
+          - rule_id: ttest_same_group_twice
+            kind: ttest_same_group_twice
+            message_zh: 两个参数必须分别连接 variant_a 和 variant_b，不能重复比较同一组。
+            misconception_tag: ttest_same_group_twice
+          - rule_id: ttest_result_not_pvalue
+            kind: ttest_result_without_pvalue
+            message_zh: ttest_ind 返回检验结果对象，本题要求最终结果明确连接到 .pvalue。
+            misconception_tag: ttest_result_not_pvalue
+        mismatch_rule_id: welch_ttest_structure_mismatch
+        mismatch_message_zh: 代码必须是两个系统数组的双侧 Welch ttest_ind 并以 .pvalue 为最终结果；系统未执行代码。
+        misconception_tag: welch_ttest_structure_mismatch
+    hints:
+      concept_cue: 概念提示：两组是独立观测，题目是否允许假设两个总体方差相等？
+      method_cue: 方法提示：选择独立样本 t 检验，明确关闭等方差假设、保留双侧备择，并只取检验结果的概率字段。
+      partial_step: 步骤提示：先核对两个数组各自的均值，再构造以两个系统变量为前两个参数、带有两个明确关键字的 ttest_ind 调用。
+      complete_explanation:
+        concept: Welch 独立样本 t 检验比较两组总体均值，不要求两组方差相等；双侧备择关心任一方向的差异。
+        calculation: A 均值为 71，B 均值为 74.875，B-A=3.875；p≈0.0029482583<0.05。
+        python: 受审表达式为 stats.ttest_ind(variant_b, variant_a, equal_var=False, alternative="two-sided").pvalue；系统只做 AST 检查，不执行它。
+        interpretation: 在设定的双侧 5% 阈值下拒绝均值相等的 H0；这份合成小样本只用于教学，现实因果结论还依赖随机化执行、数据质量和外部适用性。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: hypothesis_errors_power_concept_01
+    title: 区分一类错误、二类错误与检验功效
+    unit_id: hypothesis_testing
+    concept_id: hypothesis_testing
+    knowledge_node_ids: [ht_hypotheses, ht_errors_power]
+    prerequisites: [confidence_interval]
+    difficulty: 0.72
+    question_type: concept
+    prompt: >-
+      团队预先设 H0：新版本没有提升，H1：新版本有正向提升，并只在拒绝 H0 后上线。
+      哪项正确？
+      A. 一类错误是实际无提升却误上线；二类错误是存在规定的真实提升却未拒绝 H0；
+      功效是在该具体真实提升下正确拒绝 H0 的概率。其他条件相同时增大样本量通常提高功效，
+      但不会改变真实效应、消除偏差或保证必然显著。
+      B. 一类错误是漏掉真提升，二类错误是误报无效版本。
+      C. 功效是 H0 为真时不拒绝 H0 的概率。
+      D. 样本量足够大时一类和二类错误、抽样偏差都会归零。
+      选一项并分别说明两类错误、功效和样本量的作用边界。
+    dataset:
+      null_hypothesis: no_positive_lift
+      alternative_hypothesis: positive_lift
+      decision_action: launch_when_null_rejected
+    expected_answer: A
+    accepted_answers: [a, 选项A, 误上线是一类漏提升是二类]
+    numeric_tolerance: null
+    rubric:
+      - 一类错误是 H0 真却被拒绝，在情境中对应误上线
+      - 二类错误是具体 H1 真却未拒绝 H0，在情境中对应漏掉真提升
+      - 功效是指定真实效应下拒绝 H0 的概率
+      - 说明样本量通常提高功效但不改变效应、不修复偏差且不保证显著
+    misconception_tags: [type_i_type_ii_reversed, power_definition_reversed, larger_sample_guarantees_significance, sample_size_removes_design_bias, errors_power_boundary_unexplained]
+    dimension_weights: {concept: 0.55, calculation: 0.05, python: 0.00, interpretation: 0.40}
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [H0真而拒绝的一类错误, 实际无提升却误上线是一类错误, 一类错误是误报效果, 犯的是第一类, 空效果存在却被我们拒绝并发布]
+        - [H1真而未拒绝H0的二类错误, 有真提升却漏掉是二类错误, 二类错误是漏报效果, 真实提升到规定大小却没检出, 有预先关心的提升却没有检出]
+        - [指定真实提升下拒绝H0的概率, power=1-β, 功效是H1为具体真实效应时检出它的概率, power就是在该备择点上能拒绝H0的频率, 功效是在给定这个提升时成功驳回H0的机会]
+        - [增加样本量通常提高功效, 更大n通常提高功效, 增大样本量可降低随机误差, 加样本通常压低随机误差而提高检出率, 增加n一般会提升检出机会]
+        - [不保证显著, 不会改变真实效应或消除抽样偏差, 更大n不会改变真实效应或消除偏差, 样本大不能消除抽样偏差, 功效还取决于效应量变异和阈值, 更不承诺这次一定显著, 更没有必然显著的承诺]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: errors_power_boundary_unexplained
+        message_zh: 还需把一类错误、二类错误、功效和样本量作用分别对应到本题情境。
+        misconception_tag: errors_power_boundary_unexplained
+      relevance_terms: [一类错误, 二类错误, 功效, H0, H1, 样本量, 上线]
+      text_rules:
+        - rule_id: type_i_type_ii_reversed
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [一类错误是漏掉真提升, 二类错误是误上线无效版本, 一类是漏报二类是误报, 第一类其实是漏掉有效版本]
+          negation_guards: [不是, 并非, 错误, 不对]
+          message_zh: 一类错误是 H0 真却拒绝；二类错误是具体备择为真却未拒绝 H0。
+          misconception_tag: type_i_type_ii_reversed
+        - rule_id: power_definition_reversed
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [功效是H0为真时不拒绝的概率, 功效就是1-α, power是原假设正确时保留它, power等于1-alpha]
+          negation_guards: [不是, 并非, 错误, 不对]
+          message_zh: 功效是指定备择效应为真时拒绝 H0 的概率，通常写为 1-β。
+          misconception_tag: power_definition_reversed
+        - rule_id: larger_sample_guarantees_significance
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [样本量够大就一定显著, 无限增n两类错误都归零, 大样本保证拒绝H0, 数据量无限就必能显著, 显著性就是百分之百确定的]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 样本量只是功效的一个因素，不改变真实效应也不保证必然显著。
+          misconception_tag: larger_sample_guarantees_significance
+        - rule_id: sample_size_removes_design_bias
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [样本够大抽样偏差就消失, 增大n可以修复非随机分组, 大样本会自动消除系统偏差, 扩大样本会冲淡非随机分组问题]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 增大样本量不会自动修复非随机分组、选择偏差或测量偏差。
+          misconception_tag: sample_size_removes_design_bias
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：先问“真实世界中哪个假设成立”，再问“检验做了什么决策”。
+      method_cue: 方法提示：用真假假设×拒绝与否画一个决策表；功效要在某个具体备择效应下定义。
+      partial_step: 步骤提示：将“无提升却上线”和“有提升却不上线”分别放入两个错误格；再考察扩大样本只改变什么随机部分。
+      complete_explanation:
+        concept: 一类错误是原假设真却被拒绝，二类错误是指定备择效应真却未拒绝；功效是后者情形下正确拒绝的概率。
+        calculation: 本题不给具体数值；关系为 power=1-β，而 α 控制 H0 为真时的一类错误率。
+        python: 受审功效计算需输入效应量、方差、样本量、阈值和检验方向；本题不执行学习者代码。
+        interpretation: 选 A。增大样本量通常降低标准误并提高给定效应下的功效，但不会改变效应、修复系统偏差或保证某次显著。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: ab_effect_significance_interpretation_01
+    title: 区分统计显著、效应量和实际重要性
+    unit_id: hypothesis_testing
+    concept_id: hypothesis_testing
+    knowledge_node_ids: [ht_p_value, ht_ab_design]
+    prerequisites: [confidence_interval]
+    difficulty: 0.78
+    question_type: interpretation
+    prompt: >-
+      一项执行完整的随机 A/B 实验报告：A 转化率 10.00%，B 为 10.15%；绝对差 B-A=0.15
+      个百分点，95% 置信区间为 [0.06, 0.24] 个百分点，p=0.001。团队在看数据前规定：
+      绝对提升至少 1 个百分点才具有业务实际意义。哪项正确？
+      A. 差异在 5% 阈值下统计显著，但点估计和整个区间都低于预设的 1 个百分点实际阈值，
+      因此不应仅凭显著性宣称具有实际重要性；因果解释仍依赖随机化和实验执行，外推还受受试人群限制。
+      B. p=0.001 证明 B 的实际收益一定很大。
+      C. 0.15% 与 0.15 个百分点完全相同，相对提升也是 0.15%。
+      D. 随机分组保证结论对所有用户、所有时间和任何产品都成立。
+      选一项并说明显著性、绝对效应、区间、实际阈值与外部适用性。
+    dataset:
+      design: randomized_ab_complete_execution
+      conversion_rate_a: 0.10
+      conversion_rate_b: 0.1015
+      absolute_difference_percentage_points: 0.15
+      relative_lift_percent: 1.5
+      confidence_interval_percentage_points: [0.06, 0.24]
+      p_value: 0.001
+      alpha: 0.05
+      minimum_practical_effect_percentage_points: 1.0
+    expected_answer: A
+    accepted_answers: [a, 选项A, 统计显著但未达实际阈值]
+    numeric_tolerance: null
+    rubric:
+      - p<0.05 且区间排除 0，说明统计显著
+      - 绝对效应为 0.15 个百分点，相对提升为 1.5%，两者不得混淆
+      - 点估计与区间上限 0.24 都低于预设的 1 个百分点实际阈值
+      - 随机化支持特定实验范围内的因果解释，但不保证无限外推
+    misconception_tags: [statistical_significance_proves_large_effect, percentage_point_relative_change_confused, confidence_interval_practical_threshold_ignored, randomization_guarantees_external_validity, effect_practical_boundary_unexplained]
+    dimension_weights: {concept: 0.20, calculation: 0.20, python: 0.00, interpretation: 0.60}
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [p=0.001小于0.05所以统计显著, 95%区间排除0, 差异统计显著, 故统计上显著, 因此统计上有差异]
+        - [绝对差为0.15个百分点, 绝对差是0.15个百分点, B-A=0.15个百分点, 10.00%到10.15%差0.15个百分点, B比A高0.15个百分点]
+        - [相对提升为1.5%, 相对提升是1.5%, 百分点与百分比不同, 相对基线是1.5%, 相对A是1.5%]
+        - [点估计和区间上限0.24都低于1个百分点, 0.15和区间上限0.24都低于1个百分点, 点估计和整个区间都未达实际阈值, 估计值和上界均不到事先要求的1个百分点, 无论中心还是上端都没有达到事前定下的1个百分点门槛]
+        - [随机化支持本实验范围内的因果解释, 结论依赖随机分组完整执行, 随机分派只支撑当前实验里的因果, 随机指派支持这次试验对象内的因果判断]
+        - [外推仍受受试人群和实施条件限制, 不能保证对所有用户时间场景成立, 换人群或时间仍需验证, 换市场或时期仍要再验证]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: effect_practical_boundary_unexplained
+        message_zh: 还需同时核对统计显著、绝对/相对效应、区间与实际阈值，并限定外推范围。
+        misconception_tag: effect_practical_boundary_unexplained
+      relevance_terms: [统计显著, 效应量, 百分点, 相对提升, 置信区间, 实际阈值, 随机分组, 外推]
+      text_rules:
+        - rule_id: statistical_significance_proves_large_effect
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [p值很小所以实际收益一定很大, 统计显著就必然有业务价值, 显著性证明效应很大, 小p本身已经证明商业影响巨大]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 统计显著不表示效应必然很大或达到预设的实际阈值。
+          misconception_tag: statistical_significance_proves_large_effect
+        - rule_id: percentage_point_relative_change_confused
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [0.15%与0.15个百分点完全相同, 相对提升也是0.15%, 10%到10.15%是增长0.15%, 0.15个百分点也就是0.15%的相对涨幅]
+          negation_guards: [不是, 并非, 不对, 错误]
+          message_zh: 10.00% 到 10.15% 的绝对差是 0.15 个百分点，相对提升是 1.5%。
+          misconception_tag: percentage_point_relative_change_confused
+        - rule_id: confidence_interval_practical_threshold_ignored
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [区间排除0就说明达到1个百分点, 只要置信区间不含0就有实际价值, 不用比较实际阈值, CI避开0便自动越过业务门槛]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 区间排除 0 只回答统计显著边界；实际重要性还必须与预先规定的效应阈值比较。
+          misconception_tag: confidence_interval_practical_threshold_ignored
+        - rule_id: randomization_guarantees_external_validity
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [随机分组保证对所有用户都成立, 随机实验可以无限外推, 随机化证明任何时间任何人群都有效, 随机分配使结论在任何地区都通用, 随机化以后就拥有跨地区跨时间的普适性]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 随机化主要支持试验范围内的内部因果效度，不自动保证对任意人群或时间的外部效度。
+          misconception_tag: randomization_guarantees_external_validity
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：“差异很难用随机波动解释”与“差异大到值得上线”是同一个问题吗？
+      method_cue: 方法提示：先用 p 值和区间判断统计显著，再把效应点估计与整个区间同预设业务阈值比较。
+      partial_step: 步骤提示：区间没有跨过 0，但它的上限也没有接近预设的 1 个百分点；同时分开绝对百分点与相对比例。
+      complete_explanation:
+        concept: 统计显著性针对随机误差下的检验阈值，实际重要性则需要事先定义的业务或教学效应阈值。
+        calculation: B-A=0.15 个百分点，相对提升为 0.15/10=1.5%；[0.06,0.24] 排除 0 但整体低于 1 个百分点。
+        python: 受审分析可同时输出效应量、区间和 p 值；本题不执行学习者代码。
+        interpretation: 选 A。差异统计显著却没有达到预设的实际重要阈值；随机化不会自动赋予无限外推性。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: ab_design_multiplicity_interpretation_01
+    title: 识别多重比较、自选分组和差异流失风险
+    unit_id: hypothesis_testing
+    concept_id: hypothesis_testing
+    knowledge_node_ids: [ht_errors_power, ht_ab_design]
+    prerequisites: [data_quality, joint_correlation, confidence_interval]
+    difficulty: 0.84
+    question_type: interpretation
+    prompt: >-
+      团队没有预先指定主指标，看完数据后从 20 个指标中只报告唯一 p=0.03 的结果；
+      用户可自己选新界面，且新界面组流失率为 18%、旧界面组为 5%。为说明多重比较风险，
+      若 20 个独立的真原假设都分别用 α=0.05，至少一次假阳性的概率为 1-0.95^20≈0.6415。
+      哪项正确？
+      A. 现有 p=0.03 不足以支持确证性因果结论；应预注册主指标或校正多重比较，真正随机分组并检查分配，
+      同时报告分组流失、效应量、区间和敏感性分析。
+      B. 只要有一个 p<0.05，20 个指标中必有一个真实改善。
+      C. 自选分组等价于随机化，所以两组差异可直接解释为因果效应。
+      D. 只需删掉所有流失用户，18% 与 5% 的差异不会影响结论。
+      选一项，并说明 0.6415 的计算、多重比较、分组方式和差异流失。
+    dataset:
+      primary_metric_prespecified: false
+      inspected_metrics: 20
+      reported_p_value: 0.03
+      per_test_alpha: 0.05
+      independent_nulls_for_risk_illustration: true
+      probability_at_least_one_false_positive: 0.6415140775914581
+      assignment: self_selection
+      attrition_rate_new_ui: 0.18
+      attrition_rate_old_ui: 0.05
+    expected_answer: A
+    accepted_answers: [a, 选项A, 需校正多重比较随机分组并审计流失]
+    numeric_tolerance: null
+    rubric:
+      - 计算并解释 1-0.95^20≈0.6415 只是题设独立真原假设下的至少一次假阳性风险
+      - 说明事后挑选单一 p<0.05 会产生多重比较和选择性报告风险
+      - 说明自选新界面不是随机分组，存在混杂与选择偏差
+      - 说明 18% 与 5% 的差异流失可以改变留存样本构成，不能直接删除后忽略
+    misconception_tags: [multiple_comparisons_ignored, familywise_error_calculation_wrong, self_selection_treated_as_randomization, differential_attrition_ignored, ab_design_validity_unexplained]
+    dimension_weights: {concept: 0.25, calculation: 0.20, python: 0.00, interpretation: 0.55}
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [至少一次假阳性是1-0.95^20, 1-0.95^20约0.6415, 二十次独立检验全部不假阳性是0.95的20次方, 全都不误报的概率是.95^20, 零误报机会为0.95的二十次幂]
+        - [约64.15%, 至少一次假阳性概率约64.15%, 结果约为0.6415, 补集约.6415, 至少一个误报的补概率约64.15%]
+        - [事后只挑p=0.03有多重比较和选择性报告风险, 事后从20个指标只挑p=0.03有多重比较风险, 选择性报告会放大假阳性, 看完才挑唯一显著项属于多测与选择报告, 结果出来后再挑最小p属于多指标筛选]
+        - [应预注册主指标或校正, 应预注册主指标或做多重校正, 应用预注册或校正, 应先登记主指标或调节阈值]
+        - [用户自选不是随机分组, 自选组存在混杂或选择偏差, 不能把自选差异直接解释为因果, 用户自己选版本会混杂, 自己选择界面不能形成随机组]
+        - [18%与5%的差异流失需要审计, 流失不平衡可能改变两组留存样本构成, 不能删掉流失者后忽略偏差, 应报告效应量区间与敏感性分析, 需披露并做敏感性分析, 18%和5%的退出差也会改变可分析人群]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: ab_design_validity_unexplained
+        message_zh: 还需同时说明多重检验概率、事后挑选、自选分组和差异流失的证据与修正方向。
+        misconception_tag: ab_design_validity_unexplained
+      relevance_terms: [多重比较, 假阳性, "0.6415", 预注册, 随机分组, 自选, 流失, 18%, 5%]
+      text_rules:
+        - rule_id: multiple_comparisons_ignored
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [有一个p小于0.05就必有真实改善, 检20个指标不用校正, 多试几个指标不会增加假阳性, 能肯定至少一个改进是真的]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 对多个指标反复使用单次阈值并事后报告显著项，会提高至少一次假阳性的风险。
+          misconception_tag: multiple_comparisons_ignored
+        - rule_id: familywise_error_calculation_wrong
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [20次至少一次假阳性仍是5%, 假阳性概率就是20乘0.05等于100%, 0.95^20是至少一次假阳性, 家族误报率仍固定在单项5%]
+          negation_guards: [不是, 并非, 不对, 错误]
+          message_zh: 题设独立真 H0 下，全部不假阳性是 0.95^20，至少一次为 1-0.95^20≈0.6415。
+          misconception_tag: familywise_error_calculation_wrong
+        - rule_id: self_selection_treated_as_randomization
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [自选分组等价于随机化, 用户自己选所以两组可直接因果比较, 自愿用新界面也是随机实验, 让用户自主选择也能实现随机平衡, 让参与者自愿挑版本同样能消掉混杂]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 自选使组间可能原本就不同，不是随机分配，不足以单独识别因果效应。
+          misconception_tag: self_selection_treated_as_randomization
+        - rule_id: differential_attrition_ignored
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [删掉所有流失用户就没有影响, 18%与5%的流失差异可以忽略, 只分析留下的用户就一定无偏, 把退出者去掉即可恢复无偏]
+          negation_guards: [不能说, 不是, 并非, 错误]
+          message_zh: 两组差异流失会改变留存样本构成，需要报告、追踪并做合理敏感性分析。
+          misconception_tag: differential_attrition_ignored
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：如果只看完结果后挑选“最好看”的指标，单次 5% 误报阈值还能原样解释吗？
+      method_cue: 方法提示：先用补集计算“至少一次”风险，再分别检查指标选择、分配机制和结局缺失是否破坏解释。
+      partial_step: 步骤提示：20 次都不假阳性的概率是 0.95 连乘 20 次；用 1 减去它。然后比较“自己选组”与“由随机机制分配”。
+      complete_explanation:
+        concept: 多重比较与选择性报告会放大假阳性风险；自选分组引入混杂，差异流失又可改变可观察样本。
+        calculation: 题设独立真 H0 下，至少一次假阳性风险是 1-0.95^20≈0.641514，而非仍为 0.05。
+        python: 受审分析可计算补集概率、分组流失率和校正后阈值；本题不执行学习者代码。
+        interpretation: 选 A。应预先确定主指标或处理多重性，真正随机分配并验证执行，且披露流失、效应量、区间与敏感性分析。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: joint_correlation_concept_01
+    title: 区分联合、条件、边缘概率与独立性
+    unit_id: joint_correlation
+    concept_id: joint_correlation
+    knowledge_node_ids: [jc_joint_conditionals, jc_correlation_causation]
+    prerequisites: [probability_simulation, common_distributions]
+    difficulty: 0.56
+    question_type: concept
+    prompt: >-
+      60 名学生按学习路径分为甲、乙两组。甲组按时完成 24 人、未按时完成 6 人；
+      乙组按时完成 21 人、未按时完成 9 人。设 A 表示属于甲组，B 表示按时完成。
+      A. P(A∩B)=24/60=0.40，P(B|A)=24/30=0.80，P(B)=45/60=0.75；
+      因为 P(B|A)≠P(B)，A 与 B 在这张表中不独立；
+      B. 联合概率以甲组人数为分母，所以 P(A∩B)=24/30=0.80；
+      C. P(B|A)=24/45，因为条件概率应以所有按时完成者为分母；
+      D. 只要两个事件都出现过，它们就是独立事件。
+      答案栏选一项，并说明联合、条件和边缘概率的分母以及独立性判断。
+    dataset:
+      route_a:
+        completed: 24
+        not_completed: 6
+      route_b:
+        completed: 21
+        not_completed: 9
+      total: 60
+    expected_answer: A
+    accepted_answers: [选项A, 联合0.4条件0.8边缘0.75且不独立]
+    numeric_tolerance: null
+    rubric:
+      - 联合事件在全体 60 人中计数，得到 24/60=0.40
+      - 给定甲组后以甲组 30 人为分母，得到 24/30=0.80
+      - 按时完成的边缘概率为 45/60=0.75
+      - 比较 P(B|A) 与 P(B)，因二者不同判定表中不独立
+    misconception_tags:
+      - joint_probability_wrong_denominator
+      - conditional_probability_wrong_denominator
+      - conditional_direction_reversed
+      - marginal_probability_unexplained
+      - independence_asserted_without_comparison
+      - joint_conditional_boundary_unexplained
+    dimension_weights:
+      concept: 0.45
+      calculation: 0.35
+      python: 0.00
+      interpretation: 0.20
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [24/60=0.4, 24/60 = 0.4, 联合事件在全部 60 人中计数, 联合概率的分母是全体 60 人, 交集 24 人占全体 60 人, 交集24人占全体60人, 交集中的24人占全体60人的0.40]
+        - [24/30=0.8, 24/30 = 0.8, 给定甲组后分母缩为甲组 30 人, 条件概率的分母是甲组 30 人, 已知甲组后 30 人为分母, 已知甲组后30人为分母, 已知是甲组后30名甲组学生是分母, 已知是甲组后，30名甲组学生是分母]
+        - [45/60=0.75, 45/60 = 0.75, 按时完成的边缘概率是全体中的比例, 边缘概率以全体 60 人为分母, 全部 60 人中有 45 人按时完成, 全部60人中45人, 不分组看全部60人45人按时完成, 不分组看全部60人，45人按时完成, 不分组看全部60人，45人按时所以边缘比例是0.75]
+        - [0.8 与 0.75 不同所以不独立, 0.8不等于0.75所以不独立, P(B|A)≠P(B)所以不独立, 条件概率与边缘概率不同因此不独立, 条件与边缘不相等, 条件概率和边缘概率不相等, 条件比例和边缘比例不相等，因此二者不独立]
+      reasoning_support_negation_guards: [不, 没, 不能说, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: joint_conditional_boundary_unexplained
+        message_zh: 选项可能正确，但理由还需同时说明联合、条件、边缘概率的分母和独立性比较。
+        misconception_tag: joint_conditional_boundary_unexplained
+      relevance_terms: [联合概率, 条件概率, 边缘概率, 分母, 独立, 甲组, 按时完成, "0.40", "0.80", "0.75"]
+      text_rules:
+        - rule_id: joint_probability_wrong_denominator
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [联合概率是 24/30, 联合概率以甲组人数为分母, P(A∩B)=0.8, 交集概率应当拿24除以30]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 联合概率 P(A∩B) 是交集人数占全体人数的比例，分母应为 60。
+          misconception_tag: joint_probability_wrong_denominator
+        - rule_id: conditional_probability_wrong_denominator
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [条件概率是 24/60, 条件概率仍以全部 60 人为分母, P(B|A)=0.4, 条件比例应该仍用60个学生作分母]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 给定 A 后，条件概率的分母必须缩小为甲组 30 人。
+          misconception_tag: conditional_probability_wrong_denominator
+        - rule_id: conditional_direction_reversed
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [P(B|A)=24/45, 条件概率以所有按时完成者为分母, B给定A就是24/45, B在A条件下应是24/45]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 24/45 计算的是 P(A|B)，不是题目要求的 P(B|A)。
+          misconception_tag: conditional_direction_reversed
+        - rule_id: independence_asserted_without_comparison
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [两个事件都出现过所以独立, 0.8 不等于 0.75 所以独立, 0.8不等于0.75所以独立, A 与 B 独立, A和B独立, 两个事件独立, 这两个事件其实相互独立]
+          negation_guards: [不能, 不独立, 不是, 并非, 不对, 是错的, 不成立]
+          message_zh: 这里 P(B|A) 与 P(B) 不相等，因此不能判定独立。
+          misconception_tag: independence_asserted_without_comparison
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：联合事件、边缘事件和已知属于某组后的条件事件，参照人群相同吗？
+      method_cue: 方法提示：联合事件除以全体；条件概率的分母缩到条件事件；独立性可比较条件概率与边缘概率。
+      partial_step: 步骤提示：先分别找出全体人数、甲组人数和全部按时完成人数，再写三个分数。
+      complete_explanation:
+        concept: 联合概率以全体为样本空间，给定 A 后条件概率以 A 为样本空间；独立要求条件概率不改变边缘概率。
+        calculation: P(A∩B)=24/60=0.40，P(B|A)=24/30=0.80，P(B)=45/60=0.75。
+        python: 可用受审的列联计数核对三个比例；本题不需要也不会执行学习者代码。
+        interpretation: 应选 A。0.80 与 0.75 不同，所以这张表中 A 与 B 不独立；该描述性比较不构成因果证据。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: joint_correlation_python_01
+    title: 用 pandas 命名聚合比较分组均值与有效样本量
+    unit_id: joint_correlation
+    concept_id: joint_correlation
+    knowledge_node_ids: [jc_grouping, jc_correlation_causation]
+    prerequisites: [data_quality, mean_median]
+    difficulty: 0.64
+    question_type: python
+    prompt: >-
+      系统已提供 DataFrame df，其中 group=[甲,甲,甲,乙,乙,乙]，
+      score=[62,76,缺失,70,85,91]。使用 pandas named aggregation 按 group 分组，
+      返回以分组键为索引、且仅包含 mean_score 和 valid_n 两列的表：
+      mean_score 是该组非缺失 score 的均值，valid_n 是该组非缺失 score 的数量。
+      A. 甲为 mean_score=69.0、valid_n=2，乙为 mean_score=82.0、valid_n=3；
+      B. 甲为 46.0、3，乙为 82.0、3；C. 甲为 69.0、3，乙为 82.0、3；
+      D. 只返回全体 mean_score=76.8、valid_n=5。
+      答案栏选一项，代码栏写最终表达式；分组行顺序不作为判定依据。
+      学习者代码只做 AST 静态检查，绝不执行。
+    dataset:
+      group: [甲, 甲, 甲, 乙, 乙, 乙]
+      score: [62, 76, null, 70, 85, 91]
+      output_columns: [mean_score, valid_n]
+    expected_answer: A
+    accepted_answers: [选项A, 甲69和2乙82和3]
+    numeric_tolerance: null
+    rubric:
+      - 精确按 group 分组并对 score 聚合
+      - mean_score 使用 mean，valid_n 使用排除 score 缺失值的 count
+      - 甲组均值为 69、有效数为 2，乙组均值为 82、有效数为 3
+      - 最终表达式与命名聚合结果连通，且不执行学习者代码
+    misconception_tags:
+      - missing_treated_as_zero_in_group_mean
+      - groupby_size_used_for_valid_count
+      - count_assumed_to_include_missing
+      - wrong_groupby_key
+      - wrong_aggregation_column
+      - wrong_aggregation_function
+      - wrong_named_aggregation_outputs
+      - groupby_agg_code_conflict
+    dimension_weights:
+      concept: 0.10
+      calculation: 0.20
+      python: 0.60
+      interpretation: 0.10
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [按 group 分组, group 是分组键, 用 group 作为分组键, 以 group 为键拆组, 以group为键拆组, 先以group作为键拆分各组]
+        - [mean_score 对非缺失 score 求均值, mean 会忽略 score 的缺失值, 均值只使用非缺失 score, 只平均有记录的 score, 只平均有记录score, 只平均score中有记录的值, mean_score 只平均 score 中有记录的值]
+        - [count 排除目标列缺失, count 不统计 score 的缺失值, valid_n 是均值分母, count 统计参与均值的个数, count参与均值个数, valid_n用count记录参与平均的个数, valid_n 用 count 记录参与平均的个数]
+        - [甲组均值为 69 且有效数为 2, 甲组是 69 和 2, 甲为69有效数2, 甲 62 和 76 平均 69 共 2 个, 甲62和76平均69共2, 甲组的62和76平均为69且共有2个有效值]
+        - [乙组均值为 82 且有效数为 3, 乙组是 82 和 3, 乙为82有效数3, 乙平均 82 共 3 个, 乙平均82共3, 乙组的70和85和91平均为82且共有3个有效值, 乙组70、85、91平均为82且有3个有效值]
+      reasoning_support_negation_guards: [不, 没, 不能说, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: groupby_aggregation_boundary_unexplained
+        message_zh: 选项和代码可能正确，但理由还需同时说明分组键、缺失口径及两组结果。
+        misconception_tag: groupby_aggregation_boundary_unexplained
+      relevance_terms: [groupby, agg, named aggregation, group, score, mean, count, 缺失, mean_score, valid_n, "69", "82"]
+      text_rules:
+        - rule_id: missing_treated_as_zero_in_group_mean
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [缺失值按 0 参与均值, 把缺失当 0 后求均值, 甲组均值是 46, 均值计算时应该先把空白补成零]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: pandas mean 默认跳过目标列缺失值，不能把缺失记录当作 0。
+          misconception_tag: missing_treated_as_zero_in_group_mean
+        - rule_id: groupby_size_used_for_valid_count_text
+          source: reasoning
+          dimension: python
+          verdict: contradicts
+          phrases: [size 就是非缺失数量, 用 size 统计 valid_n, 甲组有效数是 3]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: size 统计组内行数；这里 valid_n 必须使用排除 score 缺失值的 count。
+          misconception_tag: groupby_size_used_for_valid_count
+        - rule_id: missing_row_included_in_group_mean
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [缺失那一行也应计入均值分母, 缺失的那一行也应该计入均值分母, 缺失行也要计入均值分母, mean 的分母包括缺失行, count也会把score里的空值算在内]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 分组 mean 的分母只包含目标列的非缺失值，缺失行不参与均值分母。
+          misconception_tag: count_assumed_to_include_missing
+        - rule_id: wrong_groupby_key_text
+          source: reasoning
+          dimension: python
+          verdict: contradicts
+          phrases: [按 score 分组, score 是分组键, 用 score 作为 groupby 键, 应当按成绩列而不是组别列来分组]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 题目要求按 group 分组，score 是被聚合列。
+          misconception_tag: wrong_groupby_key
+      python_static_spec:
+        structure_kind: direct_groupby_named_agg
+        variants:
+          - required_calls: [df.groupby]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+            required_constants: [group, score, mean, count]
+        mismatch_rules:
+          - rule_id: groupby_size_used_for_valid_count
+            kind: groupby_size_for_valid_count
+            message_zh: 分组键、均值和输出名都正确，但 valid_n 使用了 size；它会把 score 缺失的行也计入。
+            misconception_tag: groupby_size_used_for_valid_count
+        mismatch_rule_id: groupby_named_agg_structure_mismatch
+        mismatch_message_zh: 静态代码没有观察到按 group 对 score 进行 mean/count 命名聚合并连接到最终结果的精确结构。
+        misconception_tag: groupby_agg_code_conflict
+    hints:
+      concept_cue: 概念提示：先区分分组键、被聚合列和每组均值实际使用的分母。
+      method_cue: 方法提示：命名聚合同时声明输出列名、原列和聚合函数；再比较 count 与组内总行数。
+      partial_step: 步骤提示：对 df 按 group 分组，在 agg 中分别给 mean_score 配置 score 的 mean，给 valid_n 配置 score 的 count。
+      complete_explanation:
+        concept: 分组聚合先按 group 拆分数据；mean 和 count 都以 score 的非缺失值为口径，而 size 统计组内全部行。
+        calculation: 甲组使用 62 和 76，均值为 69、有效数为 2；乙组均值为 82、有效数为 3。
+        python: df.groupby("group").agg(mean_score=("score", "mean"), valid_n=("score", "count"))；系统只检查 AST，不执行代码。
+        interpretation: 应选 A。报告分组均值时应同时给出有效样本量和缺失口径，不能把分组差异直接解释为个体规律或因果效应。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: joint_correlation_interpretation_01
+    title: 解释协方差缩放、相关系数与因果边界
+    unit_id: joint_correlation
+    concept_id: joint_correlation
+    knowledge_node_ids: [jc_covariance, jc_correlation_causation]
+    prerequisites: [variance_std, common_distributions]
+    difficulty: 0.66
+    question_type: interpretation
+    prompt: >-
+      80 名学生的观察性记录中，X 是每周练习分钟数，Y 是测验分数。
+      样本协方差为 18 分钟·分，样本相关系数为 r=0.72。
+      若把 X 从分钟换算为小时，即 X_hour=X_minute/60，哪项解释正确？
+      A. 协方差变为 0.3 小时·分，相关系数仍为 0.72；它们支持正向线性样本关联，
+      但观察性记录本身不能证明练习时间导致分数提高；
+      B. 协方差和相关系数都保持原数值，因为单位转换不会影响任何统计量；
+      C. 协方差变为 0.3，相关系数也变为 0.72/60；
+      D. 两个统计量都变为负数，并证明增加练习时间会提高分数。
+      答案栏选一项，说明缩放、量纲、线性关联和因果边界，并提出至少一种可能的替代解释。
+    dataset:
+      sample_size: 80
+      covariance_minute_points: 18
+      correlation: 0.72
+      positive_scale_factor: 0.016666666666666666
+      study_design: observational
+    expected_answer: A
+    accepted_answers: [选项A, 协方差0.3相关0.72且不能证明因果]
+    numeric_tolerance: null
+    rubric:
+      - 用 Cov(X/60,Y)=18/60=0.3 说明协方差随单位缩放
+      - 说明正比例单位换算下相关系数保持 0.72
+      - 区分协方差的乘积量纲与相关系数的无量纲性质
+      - 只解释为样本中的正向线性关联，不推广到所有个体
+      - 不作因果断言，并提出混杂、反向关系、选择机制或测量因素
+    misconception_tags:
+      - covariance_treated_as_unitless
+      - correlation_treated_as_unitful
+      - correlation_scaled_with_units
+      - correlation_treated_as_probability
+      - observational_correlation_treated_as_causation
+      - sample_correlation_universalized
+      - zero_correlation_assumed_independence
+      - covariance_correlation_boundary_unexplained
+    dimension_weights:
+      concept: 0.25
+      calculation: 0.20
+      python: 0.05
+      interpretation: 0.50
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [18/60=0.3, 18/60 = 0.3, 协方差随分钟到小时缩小为 0.3, 协方差按单位比例缩放, X 除 60 所以协方差也除 60, X除60故协方差除60, X除以60后协方差也除以60得到0.3, X除以60后，协方差也除以60，得到0.3, X 除以60后协方差同样除以60得到0.3]
+        - [相关系数在正比例换算下保持 0.72, 相关系数仍为 0.72, 正比例单位换算不改变相关系数, r 不变, r不变, 不会改变r所以仍是0.72, 不会改变r，所以仍是0.72, 正比例换单位不会改变 r，所以仍是0.72]
+        - [协方差单位是小时乘分而相关系数无量纲, 协方差有乘积量纲且相关系数无量纲, 协方差带单位相关系数不带单位, 前者有小时乘分量纲后者无单位, 前者有小时×分量纲后者无单位, 前者带小时和分数的乘积单位而后者没有单位, 前者带小时和分数的乘积单位，而后者没有单位, 前者带小时乘分的量纲而后者没有单位]
+        - [只支持样本中的正向线性关联, 表示这 80 人中的正向线性关系, 不能说每个学生都如此, 只描述这 80 人, 只描述80人, 这只描述80人样本的正向线性关系, 这只描述80人样本中的正向线性关系]
+        - [不能证明因果且可能有混杂, 不能证明因果且可能有基础能力这一混杂因素, 观察数据不能证明因果并可能有反向关系, 不能断言因果且可能有选择机制, 不能证明因果且可能受测量因素影响, 基础能力可能混杂所以不能断言因果, 基础能力混杂不能因果, 基础能力等混杂因素仍可能解释关联所以不能从观察记录推出因果, 观察记录还可能受基础能力混杂，不能推出因果]
+      reasoning_support_negation_guards: [不, 没, 不能说, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: covariance_correlation_boundary_unexplained
+        message_zh: 选项可能正确，但理由还需同时说明缩放、量纲、样本线性关联、因果限制和替代解释。
+        misconception_tag: covariance_correlation_boundary_unexplained
+      relevance_terms: [协方差, 相关系数, 缩放, 单位, 无量纲, 线性关联, 因果, 混杂, 反向关系, "0.3", "0.72"]
+      text_rules:
+        - rule_id: covariance_treated_as_unitless
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [协方差无量纲, 协方差没有单位, 单位转换不影响协方差]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 协方差具有两个变量单位的乘积量纲，并会随单位缩放。
+          misconception_tag: covariance_treated_as_unitless
+        - rule_id: correlation_treated_as_unitful
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [相关系数也带分钟和分数乘积单位, 相关系数本身也带着分钟和分数的乘积单位, 相关系数有小时乘分的单位, r 带有两个变量的乘积单位]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 相关系数经标准差标准化后无量纲，不保留两个变量的乘积单位。
+          misconception_tag: correlation_treated_as_unitful
+        - rule_id: correlation_scaled_with_units
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [相关系数变成 0.72/60, 相关系数也除以 60, 换成小时后相关为 0.012, 换成小时后r也应该缩小60倍]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 正比例单位换算同时缩放协方差和标准差，相关系数保持不变。
+          misconception_tag: correlation_scaled_with_units
+        - rule_id: correlation_treated_as_probability
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [0.72 表示 72% 的概率, 72% 的分数由练习导致, 相关系数就是成功概率, 0.72就是说有72%的可能性]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 相关系数是无量纲的线性关联指标，不是概率或因果解释比例。
+          misconception_tag: correlation_treated_as_probability
+        - rule_id: observational_correlation_treated_as_causation
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [证明练习时间导致分数提高, 证明练习导致高分, 增加练习一定提高分数, 相关系数证明存在因果, 正相关就说明练习导致高分, 足以说明练习时间确实造成成绩提高, 这足以说明练习时间确实造成了成绩提高]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的, 不成立]
+          message_zh: 观察性相关可能受混杂、反向关系和选择机制影响，不能直接证明因果。
+          misconception_tag: observational_correlation_treated_as_causation
+        - rule_id: sample_correlation_universalized
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [每个学生练习越多分数都越高, 对所有学生都成立, 任何学生都会提高, 这个趋势对每一位学生都成立]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 样本相关描述整体线性关系，不能保证每个个体都沿同一方向变化。
+          misconception_tag: sample_correlation_universalized
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：协方差和相关系数是否以相同方式保留单位？
+      method_cue: 方法提示：对 Cov(aX,Y) 使用缩放性质，再检查相关公式中标准差是否同步缩放；最后单独判断研究设计。
+      partial_step: 步骤提示：先写 Cov(X/60,Y)=Cov(X,Y)/60，并观察相关分子、分母中的比例因子。
+      complete_explanation:
+        concept: 协方差随变量尺度变化并带乘积单位；相关系数把协方差标准化，正比例换算后数值不变。
+        calculation: Cov(X_hour,Y)=18/60=0.3 小时·分，r 仍为 0.72。
+        python: 受审程序可用同一批成对观测核对 covariance 与 correlation；本题不需要也不会执行学习者代码。
+        interpretation: 应选 A。这里只支持 80 人样本中的正向线性关联；既不能推广到每个人，也不能排除基础能力等混杂或反向关系，因此不能证明因果。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: common_distributions_concept_01
+    title: 为固定次数的成功总数选择分布
+    unit_id: common_distributions
+    concept_id: common_distributions
+    knowledge_node_ids: [cd_discrete, cd_parameters_support]
+    prerequisites: [probability_simulation]
+    difficulty: 0.50
+    question_type: concept
+    prompt: >-
+      6 个设备独立接受同一种检测，每个设备通过的概率都是 0.8。令 X 表示通过检测的设备数量。
+      A. X~Binomial(n=6,p=0.8)，支持集为 {0,1,...,6}，期望为 4.8；
+      B. X~Bernoulli(p=0.8)，支持集只有 {0,1}；
+      C. X 是可取任意实数的正态变量，期望为 0.8；
+      D. X 的期望必须是整数，所以不存在合适模型。
+      答案栏选一项，并说明模型条件、支持集和期望含义。
+    dataset:
+      trials: 6
+      success_probability: 0.8
+      random_variable: passed_device_count
+    expected_answer: A
+    accepted_answers: [选项A, 二项分布n6p0.8, "binomial(6,0.8)"]
+    numeric_tolerance: null
+    rubric:
+      - 固定 6 次独立、同概率二分类试验的成功总数服从二项分布
+      - 支持集是 0 到 6 的整数
+      - E(X)=np=4.8 是长期平均位置，不要求成为单次可观察计数
+    misconception_tags:
+      - total_count_treated_as_bernoulli
+      - discrete_count_given_continuous_support
+      - binomial_independence_ignored
+      - expectation_must_be_observable_integer
+      - probability_parameter_confused_with_expected_count
+    dimension_weights:
+      concept: 0.55
+      calculation: 0.20
+      python: 0.00
+      interpretation: 0.25
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [固定 6 次, 固定6次, 共有 6 次试验, 共有6次试验, 6 次试验, 6次试验]
+        - [彼此独立, 相互独立, 独立同概率, 独立试验]
+        - [二分类, 通过或不通过两种结果, 只有成功或失败两种结果]
+        - [同概率, 通过率都为 0.8, 通过率都为0.8, 成功概率相同, 单次成功率为 0.8]
+        - [支持集是 0 到 6 的整数, 只能取 0 到 6 的整数, "{0,1,...,6}", "X 可能取 0、1、2、3、4、5、6", "X可能取0、1、2、3、4、5、6"]
+        - [E(X)=6×0.8=4.8, np=6×0.8=4.8, 均值为 6 乘 0.8 等于 4.8, 均值为6乘0.8等于4.8]
+        - [期望是长期平均位置, 期望不要求是单次可能值, 4.8 可以是长期平均但不是单次计数, 表示大量重复检测时通过台数的平均水平, 长期重复检测的平均通过台数]
+      reasoning_support_negation_guards: [不, 没, 不能说, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: binomial_model_support_expectation_unexplained
+        message_zh: 选项可能正确，但理由还需同时说明二项条件、整数支持集和非整数期望的含义。
+        misconception_tag: binomial_model_boundary_unexplained
+      relevance_terms: [二项, binomial, 独立, 成功总数, 支持集, 整数, 期望, "4.8"]
+      text_rules:
+        - rule_id: total_count_treated_as_bernoulli
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [总数 X 也是伯努利变量, 成功总数服从伯努利分布, X 只能取 0 或 1]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 伯努利变量描述单次结果；固定多次试验的成功总数应检查二项模型。
+          misconception_tag: total_count_treated_as_bernoulli
+        - rule_id: discrete_count_given_continuous_support
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [计数可以取任意小数, X 可以取任意实数, 支持集是所有实数]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 通过设备数量是离散计数，只能取 0 到 6 的整数。
+          misconception_tag: discrete_count_given_continuous_support
+        - rule_id: binomial_independence_ignored
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [二项分布不需要独立, 成功概率可以每次不同, 是否独立都没有关系]
+          negation_guards: [不能说, 不是, 并非, 不对, 是错的]
+          message_zh: 本题的二项模型依赖固定次数、二分类、同概率和模型中的独立性。
+          misconception_tag: binomial_independence_ignored
+        - rule_id: binomial_independence_denied_after_support
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [设备其实并不独立, 这些设备并不独立, 实际上设备不独立, 实际并不独立, 检测结果其实彼此相关, 检测结果彼此相关, 并不相互独立, 不相互独立, 各次检测彼此有依赖关系, 彼此有依赖关系, 相互有依赖关系, 结果之间有依赖关系, 检测结果相互依赖, 各次检测相互依赖, 彼此依赖, 相互依赖, 互相依赖, 彼此相关, 相互相关, 互相相关, 不满足独立条件, 不符合独立条件, 不满足独立性, 不具备独立性, 缺少独立性, 并非独立, 不是独立的]
+          negation_guards: [不能说, 不可断言, 不能断言, 不能据此断言, 无法断言, 不是说, 是否, 不确定, 不能确定, 没有, 无]
+          message_zh: 理由前后矛盾：本题给出的二项模型条件包含设备检测结果相互独立。
+          misconception_tag: binomial_independence_ignored
+        - rule_id: expectation_must_be_observable_integer
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [期望 4.8 不是整数所以模型错误, 期望必须是整数, 4.8 不可能所以没有模型]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 期望是长期平均位置，不要求属于单次离散变量的支持集。
+          misconception_tag: expectation_must_be_observable_integer
+        - rule_id: probability_parameter_confused_with_expected_count
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [期望通过数量是 0.8 个, E(X)=0.8, 平均只有 0.8 个通过]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 0.8 是单个设备的通过概率，成功总数的期望是 n×p。
+          misconception_tag: probability_parameter_confused_with_expected_count
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：X 记录的是单个设备的结果，还是固定多个设备中的成功总数？
+      method_cue: 方法提示：核对次数是否固定、结果是否二分类、成功概率是否相同、模型中是否独立；再区分支持集与长期平均位置。
+      partial_step: 步骤提示：这里有 6 次同概率二分类试验；X 只能取 0 到 6 的整数，中心位置可列为 6×0.8。
+      complete_explanation:
+        concept: X 是固定 6 次独立同概率二分类试验中的成功总数，符合二项模型。
+        calculation: 支持集为 {0,1,...,6}，E(X)=6×0.8=4.8。
+        python: 固定参考程序可用 scipy.stats.binom 表示模型；本题不需要也不会执行学习者代码。
+        interpretation: 应选 A。期望 4.8 是长期平均位置，不要求某一次观察为 4.8，也不能仅凭题目模型证明现实设备真的独立。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: common_distributions_python_01
+    title: 用二项 PMF 计算恰好成功次数
+    unit_id: common_distributions
+    concept_id: common_distributions
+    knowledge_node_ids: [cd_discrete, cd_python_representation]
+    prerequisites: [probability_simulation]
+    difficulty: 0.58
+    question_type: python
+    prompt: >-
+      4 次相互独立的公平二分类试验中，恰好成功 2 次的概率是多少？答案栏填写数值；
+      Python 代码栏使用 SciPy 的 `stats.binom.pmf` 写出计算表达式。
+      假定 `from scipy import stats` 已由系统完成。说明 PMF、k、n、p 的含义。
+      代码只做 AST 静态检查，绝不执行。
+    dataset:
+      successes: 2
+      trials: 4
+      success_probability: 0.5
+      scipy_import_assumption: from scipy import stats
+    expected_answer: 0.375
+    accepted_answers: []
+    numeric_tolerance: 0.000000000001
+    rubric:
+      - 二项 PMF 表示成功次数恰好等于 k 的概率，不是累计概率
+      - k=2、n=4、p=0.5 的角色和数值正确
+      - C(4,2)×0.5^4=6/16=0.375
+    misconception_tags:
+      - cdf_used_for_exact_probability
+      - pmf_cdf_confused
+      - random_draw_used_as_theoretical_probability
+      - binomial_parameter_roles_reversed
+      - pmf_output_treated_as_count
+    dimension_weights:
+      concept: 0.15
+      calculation: 0.20
+      python: 0.60
+      interpretation: 0.05
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [PMF 表示恰好成功 2 次, PMF 是离散单点概率, pmf 计算恰好等于 k, pmf 给出恰好取得 2 次成功的概率, pmf 给出恰好取得2次成功的概率, pmf给出恰好取得2次成功的概率]
+        - [k=2, k 是成功次数, k 表示 2 次成功, 第一个参数 2 表示目标成功数, 第一个参数2表示目标成功数, 第1个参数2表示目标成功数]
+        - [n=4, n 是试验次数, n 表示 4 次试验, 第二个参数 4 表示总试验数, 第二个参数4表示总试验数, 第2个参数4表示总试验数]
+        - [p=0.5, p 是成功概率, p 表示 0.5, 0.5 表示单次成功率, 0.5表示单次成功率]
+      reasoning_support_negation_guards: [不, 没, 不能说, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: binomial_pmf_roles_unexplained
+        message_zh: 数值和代码可能正确，但理由还需说明 PMF 的单点含义以及 k、n、p 的参数角色。
+        misconception_tag: binomial_pmf_roles_unexplained
+      relevance_terms: [pmf, cdf, 二项, 恰好, k, n, p, "0.375"]
+      text_rules:
+        - rule_id: cdf_used_for_exact_probability
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [cdf 就是恰好等于 2, cdf 计算单点概率, 不超过 2 和恰好 2 相同]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 二项 CDF 是不超过 k 的累计概率；恰好等于 k 应使用 PMF。
+          misconception_tag: cdf_used_for_exact_probability
+        - rule_id: random_draw_used_as_theoretical_probability
+          source: reasoning
+          dimension: python
+          verdict: contradicts
+          phrases: [随机抽一次就得到理论概率, rvs 返回恰好成功的概率, 一次随机结果就是 0.375]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 随机抽样返回一次随机结果，不等于给定模型下的理论点概率。
+          misconception_tag: random_draw_used_as_theoretical_probability
+        - rule_id: pmf_output_treated_as_count
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [pmf 返回成功次数, pmf 的结果是 2 次, 0.375 是成功个数]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: PMF 返回无量纲概率，不返回成功次数或一次随机样本。
+          misconception_tag: pmf_output_treated_as_count
+        - rule_id: binomial_parameter_roles_reversed
+          source: reasoning
+          dimension: python
+          verdict: contradicts
+          phrases: [k 和 n 的位置可以交换, k=4 且 n=2, 2 是总次数 4 是成功次数, k 是总次数, n 是成功次数, k 其实代表试验总数, k 代表试验总数, k代表试验总数, k 其实表示总试验次数, k 表示总试验次数, k表示总试验次数, n 才代表目标成功数, n 代表目标成功数, n代表目标成功数, n 才表示成功次数, n 表示成功次数, n表示成功次数, 第一个参数是总试验数, 第一个参数为总试验数, 第一个参数代表总试验数, 第一个参数对应总试验数, 第1个参数是总试验数, 参数1是总试验数, 第二个参数才是成功数, 第二个参数是成功数, 第二个参数表示成功数, 第二个参数代表目标成功数, 第2个参数是成功数, 参数2是成功数]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: k 是目标成功次数，n 是固定试验总次数，两者不能互换。
+          misconception_tag: binomial_parameter_roles_reversed
+        - rule_id: discrete_distribution_uses_pdf
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [离散变量应该用 pdf, 二项分布用 pdf 计算点概率, pdf 才是恰好 2]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 二项分布是离散分布，单点概率使用 PMF，不使用连续密度 PDF。
+          misconception_tag: pmf_cdf_confused
+      python_static_spec:
+        structure_kind: direct_binomial_pmf
+        variants:
+          - required_calls: [stats.binom.pmf]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+            required_constants: ["2", "4", "0.5"]
+        mismatch_rules:
+          - rule_id: binomial_cdf_used_for_exact
+            kind: binomial_cdf_for_exact_probability
+            message_zh: 代码使用了二项 CDF，它计算不超过 2 次成功的累计概率，不是恰好 2 次的点概率。
+            misconception_tag: cdf_used_for_exact_probability
+        mismatch_rule_id: binomial_pmf_structure_mismatch
+        mismatch_message_zh: 静态代码没有观察到“二项 PMF→k=2、n=4、p=0.5→最终结果”的精确连通调用。
+        misconception_tag: binomial_pmf_code_conflict
+    hints:
+      concept_cue: 概念提示：题目问的是“恰好等于某个计数”，还是“不超过某个计数”？
+      method_cue: 方法提示：离散分布的单点概率使用 PMF；同时区分目标成功次数、总试验次数和单次成功概率。
+      partial_step: 步骤提示：手算结构是 C(4,2)×0.5²×0.5²；Python 调用中逐一核对 k、n、p。
+      complete_explanation:
+        concept: 二项 PMF 给出成功次数恰好等于 k 的概率，CDF 给出不超过 k 的累计概率。
+        calculation: C(4,2)×0.5^4=6/16=0.375。
+        python: "`stats.binom.pmf(2,n=4,p=0.5)` 表达正确；系统只检查调用路径、参数和最终依赖，不执行代码。"
+        interpretation: 结果是给定独立公平模型下恰好成功两次的理论概率，不是随机模拟比例，也不证明现实过程满足模型。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: common_distributions_interpretation_01
+    title: 区分连续密度、点概率与区间概率
+    unit_id: common_distributions
+    concept_id: common_distributions
+    knowledge_node_ids: [cd_continuous, cd_parameters_support, cd_python_representation]
+    prerequisites: [probability_simulation]
+    difficulty: 0.62
+    question_type: interpretation
+    prompt: >-
+      用正态模型描述连续完成时间 X，参数为 μ=30 分钟、σ=5 分钟。系统给出
+      pdf(30)=0.079788、cdf(25)=0.158655、cdf(35)=0.841345。
+      A. pdf(30) 表示恰好 30 分钟的概率是 7.9788%；
+      B. P(25≤X≤35)≈0.841345-0.158655，PDF 是密度，理想连续模型下 P(X=30)=0，
+      且正态模型的数学支持集为全部实数；
+      C. 区间概率等于 pdf(35)-pdf(25)；D. 正态模型的支持集只有 [25,35]。
+      答案栏选一项，并说明区间计算、点概率和支持集。
+    dataset:
+      mean_minutes: 30
+      standard_deviation_minutes: 5
+      lower_minutes: 25
+      upper_minutes: 35
+      pdf_at_mean: 0.079788
+      cdf_at_lower: 0.158655
+      cdf_at_upper: 0.841345
+    expected_answer: B
+    accepted_answers: [选项B, pdf是密度且区间概率用cdf作差, 连续点概率为0且区间用cdf作差]
+    numeric_tolerance: null
+    rubric:
+      - 用 F(35)-F(25)=0.682690 计算区间概率
+      - PDF 是密度；理想未舍入连续模型的精确点概率为 0
+      - 正态分布数学支持集是全部实数，选择模型不等于证明现实适配
+    misconception_tags:
+      - density_treated_as_point_probability
+      - continuous_point_given_positive_mass
+      - pdf_difference_used_for_interval
+      - upper_cdf_used_without_lower_bound
+      - normal_support_truncated_to_observed_range
+      - model_choice_treated_as_proof
+    dimension_weights:
+      concept: 0.30
+      calculation: 0.15
+      python: 0.10
+      interpretation: 0.45
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [F(35)-F(25)=0.682690, 0.841345-0.158655=0.682690, 区间概率用两个端点的 CDF 作差, 用上端的累计概率减去下端的累计概率]
+        - [PDF 是密度且不是点概率, PDF 是密度, 密度函数的高度不是某个精确时刻的概率, 密度高度不是精确点概率]
+        - [理想连续模型下 P(X=30)=0, 连续变量单个精确点概率为 0, 连续模型在单个点上的概率质量为零, 单个点上的概率质量为零]
+        - [正态模型的数学支持集为全部实数, 正态分布支持集是所有实数, 普通正态分布可以取任意实数, 正态变量可取任意实数]
+      reasoning_support_negation_guards: [不, 没, 不能说, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: continuous_density_interval_support_unexplained
+        message_zh: 选项可能正确，但理由还需同时说明 CDF 作差、PDF/点概率区别和正态支持集。
+        misconception_tag: continuous_distribution_boundary_unexplained
+      relevance_terms: [pdf, cdf, 密度, 点概率, 区间概率, 支持集, 正态, "0.682690"]
+      text_rules:
+        - rule_id: density_treated_as_point_probability
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [PDF 的值就是恰好取这个点的概率, pdf(30) 是点概率, 密度就是单点概率]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 连续分布的 PDF 值是密度，不是单个精确点的概率。
+          misconception_tag: density_treated_as_point_probability
+        - rule_id: continuous_point_given_positive_mass
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [恰好 30 分钟的概率是 0.079788, P(X=30)=0.079788, 点概率是 7.9788%]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 理想未舍入连续模型中单个精确点的概率为 0；密度值不能直接当百分比。
+          misconception_tag: continuous_point_given_positive_mass
+        - rule_id: pdf_difference_used_for_interval
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [区间概率用两个 PDF 值相减, pdf(35)-pdf(25), 两端密度作差就是区间概率]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 连续区间概率应使用两个端点的 CDF 作差，不是 PDF 值作差。
+          misconception_tag: pdf_difference_used_for_interval
+        - rule_id: upper_cdf_used_without_lower_bound
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [只用 cdf(35) 就是 25 到 35 的概率, 区间概率就是 0.841345, 不需要减下端累计概率]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: F(35) 还包含 25 以下的累计概率，必须减去 F(25)。
+          misconception_tag: upper_cdf_used_without_lower_bound
+        - rule_id: normal_support_truncated_to_observed_range
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [正态分布只允许 25 到 35, "支持集只有 [25,35]", 均值左右一个标准差以外不可能, 只允许非负数, 支持集只有非负数, 正态分布不允许负数, 正态变量的取值不能小于 0, 正态变量的取值不能小于0, 正态变量不能小于 0, 正态变量不能小于0, 不能取负数, 不能取负值, 只能产生大于等于零的值, 只能产生大于等于0的值, 只能产生非负值, 只能取大于等于零, 只能取非负值, 只能取非负数, 取值必须大于等于零, 取值必须非负, 取值不能小于零, 不可能取负数, 不可能取负值, 不会产生负数, 不会产生负值, 不能产生负值, 没有负数, 没有负值]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 正态分布的数学支持集为全部实数；25 到 35 只是本题查询区间。
+          misconception_tag: normal_support_truncated_to_observed_range
+        - rule_id: model_choice_treated_as_proof
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [使用正态 API 就证明数据服从正态分布, 选了正态模型所以现实一定正态, SciPy 证明模型正确]
+          negation_guards: [不能, 不是, 并非, 不对, 是错的]
+          message_zh: 选择或计算一个分布只是采用模型假设，不是现实适配性的证明。
+          misconception_tag: model_choice_treated_as_proof
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：连续模型中，某一点的密度和一段区间内的概率是同一种量吗？
+      method_cue: 方法提示：区间概率比较两个端点的累计概率；同时区分数学支持集与当前查询区间。
+      partial_step: 步骤提示：先列 0.841345-0.158655；理想连续模型不会给单个精确点分配正的概率质量。
+      complete_explanation:
+        concept: PDF 描述局部密度，CDF 描述不超过某值的累计概率；理想连续模型的点概率为 0。
+        calculation: P(25≤X≤35)=0.841345-0.158655=0.682690。
+        python: 固定参考表达可用两次 stats.norm.cdf 作差；本题不需要也不会执行学习者代码。
+        interpretation: 应选 B。正态模型形式上允许全部实数，选择该模型不等于验证现实数据正态；若 30 分钟是舍入记录，则对应区间而非精确点。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: probability_simulation_concept_01
+    title: 条件概率、互斥与独立
+    unit_id: probability_simulation
+    concept_id: probability_simulation
+    knowledge_node_ids: [ps_probability_rules, ps_independence]
+    prerequisites: [data_quality]
+    difficulty: 0.45
+    question_type: concept
+    prompt: >-
+      100 名学生中，40 人参加 Python 社团 A，30 人参加统计社团 B，10 人同时参加。
+      已知随机选中的学生参加了 A，他也参加 B 的条件概率是多少？A、B 是什么关系？
+      A. 0.25，既不互斥也不独立；B. 0.10，互斥；C. 1/3，独立；D. 0.25，独立。
+      答案栏选一项，并说明条件分母、交集和独立性检查。
+    dataset:
+      total: 100
+      event_a_count: 40
+      event_b_count: 30
+      intersection_count: 10
+    expected_answer: A
+    accepted_answers: [选项A, "0.25且既不互斥也不独立", 四分之一且既不互斥也不独立]
+    numeric_tolerance: null
+    rubric:
+      - 使用条件事件 A 的 40 人作为分母，得到 10/40=0.25
+      - 交集人数为 10，因此两事件不互斥
+      - 比较 0.10 与 0.40×0.30=0.12，得出两事件不独立
+    misconception_tags:
+      - conditional_uses_total_denominator
+      - conditional_uses_wrong_condition_denominator
+      - mutually_exclusive_despite_overlap
+      - nonexclusive_assumed_independent
+    dimension_weights:
+      concept: 0.55
+      calculation: 0.25
+      python: 0.00
+      interpretation: 0.20
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [分母是参加 A 的 40 人, 10/40=0.25, 10/40 = 0.25]
+        - [交集不为 0, 交集不为0, 10 人同时参加, 不互斥]
+        - [0.10 不等于 0.12, 0.10不等于0.12, 0.25 不等于 0.30, 不独立]
+      reasoning_support_negation_guards: [不能说, 不能, 不是, 并非, 不应, 不对, 没, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: probability_relationship_not_justified
+        message_zh: 选项可能正确，但理由还需同时说明条件分母、交集和独立性比较。
+        misconception_tag: independence_not_checked
+      relevance_terms: [条件概率, 分母, 交集, 互斥, 独立, "40", "10", "0.25"]
+      text_rules:
+        - rule_id: conditional_uses_total_denominator
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [条件概率是 10/100, 分母仍然是全部 100 人, 用 100 作条件概率分母]
+          negation_guards: [不是, 不能, 不应]
+          message_zh: 已知 A 发生后，条件概率的分母应缩小为参加 A 的 40 人。
+          misconception_tag: conditional_uses_total_denominator
+        - rule_id: conditional_uses_wrong_condition_denominator
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [条件概率是 10/30, 分母是参加 B 的 30 人]
+          negation_guards: [不是, 不能, 不应]
+          message_zh: P(B|A) 的条件事件是 A，分母应使用 A 的人数，不是 B 的人数。
+          misconception_tag: conditional_uses_wrong_condition_denominator
+        - rule_id: mutually_exclusive_despite_overlap
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases:
+            - 两个社团名称不同所以互斥
+            - A 和 B 互斥
+            - 他们不能同时发生
+            - 交集为 0
+            - 交集为0
+            - 交集是 0
+            - 交集是0
+            - 两事件互相排斥
+            - 两事件互斥
+            - 所以互斥
+          negation_guards: [不互斥, 不为, 不是, 并非]
+          message_zh: 题目观察到 10 人同时参加，交集不为空，所以两事件不互斥。
+          misconception_tag: mutually_exclusive_despite_overlap
+        - rule_id: nonexclusive_assumed_independent
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases:
+            - 有人同时参加所以独立
+            - 能同时发生所以独立
+            - 不互斥就一定独立
+            - 0.10 不等于 0.12 所以独立
+            - 0.10不等于0.12所以独立
+            - 不相等所以独立
+            - 两事件相互独立
+            - 两事件独立
+            - 两个事件相互独立
+            - 两个事件独立
+            - 意味着彼此独立
+            - 证明彼此独立
+            - 彼此独立
+          negation_guards: [不能, 不独立, 不是, 并非, 是否, 不对, 是错的, 不成立]
+          message_zh: 能同时发生只能说明不互斥；独立还需比较交集概率与边缘概率乘积。
+          misconception_tag: nonexclusive_assumed_independent
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：条件已经把人群限定在事件 A 中，新的参照人群还是全部学生吗？
+      method_cue: 方法提示：先用“交集人数÷条件事件人数”；再分别检查交集是否为空，以及交集概率是否等于两个边缘概率的乘积。
+      partial_step: 步骤提示：条件概率的分子是 10、分母是 40；交集概率是 0.10，边缘概率乘积是 0.40×0.30=0.12。
+      complete_explanation:
+        concept: 互斥检查两事件能否同时发生，独立检查一个事件发生是否改变另一个事件的概率。
+        calculation: P(B|A)=10/40=0.25；交集不为 0，所以不互斥；0.10≠0.40×0.30=0.12，所以不独立。
+        python: 固定的项目代码可用列联计数核对这些比例，但本题不需要也不会执行学习者代码。
+        interpretation: 应选 A。这里只判断社团事件的概率关系，不能推断参加某个社团导致参加另一个社团。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: probability_simulation_python_01
+    title: 用 default_rng 构造可复现的伯努利模拟
+    unit_id: probability_simulation
+    concept_id: probability_simulation
+    knowledge_node_ids: [ps_random_generation, ps_monte_carlo_error]
+    prerequisites: [data_quality]
+    difficulty: 0.55
+    question_type: python
+    prompt: >-
+      目标是用种子 2026 创建一个 NumPy default_rng 生成器，模拟 1000 次相互独立的公平硬币试验，
+      用 1 表示正面，并返回正面比例。A. 初始化生成器一次，生成 1000 个伯努利结果后求比例；
+      B. 每次试验前都重置相同种子；C. 只抽一次再复制 1000 次；D. 不模拟，直接返回 0.5。
+      答案栏选一项，代码栏自行写等价实现，并用一句话说明种子和模拟比例的含义。
+      代码只做 AST 静态检查，绝不执行。
+    dataset:
+      seed: 2026
+      bernoulli_n: 1
+      success_probability: 0.5
+      repetitions: 1000
+      success_value: 1
+    expected_answer: A
+    accepted_answers: [选项A, 一次初始化后重复1000次并取比例, 初始化一次生成1000个结果再求均值]
+    numeric_tolerance: null
+    rubric:
+      - 用种子 2026 初始化一个 default_rng 生成器一次
+      - 通过同一生成器的 binomial 生成 n=1、p=0.5、size=1000 的 0/1 结果
+      - 最终结果与生成数组相连，用数组 mean、np.mean、sum()/1000 或 sum()/len 返回比例
+    misconception_tags:
+      - seed_reset_each_trial
+      - seed_missing_for_reproducibility
+      - single_draw_not_repeated
+      - wrong_binomial_parameter_roles
+      - returns_theoretical_probability
+      - returns_success_count_not_proportion
+      - simulation_uncertainty_denied
+    dimension_weights:
+      concept: 0.15
+      calculation: 0.10
+      python: 0.65
+      interpretation: 0.10
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [种子用于复现, 种子支持复现, 随机种子使结果可复现]
+        - [模拟比例是估计, 模拟比例存在随机误差, 有限模拟比例不是精确值, 模拟比例不是精确值, 模拟比例不是固定值, 不保证比例恰好]
+      reasoning_support_negation_guards: [不能说, 不能, 不是, 并非, 不应, 不对, 没, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: seed_and_proportion_role_unexplained
+        message_zh: 选项和代码可能正确，但理由还需区分“种子用于复现”与“模拟比例是有随机误差的估计”。
+        misconception_tag: seed_role_unexplained
+      relevance_terms: [default_rng, binomial, seed, 种子, 伯努利, 正面比例, "1000", "0.5"]
+      text_rules:
+        - rule_id: seed_reset_each_trial
+          source: reasoning
+          dimension: python
+          verdict: contradicts
+          phrases:
+            - 每次试验前都重置相同种子
+            - 每抽一次都重新 default_rng
+            - 循环内反复用 2026 初始化
+            - 每轮都应重设种子
+            - 每轮重设种子
+            - 每次都应重新设置种子
+          negation_guards: [不能, 不应, 不是]
+          message_zh: 一段重复模拟应初始化一个生成器后持续使用，不应在每次试验前重置相同种子。
+          misconception_tag: seed_reset_each_trial
+        - rule_id: seed_guarantees_exact_probability
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases:
+            - 固定种子保证比例恰好等于 0.5
+            - 有种子就没有模拟误差
+            - 种子让结果更准确
+            - 模拟比例是没有随机误差的精确值
+            - 模拟比例没有随机误差
+            - 模拟比例是精确值
+            - 有限模拟比例是确定且完全无误差的
+            - 模拟比例是确定且完全无误差的
+            - 完全无误差的精确值
+          negation_guards: [不能, 不会, 不是]
+          message_zh: 种子用于复现随机流，不保证一次有限模拟的比例恰好等于理论概率。
+          misconception_tag: seed_guarantees_accuracy
+        - rule_id: theoretical_probability_returned_as_simulation
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [不需要生成数据直接返回 0.5, 用理论概率冒充模拟比例, 模拟比例必然就是 0.5]
+          negation_guards: [不能, 不应, 不是]
+          message_zh: 题目要求构造有限随机模拟，理论概率 0.5 不是这次模拟产生的比例。
+          misconception_tag: returns_theoretical_probability
+        - rule_id: finite_simulation_claimed_deterministic
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [有限模拟比例是固定值, 模拟比例是固定值, 完全不会波动, 比例不会波动]
+          negation_guards: [不是, 并非, 不对, 是错的, 不成立]
+          message_zh: 有限模拟比例会随随机结果波动，不能把一次模拟写成固定且无误差的值。
+          misconception_tag: simulation_uncertainty_denied
+      python_static_spec:
+        structure_kind: seeded_binomial_proportion
+        variants:
+          - required_calls: [np.random.default_rng, binomial, mean]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+            required_constants: ["1", "0.5", "1000", "2026"]
+            required_keywords: [size=1000]
+          - required_calls: [np.random.default_rng, binomial, sum]
+            required_operators: [Div]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div]
+            required_constants: ["1", "0.5", "1000", "2026"]
+            required_keywords: [size=1000]
+        mismatch_rules:
+          - rule_id: binomial_seed_missing
+            kind: unseeded_binomial_proportion
+            message_zh: 代码生成了所需的伯努利结果和比例，但 default_rng 没有使用题目要求的种子 2026。
+            misconception_tag: seed_missing_for_reproducibility
+        mismatch_rule_id: binomial_simulation_structure_mismatch
+        mismatch_message_zh: 静态代码没有观察到“带种子的生成器→1000 个伯努利 0/1 结果→最终比例”的连通结构。
+        misconception_tag: probability_simulation_code_conflict
+    hints:
+      concept_cue: 概念提示：可复现的随机流在整段模拟中应初始化几次？最终需要的是成功次数还是成功比例？
+      method_cue: 方法提示：用一个带种子的生成器产生多个 0/1 伯努利结果，再把这些结果汇总为比例。
+      partial_step: 步骤提示：先写 `rng = np.random.default_rng(...)`，再用 `rng.binomial(n=..., p=..., size=...)` 生成数组；核对种子、单次试验成功次数、成功概率和重复次数的参数位置。
+      complete_explanation:
+        concept: 公平硬币的一次结果可表示为 n=1、p=0.5 的伯努利试验；1000 次结果构成一次有限模拟。
+        calculation: 模拟比例是成功次数除以 1000；对 0/1 数组求均值与该比例等价，不要求手算某个种子的随机输出。
+        python: 可先写 `rng = np.random.default_rng(2026)`，再写 `outcomes = rng.binomial(1, 0.5, size=1000)`，最后使用 `outcomes.mean()`、`np.mean(outcomes)`、`outcomes.sum()/1000` 或 `outcomes.sum()/len(outcomes)`。系统只检查 AST，不执行代码。
+        interpretation: 应选 A。种子支持复现，不保证比例恰好为 0.5，也不会使概率模型自动正确。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: probability_simulation_interpretation_01
+    title: 区分理论概率与有限模拟比例
+    unit_id: probability_simulation
+    concept_id: probability_simulation
+    knowledge_node_ids: [ps_monte_carlo_error, ps_random_generation]
+    prerequisites: [data_quality]
+    difficulty: 0.50
+    question_type: interpretation
+    prompt: >-
+      公平硬币的理论正面概率为 0.5。一次 100 次模拟得到 58 次正面；另一次 10000 次模拟得到
+      5041 次正面。A. 第一次证明理论概率变为 0.58；B. 0.5041 是精确理论概率；
+      C. 两者都是有限模拟比例，理论概率仍为 0.5；增加次数通常使比例更稳定，但不保证每一次更大模拟都更接近理论值；
+      D. 固定种子后任何模拟比例都必然等于 0.5。请选择并说明理由。
+    dataset:
+      theoretical_probability: 0.5
+      first_successes: 58
+      first_repetitions: 100
+      second_successes: 5041
+      second_repetitions: 10000
+    expected_answer: C
+    accepted_answers: [选项C, 理论概率不变且模拟比例存在随机误差, 模拟不改变理论概率]
+    numeric_tolerance: null
+    rubric:
+      - 计算两次模拟比例为 0.58 和 0.5041
+      - 说明理论概率仍为 0.5，不会被模拟观察改写
+      - 说明更多重复通常使比例更稳定，但不保证逐次单调接近
+    misconception_tags:
+      - simulation_changes_theoretical_probability
+      - simulated_proportion_equals_exact_probability
+      - larger_n_guarantees_monotonic_closeness
+      - seed_guarantees_accuracy
+      - count_confused_with_proportion
+    dimension_weights:
+      concept: 0.25
+      calculation: 0.20
+      python: 0.05
+      interpretation: 0.50
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [理论概率仍为 0.5, 理论概率仍为0.5, 理论概率不变, 模拟不改变理论概率]
+        - [两者都是有限模拟比例, 都是有限模拟比例, 模拟比例存在随机误差, 有限模拟比例不是精确理论概率, 模拟比例不是精确概率, 有限模拟比例是估计, 模拟比例是估计]
+        - [通常更稳定, 不保证每次更接近, 不一定每次更接近, 不保证单调接近]
+      reasoning_support_negation_guards: [不, 不能说, 不能, 不是, 并非, 不应, 不对, 没, 否认, 是错的, 不成立, 错误]
+      reasoning_insufficient_rule:
+        rule_id: theory_and_simulation_boundary_unexplained
+        message_zh: 选项可能正确，但理由还需区分理论概率和有限模拟比例，并说明增大次数只是通常趋势。
+        misconception_tag: simulation_uncertainty_unexplained
+      relevance_terms: [理论概率, 模拟比例, 随机误差, 稳定, "0.5", "0.58", "0.5041"]
+      text_rules:
+        - rule_id: simulation_changes_theoretical_probability
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases:
+            - 58 次正面证明理论概率是 0.58
+            - 模拟把理论概率改成 0.58
+            - 观察频率会改写理论概率
+            - 第一次已经证明公平硬币概率改成 0.58
+            - 第一次已经证明公平硬币概率改成0.58
+            - 概率改成 0.58
+            - 概率改成0.58
+            - 概率改成了 0.58
+            - 概率改成了0.58
+          negation_guards: [不能, 不会, 不是]
+          message_zh: 公平硬币模型的理论概率仍为 0.5，一次有限模拟频率不会改写它。
+          misconception_tag: simulation_changes_theoretical_probability
+        - rule_id: simulated_proportion_equals_exact_probability
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases:
+            - 0.5041 是精确理论概率
+            - 模拟次数够多就得到精确概率
+            - 有限模拟比例等于真实概率
+            - 有限模拟比例就是精确真概率
+            - 模拟比例就是精确真概率
+            - 模拟比例是精确真概率
+            - 有限模拟比例没有任何误差
+            - 模拟比例没有任何误差
+            - 完全没有随机误差
+            - 有限模拟比例是固定值
+            - 模拟比例是固定值
+            - 完全不会波动
+          negation_guards: [不能, 不是, 不等于]
+          message_zh: 0.5041 是这次有限模拟的比例，不是被模拟确定的精确理论概率。
+          misconception_tag: simulated_proportion_equals_exact_probability
+        - rule_id: larger_n_guarantees_monotonic_closeness
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases:
+            - 模拟次数增加后每次都一定更接近
+            - 样本量越大就保证单调接近
+            - 更多试验必然使每次结果更准
+            - 次数越多保证每次都更接近
+            - 更多次数保证每次更接近
+            - 保证每次更接近
+            - 样本越大每次误差都会下降
+            - 每次误差都会下降
+            - 误差每次都会下降
+          negation_guards: [不, 不保证, 不一定, 不能]
+          message_zh: 增加重复次数通常减小模拟波动，但不保证每一次更大的随机运行都更接近理论值。
+          misconception_tag: larger_n_guarantees_monotonic_closeness
+        - rule_id: seed_guarantees_accuracy
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [固定种子后模拟比例必然等于 0.5, 种子保证模拟比例正确, 设置 seed 就没有随机误差]
+          negation_guards: [不能, 不会, 不是]
+          message_zh: 随机种子用于复现一个随机序列，不保证比例等于理论值或模型正确。
+          misconception_tag: seed_guarantees_accuracy
+        - rule_id: count_confused_with_proportion
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [5041 就是模拟比例, 58 就是正面概率, 成功次数不需要除以试验次数]
+          negation_guards: [不是, 不能, 不应]
+          message_zh: 成功次数需要除以总试验次数才是模拟比例。
+          misconception_tag: count_confused_with_proportion
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：先区分模型给出的理论概率，以及一次有限随机模拟观察到的频率。
+      method_cue: 方法提示：分别用“成功次数÷试验次数”得到模拟比例，再判断增大次数表达的是通常趋势还是逐次保证。
+      partial_step: 步骤提示：两次比例分别是 58/100=0.58 和 5041/10000=0.5041；它们与 0.5 的绝对差分别是 0.08 和 0.0041。
+      complete_explanation:
+        concept: 理论概率由公平硬币模型给出，模拟比例是有限随机试验产生的估计。
+        calculation: 两次比例是 0.58 和 0.5041；本例中第二次与理论值 0.5 的差更小。
+        python: 固定参考程序可用成功次数除以试验次数得到比例；随机种子只支持复现，不决定理论概率。
+        interpretation: 应选 C。更多重复通常减小模拟波动，但不保证每个更大的单次运行都单调地更接近理论概率，模拟也不会改写理论概率。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: data_quality_python_01
+    title: 用静态 Python 结构统计单列缺失数
+    unit_id: data_quality
+    concept_id: data_quality
+    knowledge_node_ids: [dq_missing_values, dq_python_audit]
+    prerequisites: []
+    difficulty: 0.35
+    question_type: python
+    prompt: >-
+      同一数据已加载为 df。答案栏填写 score 列的缺失数量，并在 Python 代码栏写出
+      “只统计该列缺失数量”的表达式。代码只做 AST 静态检查，绝不会执行。
+    dataset:
+      dataframe:
+        score: [80, null, 0, 100, null, 70]
+    expected_answer: 2
+    numeric_tolerance: 0
+    rubric:
+      - 数值答案为 2
+      - 先调用 isna() 或 isnull() 生成缺失掩码
+      - 再对该掩码调用 sum()，且必须是相连的最终结果结构
+    misconception_tags: [missing_mask_not_created, missing_method_not_called, counts_rows_not_missing]
+    dimension_weights:
+      concept: 0.15
+      calculation: 0.15
+      python: 0.60
+      interpretation: 0.10
+    evidence_policy:
+      reasoning_required: false
+      reasoning_support_any: [缺失掩码, 布尔值, "true", isna, isnull, sum]
+      relevance_terms: [缺失, isna, isnull, sum, "2", score]
+      text_rules:
+        - rule_id: zero_filter_used_as_missing_mask
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [用等于 0 统计缺失, 0 的数量就是缺失数量, 零值是空值]
+          negation_guards: [不能, 不是, 不应]
+          message_zh: 题目中的 0 是合法观测，不能用等于 0 的条件代替缺失掩码。
+          misconception_tag: zero_treated_as_missing
+      python_static_spec:
+        structure_kind: direct_missing_count_chain
+        variants:
+          - required_calls: [isna, sum]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+          - required_calls: [isnull, sum]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+        mismatch_rules:
+          - rule_id: missing_method_not_called
+            kind: missing_method_not_called
+            message_zh: 代码引用了缺失判断方法，却没有用括号生成缺失掩码。
+            misconception_tag: missing_method_not_called
+          - rule_id: rows_counted_instead_of_missing
+            kind: non_missing_row_count
+            message_zh: 代码统计的是行数或非缺失数，不是缺失掩码中 True 的数量。
+            misconception_tag: counts_rows_not_missing
+        mismatch_rule_id: missing_count_structure_mismatch
+        mismatch_message_zh: 静态 AST 没有观察到“缺失判断后紧接求和”的结果结构。
+        misconception_tag: missing_mask_not_created
+    hints:
+      concept_cue: 概念提示：先把每个单元格转换为“是否缺失”的布尔判断。
+      method_cue: 方法提示：先调用 isna() 或 isnull()，再利用布尔值求和统计 True。
+      partial_step: 步骤提示：先选择 df["score"]，构造 df["score"].isna()，最后还差一个计数调用。
+      complete_explanation:
+        concept: 缺失掩码把真正的空白标为 True，不会把合法的 0 当成缺失。
+        calculation: 掩码中共有两个 True，所以缺失数量为 2。
+        python: df["score"].isna().sum() 会先生成掩码再求和；代码只经 AST 解析，未被执行。
+        interpretation: 这个数只说明缺失数量，是否填补或删行仍需结合数据来源和分析目的。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: data_quality_interpretation_01
+    title: 识别分组缺失带来的代表性风险
+    unit_id: data_quality
+    concept_id: data_quality
+    knowledge_node_ids: [dq_missingness_bias, dq_decision_log]
+    prerequisites: []
+    difficulty: 0.45
+    question_type: interpretation
+    prompt: >-
+      8 个学习会话中，桌面端 4 个时长都已记录；移动端 4 个时长有 2 个缺失。
+      删除缺失后，6 个已观察会话的平均时长约为 17.7 分钟。哪项结论更稳妥？
+      A. 17.7 可直接代表全部 8 个会话；B. 把缺失当 0 后即可代表全部；
+      C. 17.7 只描述 6 个已观察会话，缺失集中在移动端，应先调查原因再推广。
+    dataset:
+      rows:
+        - {device: desktop, completion_time: 12}
+        - {device: desktop, completion_time: 14}
+        - {device: desktop, completion_time: 13}
+        - {device: desktop, completion_time: 15}
+        - {device: mobile, completion_time: 24}
+        - {device: mobile, completion_time: null}
+        - {device: mobile, completion_time: null}
+        - {device: mobile, completion_time: 28}
+      observed_mean: 17.6666666667
+    expected_answer: C
+    numeric_tolerance: null
+    rubric:
+      - 把 17.7 的适用范围限定为 6 个已观察会话
+      - 指出桌面端缺失 0/4、移动端缺失 2/4
+      - 不凭当前表格断言偏差方向或具体缺失机制
+    misconception_tags: [complete_case_always_representative, missing_treated_as_zero, grouped_missingness_ignored]
+    dimension_weights:
+      concept: 0.20
+      calculation: 0.10
+      python: 0.00
+      interpretation: 0.70
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_any: [移动端, 2/4, 50%, 50％, 6 个, 6个, 分组缺失, 代表性, 缺失原因]
+      reasoning_insufficient_rule:
+        rule_id: grouped_missingness_reason_unexplained
+        message_zh: 已选择谨慎结论，但理由尚未说明移动端集中缺失或 17.7 的分母只有 6。
+        misconception_tag: grouped_missingness_ignored
+      relevance_terms: [移动端, 桌面端, 缺失, "17.7", "6", "8", 代表]
+      text_rules:
+        - rule_id: complete_cases_assumed_representative
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [删掉缺失后一定有代表性, 完整案例总能代表全部, dropna 后不会有偏差]
+          negation_guards: [不能, 不是, 不一定]
+          message_zh: 完整案例是否有代表性取决于缺失如何产生；本题的缺失集中在移动端。
+          misconception_tag: complete_case_always_representative
+        - rule_id: grouped_missing_values_treated_as_zero
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [把两个缺失当成 0, 空白时长就是 0, 缺失都补零]
+          negation_guards: [不能, 不是, 不应]
+          message_zh: 未观察到的完成时长不能在没有情境依据时解释为 0 分钟。
+          misconception_tag: missing_treated_as_zero
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：比较桌面端与移动端的缺失比例是否相同。
+      method_cue: 方法提示：检查删行前后的分母和分组构成，再限定统计量能代表的对象。
+      partial_step: 步骤提示：桌面端缺失 0/4，移动端缺失 2/4；17.7 的计算分母只有 6。
+      complete_explanation:
+        concept: 缺失集中在移动端，完整案例可能不再代表原来的 8 个会话。
+        calculation: 17.7 约等于 106/6；移动端缺失率为 2/4=50%，桌面端为 0/4=0%。
+        python: dropna() 只负责删行，不会检验删行后样本是否仍有代表性，也不会说明偏差方向。
+        interpretation: 应选 C，把均值限定为 6 个已观察会话，并调查移动端缺失原因后再推广。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
   - id: mean_median_concept_01
     title: 异常值出现时选择代表值
+    unit_id: descriptive_statistics
     concept_id: mean_median
+    knowledge_node_ids: [ds_center, ds_outlier_robustness, ds_context_interpretation]
     prerequisites: []
     difficulty: 0.20
     question_type: concept
@@ -11,6 +1818,7 @@ questions:
       values: [5000, 5200, 5500, 5800, 50000]
       unit: 元
     expected_answer: median
+    accepted_answers: [中位数, 中位数更合适, 选择中位数]
     numeric_tolerance: null
     rubric:
       - 选择中位数
@@ -21,18 +1829,61 @@ questions:
       calculation: 0.00
       python: 0.00
       interpretation: 0.30
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_any: [异常值, 极端值, 异常高值, 拉高均值, 中位数更能]
+      relevance_terms: [均值, 中位数, 异常值, 极端值, "50000"]
+      text_rules:
+        - rule_id: mean_always_best
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [均值最有代表性, 均值都最有代表性, 无论有没有异常值]
+          negation_guards: [并非, 不是, 不能说]
+          message_zh: 异常值存在时，不能仅因均值使用全部数据就认定它最有代表性。
+          misconception_tag: mean_always_best
+        - rule_id: ignores_outlier
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [无论有没有异常值, 即使存在极端值也应选均值, 异常值不影响均值的代表性]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 回答明确忽略了异常值可能拉动均值这一影响。
+          misconception_tag: ignores_outlier
+        - rule_id: median_affected_by_outlier
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [中位数最容易被极端值大幅拉动, 中位数会被异常值大幅拉高, 中位数比均值更受极端值影响]
+          negation_guards: [不会, 不容易, 不是]
+          message_zh: 中位数主要由排序位置决定，不会像均值一样被单个极端值大幅拉动。
+          misconception_tag: median_affected_by_outlier
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：一个观测值远高于其余值时，“使用全部数值”和“依赖排序位置”的两种中心量，哪个更容易被改变？
+      method_cue: 方法提示：分别按“总和除以个数”和“排序后找中间位置”计算，再比较哪个结果更接近前四个收入所在区域。
+      partial_step: 步骤提示：排序后的中间位置是 5500；总和是 71500，除以 5 得 14300。结合“描述典型家庭”的目标作出选择。
+      complete_explanation:
+        concept: 中位数依赖排序位置，对单个极高值通常比均值更稳健；均值使用所有数值，会受到 50000 明显影响。
+        calculation: 中位数为 5500 元；均值为 71500÷5=14300 元。
+        python: 固定的参考计算可分别使用 Series.median() 和 Series.mean()；这些函数不会替代对代表性的判断。
+        interpretation: 本例应选中位数描述这五个家庭的典型收入；这一选择不会改变收入，也不能直接外推到更大人群。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: mean_median_python_01
     title: 用 Pandas 计算中位数
+    unit_id: descriptive_statistics
     concept_id: mean_median
+    knowledge_node_ids: [ds_center]
     prerequisites: []
     difficulty: 0.30
     question_type: python
-    prompt: 执行 `df["value"].median()` 会得到什么数值？
+    prompt: 数据已存在 DataFrame `df` 的 `value` 列中。请回答中位数，并在代码栏写出一行 Pandas 计算表达式。
     dataset:
       dataframe:
         value: [4, 6, 10, 20]
-      code: 'df["value"].median()'
     expected_answer: 8.0
     numeric_tolerance: 0.000000001
     rubric:
@@ -44,10 +1895,63 @@ questions:
       calculation: 0.20
       python: 0.60
       interpretation: 0.00
+    evidence_policy:
+      reasoning_required: false
+      reasoning_support_any: [两个中间值, 中间两个数, 平均为, 除以 2]
+      relevance_terms: [median, 中位数, 中间, 平均, df]
+      text_rules:
+        - rule_id: even_count_uses_single_middle_position
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [只需要取一个中间位置, 中间位置是第 2 个]
+          negation_guards: [不能, 不是]
+          message_zh: 偶数个观测需要取两个中间值的平均，不能只取一个位置。
+          misconception_tag: even_count_uses_single_middle_position
+        - rule_id: median_affected_by_outlier
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [中位数会像均值一样被, 中位数被极端值大幅拉高]
+          negation_guards: [不会, 不容易]
+          message_zh: 中位数通常不会像均值一样被单个极端值大幅拉动。
+          misconception_tag: median_affected_by_outlier
+      python_static_spec:
+        structure_kind: direct_median_call
+        variants:
+          - required_calls: [median]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+        mismatch_rules:
+          - rule_id: median_method_not_called
+            kind: direct_median_attribute_reference
+            message_zh: 代码只引用了 median 方法，没有使用括号实际调用它。
+            misconception_tag: python_method_not_called
+          - rule_id: single_middle_position_selection
+            kind: scalar_iloc_selection
+            message_zh: 代码只选择了一个位置，没有体现偶数个数据取两个中间值平均。
+            misconception_tag: uses_middle_without_averaging
+        mismatch_rule_id: median_python_structure_mismatch
+        mismatch_message_zh: 静态代码中没有观察到对 median 方法的实际调用。
+        misconception_tag: python_code_conflicts_with_answer
+    hints:
+      concept_cue: 概念提示：观测个数为偶数时，排序后会有几个中间位置？
+      method_cue: 方法提示：先排序，再对两个中间位置的数取平均；Pandas 方法调用需要括号。
+      partial_step: 步骤提示：排序结果为 [4, 6, 10, 20]，两个中间值是 6 和 10，可列式为 (6+10)/2。
+      complete_explanation:
+        concept: 偶数个观测的中位数由排序后两个中间值的平均确定。
+        calculation: (6+10)/2=8，所以数值答案为 8。
+        python: 代码栏可写 df["value"].median()。系统只做 AST 静态结构检查，不执行学习者代码。
+        interpretation: 结果 8 只描述这四个观测的中心位置，不表示数据的波动程度。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: mean_median_interpretation_01
     title: 解读偏态收入数据
+    unit_id: descriptive_statistics
     concept_id: mean_median
+    knowledge_node_ids: [ds_center, ds_outlier_robustness, ds_context_interpretation]
     prerequisites: []
     difficulty: 0.40
     question_type: interpretation
@@ -58,6 +1962,7 @@ questions:
       median: 6000
       unit: 元
     expected_answer: median_better_represents_typical_income
+    accepted_answers: [中位数, "6000", "6000元", 中位数更典型, "6000元的中位数"]
     numeric_tolerance: null
     rubric:
       - 选择 6000 元的中位数
@@ -69,10 +1974,46 @@ questions:
       calculation: 0.00
       python: 0.00
       interpretation: 0.75
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_any: ["28000", 异常值, 高收入, 拉高, 偏态, 大多数人]
+      relevance_terms: [均值, 中位数, 收入, "28000", "6000"]
+      text_rules:
+        - rule_id: mean_equals_typical_person
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [均值 10000 就是大多数人的实际收入, 均值就是大多数人的实际收入, 均值更典型]
+          negation_guards: [不是, 不能说]
+          message_zh: 偏态数据中的均值不能直接解释为大多数人的实际收入。
+          misconception_tag: mean_equals_typical_person
+        - rule_id: statistic_causes_observed_values
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [改用中位数就会让居民收入下降, 高收入一定是由使用均值造成]
+          negation_guards: [不会, 不能]
+          message_zh: 选择统计量只改变描述方式，不会导致已观察到的收入发生变化。
+          misconception_tag: statistic_causes_observed_values
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：一个观测值远高于其余值时，它会怎样影响使用全部数值的中心量？
+      method_cue: 方法提示：先找出四个集中在 5000–6000 元的收入，再检查两个中心量中哪个更接近这个区域。
+      partial_step: 步骤提示：五个数的总和为 50000，均值是 10000；排序后的中间值是 6000。
+      complete_explanation:
+        concept: 少数较高观测会向上拉动均值，而中位数更多取决于排序位置。
+        calculation: 均值为 50000÷5=10000 元，中位数为 6000 元。
+        python: 参考分析可同时计算 Series.mean() 和 Series.median()，再结合原始分布判断代表性。
+        interpretation: 本例中 6000 元的中位数更接近四人所在收入区域；这只是对当前五个观测的描述，不是因果结论。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: variance_std_concept_01
     title: 比较两组数据的离散程度
+    unit_id: descriptive_statistics
     concept_id: variance_std
+    knowledge_node_ids: [ds_center, ds_spread]
     prerequisites: [mean_median]
     difficulty: 0.30
     question_type: concept
@@ -81,6 +2022,7 @@ questions:
       group_a: [5, 5, 5]
       group_b: [3, 5, 7]
     expected_answer: group_b
+    accepted_answers: [B, "B组", b, "b组", "B 组"]
     numeric_tolerance: null
     rubric:
       - 选择 B 组
@@ -91,17 +2033,52 @@ questions:
       calculation: 0.10
       python: 0.00
       interpretation: 0.20
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_any: [离均值更远, 没有波动, 更分散, 偏离均值]
+      relevance_terms: [方差, 标准差, 离散, 波动, 均值, group_b]
+      text_rules:
+        - rule_id: same_mean_same_spread
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [均值都是 5，所以方差和标准差也必然一样, 相同均值所以离散程度相同]
+          negation_guards: [不是, 不能]
+          message_zh: 均值相同不能推出方差或标准差相同。
+          misconception_tag: same_mean_same_spread
+        - rule_id: range_ignored
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [所以方差和标准差也必然一样, 相同均值所以离散程度相同]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 回答由均值相同直接推出离散程度相同，没有比较观测值的偏离或波动。
+          misconception_tag: range_ignored
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：两组均值相同，是否足以说明各观测值到均值的距离也相同？
+      method_cue: 方法提示：分别列出每个观测值减去 5 的离差，再比较平方离差。
+      partial_step: 步骤提示：A 组离差为 [0, 0, 0]；B 组离差为 [-2, 0, 2]，平方离差和为 8。
+      complete_explanation:
+        concept: 均值描述中心，方差和标准差描述围绕中心的离散程度；中心相同不代表离散相同。
+        calculation: A 组方差和标准差都为 0。B 组按总体口径的方差为 8/3、标准差约 1.633；按样本口径为 4 和 2。一致口径下 B 组都更大。
+        python: 可使用相同 ddof 的 Series.var() 和 Series.std() 比较两组，不能混用口径。
+        interpretation: B 组观测值更分散，A 组没有组内波动；这个描述不说明波动由什么原因造成。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: variance_std_python_01
     title: 理解 Pandas 样本标准差
+    unit_id: descriptive_statistics
     concept_id: variance_std
+    knowledge_node_ids: [ds_spread]
     prerequisites: [mean_median]
     difficulty: 0.45
     question_type: python
-    prompt: 对给定 Series 执行 `s.std()`，结果是多少？Pandas 默认使用样本标准差（ddof=1）。
+    prompt: 数据已存在 Series `s` 中。按样本标准差（ddof=1）回答数值，并在代码栏写出一行 Pandas 或 NumPy 计算表达式。
     dataset:
       series: [2, 4, 6]
-      code: s.std()
       ddof: 1
     expected_answer: 2.0
     numeric_tolerance: 0.000000001
@@ -114,19 +2091,77 @@ questions:
       calculation: 0.25
       python: 0.55
       interpretation: 0.00
+    evidence_policy:
+      reasoning_required: false
+      reasoning_support_any: [ddof=1, ddof, 样本标准差, n-1]
+      relevance_terms: [std, var, 标准差, 方差, ddof]
+      text_rules:
+        - rule_id: ddof_claimed_irrelevant
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [分母用 3 或 2 都会得到 2, 不需要说明 ddof, ddof 不重要]
+          negation_guards: [不是, 不能]
+          message_zh: 总体与样本标准差的分母不同，ddof 会影响结果。
+          misconception_tag: ddof_claimed_irrelevant
+        - rule_id: larger_std_more_stable
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准差越大表示数据越集中, 标准差越大表示数据越稳定]
+          negation_guards: [不是, 不表示]
+          message_zh: 标准差越大通常表示数据更分散，而不是更集中稳定。
+          misconception_tag: larger_std_more_stable
+      python_static_spec:
+        structure_kind: direct_std_call
+        variants:
+          - required_calls: [s.std]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+          - required_calls: [np.std]
+            allowed_root_kinds: [Call]
+            allowed_operators: []
+            required_keywords: [ddof=1]
+        mismatch_rules:
+          - rule_id: variance_returned_as_standard_deviation
+            kind: direct_var_call
+            message_zh: 结果表达式调用了 var，得到的是方差，不是题目要求的标准差。
+            misconception_tag: returns_variance
+          - rule_id: numpy_population_std_default
+            kind: numpy_std_missing_ddof
+            message_zh: NumPy 的 std 调用没有设置 ddof=1，使用了总体标准差默认口径。
+            misconception_tag: uses_population_ddof
+        mismatch_rule_id: std_python_structure_mismatch
+        mismatch_message_zh: 静态代码中没有观察到符合样本标准差口径的 std 调用。
+        misconception_tag: python_code_conflicts_with_answer
+    hints:
+      concept_cue: 概念提示：std 返回的是平方离差的结果，还是对方差开平方后的结果？
+      method_cue: 方法提示：先求均值和平方离差和，按题目给定的自由度口径确定分母，最后开平方。
+      partial_step: 步骤提示：均值为 4，平方离差为 [4, 0, 4]，总和为 8；ddof=1 时分母为 3-1，样本方差为 4。
+      complete_explanation:
+        concept: 样本标准差是样本方差的平方根；Pandas Series.std() 默认使用 ddof=1。
+        calculation: 样本方差为 8/(3-1)=4，样本标准差为 √4=2。
+        python: 代码栏可写 s.std()；等价 NumPy 写法是 np.std(s, ddof=1)。系统只检查 AST，不执行代码。
+        interpretation: 标准差 2 与原数据使用相同单位，它描述样本内波动，不表示每个观测都恰好偏离均值 2。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: variance_std_interpretation_01
     title: 用标准差判断成绩稳定性
+    unit_id: descriptive_statistics
     concept_id: variance_std
+    knowledge_node_ids: [ds_spread, ds_context_interpretation]
     prerequisites: [mean_median]
     difficulty: 0.45
     question_type: interpretation
-    prompt: 两个班平均分都是 75 分，A 班标准差为 2 分，B 班标准差为 8 分。哪个班的成绩更稳定？
+    prompt: 两个班平均分都是 75 分，A 班标准差为 2 分，B 班标准差为 8 分。若“更稳定”指成绩更集中于各班均值，哪个班更稳定？
     dataset:
       group_a: {mean: 75, standard_deviation: 2}
       group_b: {mean: 75, standard_deviation: 8}
       unit: 分
     expected_answer: group_a_is_more_consistent
+    accepted_answers: [A, "A班", a, "a班", "A 班"]
     numeric_tolerance: null
     rubric:
       - 选择 A 班
@@ -137,14 +2172,62 @@ questions:
       calculation: 0.00
       python: 0.00
       interpretation: 0.80
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_any: [标准差更小, 更集中, 更稳定, 波动更小]
+      reasoning_insufficient_rule:
+        rule_id: insufficient_statistical_interpretation
+        message_zh: 理由只比较了数值大小，尚未说明较小标准差为何表示更集中、更稳定。
+        misconception_tag: insufficient_statistical_interpretation
+      relevance_terms: [标准差, 稳定, 集中, 波动, A 班, B 班]
+      text_rules:
+        - rule_id: larger_std_more_stable
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准差越大越稳定, 标准差越大表示更稳定]
+          negation_guards: [不是, 不表示]
+          message_zh: 更大的标准差表示更分散，不能据此说成绩更稳定。
+          misconception_tag: larger_std_more_stable
+        - rule_id: spread_measure_causes_score_change
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [较小的标准差一定会导致学生成绩提高, 标准差导致学生成绩提高]
+          negation_guards: [不会, 不能]
+          message_zh: 标准差描述离散程度，不会导致学生成绩发生变化。
+          misconception_tag: spread_measure_causes_score_change
+        - rule_id: smaller_std_more_dispersed
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准差越小代表数据越分散, 标准差越小数据越分散, 较小标准差表示更分散]
+          negation_guards: [不代表, 不表示, 不是]
+          message_zh: 在相同单位和口径下，较小标准差表示观测值更集中于均值，不是更分散。
+          misconception_tag: smaller_std_more_dispersed
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：如果“稳定”指成绩更集中于各自均值，应查看哪个离散统计量？
+      method_cue: 方法提示：两班均值和单位相同，可直接比较标准差；数值越小表示围绕均值的典型波动越小。
+      partial_step: 步骤提示：2<8，因此 A 班成绩相对其均值的离散程度较小。
+      complete_explanation:
+        concept: 标准差衡量观测值围绕均值的离散程度；在相同单位和口径下，较小标准差表示更集中。
+        calculation: A 班标准差为 2 分，B 班为 8 分，A 班的离散尺度更小。
+        python: 若有原始成绩，可用相同 ddof 的 Series.std() 分别计算；当前只有汇总值，不能恢复每名学生成绩。
+        interpretation: 按题目对“稳定”的定义，A 班更稳定；这不表示 A 班均分更高，也不能说明教师或教学方法造成差异。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: sampling_standard_error_concept_01
     title: 样本量对标准误的影响
+    unit_id: sampling_inference
     concept_id: sampling_standard_error
+    knowledge_node_ids: [si_standard_error]
     prerequisites: [variance_std]
     difficulty: 0.45
     question_type: concept
-    prompt: 在总体标准差近似不变时，样本量从 25 增加到 100，样本均值的标准误约变为原来的多少？
+    prompt: 在总体标准差和抽样设计近似不变时，样本量从 25 增加到 100，样本均值的标准误约变为原来的多少？请说明平方根缩放关系。
     dataset:
       original_sample_size: 25
       new_sample_size: 100
@@ -160,17 +2243,227 @@ questions:
       calculation: 0.25
       python: 0.00
       interpretation: 0.10
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [平方根成反比, 平方根反比, 按平方根关系, 与 √n 成反比, 1/√n, 根号关系, 分母是 √n, 分母为 √n, SE=s/sqrt(n), SE=s/√n, SE=s/√(n)]
+        - [减半, 一半, "0.5", 50%]
+      reasoning_support_negation_guards: [不是, 不会, 不能, 不应]
+      reasoning_insufficient_rule:
+        rule_id: standard_error_scaling_unexplained
+        message_zh: 理由尚未同时说明平方根缩放关系和标准误减半的结论。
+        misconception_tag: standard_error_scaling_unexplained
+      relevance_terms: [标准误, 样本量, 平方根, "0.5", 一半]
+      text_rules:
+        - rule_id: se_divides_by_n
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [样本量扩大四倍所以标准误缩小四倍, 标准误变成原来的四分之一, 标准误直接除以 4]
+          negation_guards: [不能, 不是, 并非]
+          message_zh: 样本均值标准误按样本量平方根缩放，不是按样本量线性缩放。
+          misconception_tag: se_divides_by_n
+        - rule_id: larger_sample_larger_se
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [样本越多标准误越大, 样本量增加会让标准误增加]
+          negation_guards: [不会, 不能, 不是]
+          message_zh: 在变异程度和抽样设计近似不变时，增加样本量会减小均值标准误。
+          misconception_tag: larger_sample_larger_se
+        - rule_id: se_proportional_to_sqrt_n
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [标准误与样本量平方根成正比, 标准误与样本量的平方根成正比, SE 与 √n 成正比]
+          negation_guards: [不是, 并非, 不应]
+          message_zh: 在变异程度近似不变时，均值标准误与样本量平方根成反比，不是正比。
+          misconception_tag: se_scaling_direction_reversed
+        - rule_id: conclusion_reverses_ratio
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [比例是 0.5，因此新标准误是原来的两倍, 0.5 所以变成两倍]
+          negation_guards: [不是, 不能]
+          message_zh: 比例 0.5 表示减半，而不是变成原来的两倍。
+          misconception_tag: conclusion_reverses_ratio
+        - rule_id: se_scaling_ignores_fixed_variability_condition
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [任何统计量只要样本量扩大四倍, 不需要总体标准差近似不变]
+          negation_guards: [不能, 不是]
+          message_zh: 该缩放关系依赖统计量和总体变异近似不变等条件。
+          misconception_tag: se_scaling_ignores_fixed_variability_condition
+        - rule_id: sample_size_does_not_affect_se
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [标准误也不会变, 样本量变化不影响标准误]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 在总体变异近似不变时，样本量会通过平方根分母影响标准误。
+          misconception_tag: sample_size_does_not_affect_se
+        - rule_id: smaller_se_proves_unbiased
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准误减半就证明没有偏差, 标准误更小所以一定无偏, 标准误小就一定准确, 选择偏差已经完全消失, 样本增多会消除选择偏差]
+          negation_guards: [不能, 不是, 不代表]
+          message_zh: 标准误描述随机抽样波动；较小标准误不能证明没有选择或测量偏差。
+          misconception_tag: small_se_proves_unbiased
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：均值标准误公式中的样本量位于平方根内还是平方根外？
+      method_cue: 方法提示：在变异程度和设计近似不变时，比较新旧样本量平方根之比，再取倒数。
+      partial_step: 步骤提示：新旧样本量之比为 4，因此平方根之比为 2；标准误按这个比值的倒数变化。
+      complete_explanation:
+        concept: 样本均值标准误描述均值统计量在重复抽样中的典型波动，并与样本量平方根成反比。
+        calculation: SE_new/SE_old=√25/√100=5/10=0.5，所以新标准误约为原来的一半。
+        python: 参考计算可写 np.sqrt(25)/np.sqrt(100)；本题不要求也不执行学习者代码。
+        interpretation: 在总体变异和抽样设计近似不变时，更大的样本使均值的随机波动更小；这不能消除选择偏差或测量偏差。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: sampling_inference_clt_01
+    title: 区分抽样分布与中心极限定理的对象
+    unit_id: sampling_inference
+    concept_id: sampling_standard_error
+    knowledge_node_ids: [si_population_sample, si_sampling_distribution, si_clt, si_standard_error]
+    prerequisites: [probability_simulation, common_distributions, variance_std]
+    difficulty: 0.68
+    question_type: concept
+    prompt: >-
+      某目标总体明显右偏，总体均值 μ=50、总体标准差 σ=16。每次按相同方式独立随机抽取
+      n=64 个观测并计算一个样本均值，共重复 2000 次。哪项说法正确？请选择一项，并区分
+      总体、单份样本、样本均值统计量和抽样分布，说明中心极限定理的对象、条件和标准误。
+      A. 2000 个样本均值形成样本均值抽样分布的经验近似；在独立随机抽样、总体方差有限且
+      样本量足够时，其分布可近似正态，中心为 50、标准误为 2，但原始个体观测仍可右偏。
+      B. 中心极限定理会把每份样本中的 64 个原始观测变成正态分布。
+      C. 一份样本中 64 个观测的直方图就是样本均值的抽样分布。
+      D. 样本均值标准误为 16/64=0.25，且 n=64 保证抽样分布精确正态。
+    dataset:
+      population_shape: right_skewed
+      population_mean: 50
+      population_standard_deviation: 16
+      sample_size: 64
+      repetitions: 2000
+      sampling_design: independent_random_samples
+      statistic: sample_mean
+    expected_answer: A
+    accepted_answers: [a, 选项A, 选项a]
+    numeric_tolerance: null
+    rubric:
+      - 说明重复得到的样本均值形成抽样分布的经验近似
+      - 说明中心极限定理近似的是样本均值的抽样分布并列出适用条件
+      - 得出抽样分布中心为 50、标准误为 2
+      - 不声称原始观测被正态化或近似必然精确
+    misconception_tags: [raw_data_becomes_normal_under_clt, single_sample_is_sampling_distribution, se_divides_by_n, clt_exact_normality_claim]
+    dimension_weights:
+      concept: 0.55
+      calculation: 0.20
+      python: 0.00
+      interpretation: 0.25
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [重复抽样, 反复抽样, 反复独立随机抽样, 每次只保留均值, 每次只保留一个均值, 许多样本均值, 做两千遍, 多次重复, 每回重新抽取]
+        - [样本均值的抽样分布, 均值统计量的分布, 统计量的抽样分布, 平均数组成均值经验分布, 平均数组成均值的经验分布, 均值经验分布, 各批平均数的分布]
+        - [独立随机, 随机且独立, 独立同分布, 相互独立, 观察互不依赖, 互不依赖]
+        - [方差有限, 有限方差, 二阶矩存在]
+        - [样本量足够, 样本量较大, n 足够大, 规模充分]
+        - [中心为 50, 中心仍是 50, 均值是 50, 期望为 50, 围绕 50, 围绕50]
+        - [标准误为 2, 标准误是 2, 16/8=2, 16÷8=2, 16除以根号64等于2, 16/√64=2, 波动尺度是 2]
+        - [原始总体仍, 原始观测仍, 个体观测仍, 原始个体观测, 底层个体仍右偏, 底层观测仍右偏, 原始数据保持右偏, 不改变底层个体分布, 底层个体分布依旧右偏, 不会把原始个体观测变成正态]
+        - [近似, 不保证精确, 渐近逼近, 只是一种逼近, 近似也不等于精确保证]
+      reasoning_support_negation_guards: [不是, 不能]
+      reasoning_insufficient_rule:
+        rule_id: sampling_distribution_clt_boundary_unexplained
+        message_zh: 理由尚未同时说明抽样分布对象、中心极限定理条件、中心与标准误以及近似边界。
+        misconception_tag: sampling_distribution_clt_boundary_unexplained
+      relevance_terms: [总体, 样本, 样本均值, 抽样分布, 中心极限定理, 标准误, CLT]
+      text_rules:
+        - rule_id: raw_data_becomes_normal_under_clt
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [中心极限定理把原始数据变成正态, 原始观测会变成正态, 每个个体会被变成正态, CLT 近似的是原始数据分布, 被拉成钟形的是每批64个观测本身, 每批64个观测本身变成钟形, 底层观测会成为钟形]
+          negation_guards: [不会, 不能, 不是, 不表示]
+          message_zh: 中心极限定理近似的是适用统计量的抽样分布，不会改变原始观测的分布。
+          misconception_tag: raw_data_becomes_normal_under_clt
+        - rule_id: single_sample_is_sampling_distribution
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [一份样本的直方图就是抽样分布, 64 个原始观测就是抽样分布, 单份样本就是抽样分布]
+          negation_guards: [不是, 不能说, 不等于]
+          message_zh: 抽样分布描述统计量在重复抽样中的分布，不是一份样本内原始观测的分布。
+          misconception_tag: single_sample_is_sampling_distribution
+        - rule_id: sampling_distribution_confused_with_population
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [总体分布就是抽样分布, 抽样分布就是右偏总体本身]
+          negation_guards: [不是, 不等于]
+          message_zh: 总体分布描述个体变量，样本均值抽样分布描述跨样本的统计量，二者对象不同。
+          misconception_tag: sampling_distribution_confused_with_population
+        - rule_id: se_divides_by_n_for_clt
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [标准误是 16/64, 标准误为 0.25, 标准差直接除以 64, 标准误该写成16除以64, 16除以64也就是0.25]
+          negation_guards: [不是, 不能, 并非]
+          message_zh: 样本均值标准误的分母是样本量的平方根。
+          misconception_tag: se_divides_by_n
+        - rule_id: clt_exact_normality_claim
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [保证抽样分布精确正态, 必然精确正态, n=64 就一定正态, 样本量超过 30 就必然正态, 64这个数确保最后绝对就是正态, 64确保绝对正态, 样本数64保证正态]
+          negation_guards: [不能, 不是, 不保证]
+          message_zh: 一般总体下中心极限定理给出条件性的渐近近似，不是固定样本量下的精确保证。
+          misconception_tag: clt_exact_normality_claim
+        - rule_id: population_mean_changes_across_samples
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [总体均值会随每次抽样改变, 每抽一次总体均值就变化, 总体的均值会在每回重新抽取时跟着变化]
+          negation_guards: [不会, 不能说, 不是]
+          message_zh: 在设定的总体不变时，样本均值会变化，但总体均值是固定参数。
+          misconception_tag: population_parameter_treated_as_sample_statistic
+        - rule_id: clt_conditions_ignored
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [观察之间会互相影响, 观察之间会互相影响并不独立, 观测并不独立, 观测相互依赖, 数据在时间上有关联, 独立条件并不成立, 无需独立, 总体的方差无限大, 总体方差不存在, 没有有限的二阶矩, 没有有限二阶矩, 方差不必有限, 64个样本在这里根本不足以支持正态近似, 样本量根本不足, n=64 不足以近似]
+          negation_guards: [不能说, 并非, 不是, 不应]
+          message_zh: 题设中的独立随机抽样、有限方差和足够样本量是本例使用中心极限定理近似的条件。
+          misconception_tag: clt_conditions_ignored
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：先区分总体中的个体、一份样本、从样本算出的均值，以及重复得到许多均值后的分布。
+      method_cue: 方法提示：确定中心极限定理近似的对象与条件，再分别写出样本均值抽样分布中心和尺度的一般公式。
+      partial_step: 步骤提示：每轮只保存一个样本均值；把总体标准差放在样本量平方根的分母上，同时检查原总体形状是否因此改变。
+      complete_explanation:
+        concept: 2000 次重复抽样各产生一个样本均值，这些均值形成抽样分布的经验近似；中心极限定理近似的是均值统计量的抽样分布，而非原始个体分布。
+        calculation: E(X̄)=μ=50，SE(X̄)=σ/√n=16/√64=2。
+        python: 教学演示可用受审随机数生成器重复计算均值并画直方图；有限模拟只帮助观察，不构成定理证明，也不执行学习者代码。
+        interpretation: 选择 A。独立随机抽样、有限方差和足够样本量支持近似；原始总体仍可右偏，近似不等于精确保证。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: sampling_standard_error_python_01
     title: 用 NumPy 计算标准误
+    unit_id: sampling_inference
     concept_id: sampling_standard_error
+    knowledge_node_ids: [si_standard_error]
     prerequisites: [variance_std]
     difficulty: 0.60
     question_type: python
-    prompt: 根据给定代码 `np.std(sample, ddof=1) / np.sqrt(len(sample))`，计算样本均值的标准误。
+    prompt: 系统已提供一维 NumPy 数组 `sample=np.array([8.0,10.0,12.0,14.0])`。答案栏填写样本均值的估计标准误；Python 代码栏用 NumPy 显式表达“样本标准差除以样本量平方根”，不要调用 sem 便捷函数。代码只做 AST 静态检查，绝不执行。
     dataset:
       sample: [8, 10, 12, 14]
-      code: np.std(sample, ddof=1) / np.sqrt(len(sample))
     expected_answer: 1.2909944487358056
     numeric_tolerance: 0.000001
     rubric:
@@ -183,18 +2476,131 @@ questions:
       calculation: 0.25
       python: 0.60
       interpretation: 0.00
+    evidence_policy:
+      reasoning_required: false
+      reasoning_support_any: [除以 sqrt, 除以平方根, 标准误, ddof=1]
+      relevance_terms: [std, sqrt, len, 标准误, 标准差, ddof]
+      text_rules:
+        - rule_id: wrong_ddof_for_estimated_se
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [ddof=0 才是样本标准差, 不需要 ddof=1, ddof 不影响结果]
+          negation_guards: [不是, 不能, 不对]
+          message_zh: 本题要求用 ddof=1 的样本标准差口径估计标准误。
+          misconception_tag: wrong_ddof
+        - rule_id: linear_n_used_for_standard_error
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [标准差直接除以样本量, 标准差除以 4, 分母就是 n]
+          negation_guards: [不是, 不能, 不应]
+          message_zh: 均值标准误的分母是样本量平方根，不是样本量本身。
+          misconception_tag: omits_sqrt
+        - rule_id: result_named_as_raw_data_sd
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [原始观测值自身的标准差, 原始数据的标准差]
+          negation_guards: [不是, 不能解释为]
+          message_zh: 除以样本量平方根后的结果是样本均值标准误，不是原始观测的标准差。
+          misconception_tag: result_named_as_raw_data_sd
+        - rule_id: smaller_estimated_se_proves_unbiased
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准误小就证明样本无偏, 这个标准误保证均值准确, 标准误小所以没有抽样偏差]
+          negation_guards: [不能, 不是, 不代表]
+          message_zh: 估计标准误描述随机波动，不能单独证明样本或估计量无偏。
+          misconception_tag: small_se_proves_unbiased
+      python_static_spec:
+        structure_kind: standard_error_formula
+        variants:
+          - required_calls: [np.std, np.sqrt, len]
+            required_names: [sample]
+            required_operators: [Div]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div]
+            required_keywords: [ddof=1]
+          - required_calls: [sample.std, np.sqrt, len]
+            required_names: [sample]
+            required_operators: [Div]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div]
+            required_keywords: [ddof=1]
+          - required_calls: [np.std, np.sqrt]
+            required_names: [sample]
+            required_operators: [Div]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div]
+            required_keywords: [ddof=1]
+          - required_calls: [sample.std, np.sqrt]
+            required_names: [sample]
+            required_operators: [Div]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div]
+            required_keywords: [ddof=1]
+          - required_calls: [np.std]
+            required_names: [sample]
+            required_operators: [Div, Pow]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div, Pow]
+            required_constants: ["0.5"]
+            required_keywords: [ddof=1]
+          - required_calls: [sample.std]
+            required_names: [sample]
+            required_operators: [Div, Pow]
+            allowed_root_kinds: [BinOp]
+            allowed_operators: [Div, Pow]
+            required_constants: ["0.5"]
+            required_keywords: [ddof=1]
+        mismatch_rules:
+          - rule_id: variance_used_in_standard_error_formula
+            kind: variance_standard_error_formula
+            message_zh: 标准误公式的分子使用了方差；这里需要使用样本标准差。
+            misconception_tag: uses_variance_in_se_formula
+          - rule_id: population_std_used_in_standard_error_formula
+            kind: population_std_standard_error_formula
+            message_zh: 代码使用了总体标准差口径；本题要求使用 ddof=1 的样本标准差估计标准误。
+            misconception_tag: wrong_ddof
+          - rule_id: sample_size_not_square_rooted
+            kind: linear_n_standard_error_formula
+            message_zh: 代码把样本标准差直接除以样本量；均值标准误应除以样本量平方根。
+            misconception_tag: omits_sqrt
+          - rule_id: raw_standard_deviation_returned
+            kind: raw_std_as_standard_error
+            message_zh: 代码只返回了样本标准差，尚未除以样本量平方根得到均值标准误。
+            misconception_tag: returns_standard_deviation
+        mismatch_rule_id: standard_error_python_structure_mismatch
+        mismatch_message_zh: 静态代码未同时体现样本标准差、ddof=1 和除以样本量平方根。
+        misconception_tag: python_code_conflicts_with_answer
+    hints:
+      concept_cue: 概念提示：先确认要描述原始观测的离散，还是样本均值跨重复样本的波动。
+      method_cue: 方法提示：先按样本口径求标准差，再除以有效样本量的平方根；代码必须把两步连接到最终结果。
+      partial_step: 步骤提示：先求 sd=np.std(sample,ddof=1)，再把 len(sample) 放入平方根分母。
+      complete_explanation:
+        concept: ddof=1 使用样本标准差口径；均值的估计标准误是 s/√n，不是 s、s/n 或方差除以根号。
+        calculation: 样本标准差约为 2.58199，√4=2，因此估计标准误约为 1.29099。
+        python: 可写 np.std(sample,ddof=1)/np.sqrt(len(sample))。系统只检查 AST 结构和最终依赖，从不执行学习者代码。
+        interpretation: 结果描述样本均值在重复抽样中的典型随机波动，不是四个原始观测的标准差，也不能证明样本无偏。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: sampling_standard_error_interpretation_01
     title: 比较两个样本均值的精确度
+    unit_id: sampling_inference
     concept_id: sampling_standard_error
+    knowledge_node_ids: [si_population_sample, si_standard_error]
     prerequisites: [variance_std]
     difficulty: 0.55
     question_type: interpretation
-    prompt: 两项研究的样本标准差都是 10。研究 A 有 25 个观测，研究 B 有 100 个观测。哪项研究的样本均值通常更精确？
+    prompt: 两项研究都按独立随机观测的简单公式估计总体均值，样本标准差都是 10。研究 A 有 25 个观测，研究 B 有 100 个观测。哪项研究的样本均值随机抽样波动通常更小、因而更精确？请结合相同标准差、样本量和标准误说明理由。
     dataset:
       study_a: {sample_size: 25, sample_standard_deviation: 10}
       study_b: {sample_size: 100, sample_standard_deviation: 10}
     expected_answer: study_b_is_more_precise
+    accepted_answers: [研究B, B, b, B研究, study_b]
     numeric_tolerance: null
     rubric:
       - 选择研究 B
@@ -206,56 +2612,376 @@ questions:
       calculation: 0.00
       python: 0.00
       interpretation: 0.80
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [标准差相同, 相同标准差, s 相同, s 一样, 给定 s 相等, 两边 s 一样, 两边标准差一样, 两组 s 都是 10]
+        - [B 的样本量更大, B 样本量更大, B样本量更大, B 的样本更多, B样本更多, B 的 n 更大, B的n更大, B 有更多观测, B 有 100 人, B有100人, B 的 n 是 A 的四倍, 100 比 25]
+        - [标准误更小, 标准误较小, SE 更小, SE更小, SE 更低, SE更低, 抽样波动更小, 波动尺度更小, B 均值估计波动更少, B均值波动更少, SE_B=SE_A/2]
+      reasoning_support_negation_guards: [不是, 不会, 不能, 不应]
+      reasoning_insufficient_rule:
+        rule_id: precision_comparison_unexplained
+        message_zh: 理由尚未同时使用相同标准差、更大样本量和更小标准误说明精度比较。
+        misconception_tag: precision_comparison_unexplained
+      relevance_terms: [标准误, 标准差, 样本量, 精确, 研究 B]
+      text_rules:
+        - rule_id: precision_claim_ignores_equal_sd_condition
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [样本更多，所以 B 一定更精确, 样本量大就一定更精确]
+          negation_guards: [不能, 不是]
+          message_zh: 本题结论依赖两项研究样本标准差相同，不能脱离条件说样本多就一定更精确。
+          misconception_tag: precision_claim_ignores_equal_sd_condition
+        - rule_id: equal_sd_means_equal_se
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [标准差相同所以标准误相同, 两项研究的标准误一样]
+          negation_guards: [不能, 不是, 不表示]
+          message_zh: 标准误还取决于样本量；相同样本标准差不能推出标准误相同。
+          misconception_tag: sample_size_does_not_matter
+        - rule_id: standard_error_treated_as_individual_spread
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准误描述个体数据的离散, 标准误描述每个人的起伏, B 的每个观测更集中, B 的每个学生成绩也一定更集中, B的每个学生成绩也一定更集中, B 的个体观测一定更集中, B个体更集中, 标准误就是原始数据标准差]
+          negation_guards: [不是, 不代表, 不能]
+          message_zh: 标准误描述样本均值跨重复样本的波动，不是个体观测的离散程度。
+          misconception_tag: confuses_sd_se
+        - rule_id: small_se_proves_no_bias
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [B 标准误小所以一定无偏, B 一定更接近总体真值, 样本更多会消除选择偏差]
+          negation_guards: [不能, 不是, 不代表]
+          message_zh: 较小标准误只表示随机抽样波动较小，不能证明没有系统偏差或必然更接近真值。
+          misconception_tag: small_se_proves_unbiased
+        - rule_id: larger_sample_claimed_more_variable
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [样本越多均值的抽样波动反而越大, B 的均值抽样波动更大, B样本均值波动更大]
+          negation_guards: [不会, 不是, 不能]
+          message_zh: 在相同样本标准差和题设简单公式下，B 的更大样本量对应更小的均值抽样波动。
+          misconception_tag: larger_sample_larger_se
+        - rule_id: study_a_claimed_more_precise
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [实际 A 的样本均值才更稳定, 实际A的样本均值才更稳定, A 的样本均值更精确, A研究更精确]
+          negation_guards: [不是, 不能, 不应]
+          message_zh: 在两项研究样本标准差相同的题设下，B 的均值标准误更小，A 不是更稳定的一项。
+          misconception_tag: study_a_claimed_more_precise
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：标准差描述个体观测，标准误描述样本均值；两者在比较时承担相同角色吗？
+      method_cue: 方法提示：分别把相同的样本标准差除以各自样本量平方根，再比较均值的随机波动尺度。
+      partial_step: 步骤提示：A 的分母为 √25，B 的分母为 √100；分子相同，比较两个比值即可。
+      complete_explanation:
+        concept: 在独立随机观测的简单公式下，均值标准误是 s/√n，描述均值统计量在重复抽样中的波动。
+        calculation: A 的估计标准误为 10/5=2，B 为 10/10=1，因此 B 的随机抽样波动尺度更小。
+        python: 参考分析可分别计算 10/np.sqrt(25) 与 10/np.sqrt(100)；本题不要求也不执行学习者代码。
+        interpretation: 研究 B 的样本均值通常更精确，但个体标准差仍同为 10；较小标准误不表示无偏，也不能自动修复选择或测量问题。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: sampling_inference_bias_interpretation_01
+    title: 区分标准误、精度与系统偏差
+    unit_id: sampling_inference
+    concept_id: sampling_standard_error
+    knowledge_node_ids: [si_population_sample, si_standard_error]
+    prerequisites: [variance_std, sampling_standard_error]
+    difficulty: 0.72
+    question_type: interpretation
+    prompt: >-
+      两项研究都按独立随机观测的简单公式估计总体均值，样本标准差均为 12。研究 A 有
+      100 个观测且仪器无已知系统偏移；研究 B 有 400 个观测，但仪器的每次读数都会系统性
+      增加 5 个单位。哪项说法正确？请选择一项，并分别说明标准误、样本量、个体标准差和
+      系统偏差。A. SE_A=1.2、SE_B=0.6；B 的样本均值随机抽样波动较小，但扩大样本量不会
+      消除仪器的 +5 系统偏差，所以较小标准误不能证明 B 无偏或一定更接近总体真值。
+      B. B 的样本量是四倍，所以标准误是 A 的四分之一，系统偏差也会消失。
+      C. 两项研究样本标准差相同，所以标准误相同。
+      D. 标准误描述个体读数的离散程度，因此 B 的个体读数更加集中。
+    dataset:
+      study_a: {sample_size: 100, sample_standard_deviation: 12, instrument_shift: 0}
+      study_b: {sample_size: 400, sample_standard_deviation: 12, instrument_shift: 5}
+      sampling_design: independent_random_observations
+    expected_answer: A
+    accepted_answers: [a, 选项A, 选项a]
+    numeric_tolerance: null
+    rubric:
+      - 得出研究 A 的估计标准误为 1.2、研究 B 为 0.6
+      - 说明标准误描述样本均值的随机抽样波动
+      - 说明固定仪器偏移是系统偏差，增加样本量不会消除
+      - 不把较小标准误解释为无偏、准确或个体数据更集中
+    misconception_tags: [fourfold_n_quarters_se, equal_sd_means_equal_se, standard_error_treated_as_individual_spread, large_sample_removes_systematic_bias, small_se_proves_unbiased]
+    dimension_weights:
+      concept: 0.25
+      calculation: 0.25
+      python: 0.00
+      interpretation: 0.50
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [A 的标准误为 1.2, A标准误为1.2, A 为 12/√100=1.2, A 均值标准误 1.2, A 均值标准误为 1.2, 研究 A 均值标准误 1.2, 研究 A 均值标准误为 1.2, 12/10=1.2, SE_A=1.2]
+        - [B 的标准误为 0.6, B标准误为0.6, B 为 12/√400=0.6, B 均值标准误 0.6, B 均值标准误为 0.6, 研究 B 均值标准误 0.6, 研究 B 均值标准误为 0.6, 12/20=0.6, SE_B=0.6]
+        - [均值, 平均值]
+        - [重复抽样, 反复抽样, 随机抽样, 抽样, 跨样本]
+        - [波动, 随机误差]
+        - [系统偏差, 固定偏移, 固定系统偏差, 固定测量偏移, 方向固定测量偏移, 系统性增加 5, 系统性偏高, 系统性偏移, 统一系统性偏移]
+        - [更多样本, 增加样本量, 样本量增加, 增加人数, 再收集更多样本, 不是增加样本量能平均掉]
+        - [不会消除, 无法消除, 不能消除, 不会被平均掉, 不能抵消, 不是增加样本量能平均掉, 增加样本量不能平均掉, 更多样本抵消不了, 更多样本不能消除, 样本再多也抵消不了, 冲不掉]
+        - [不能证明 B 无偏, 不等于无偏, 不一定更接近总体真值, 精度不等于准确, 不能保证准确, 不能由较小标准误断言 B 无偏, 不能由较小 SE 断言无偏, 不一定更准确, 不能说无偏, 不能说离真值更近, 不意味无偏, 不推出无偏]
+      reasoning_support_negation_guards: [不正确, 不对, 错误, 错误结论, 不成立, 不是, 并非]
+      reasoning_insufficient_rule:
+        rule_id: standard_error_bias_boundary_unexplained
+        message_zh: 理由尚未同时说明两个标准误、均值随机波动、固定系统偏差及精度不等于无偏的边界。
+        misconception_tag: standard_error_bias_boundary_unexplained
+      relevance_terms: [标准误, 样本量, 标准差, 系统偏差, 固定偏移, 无偏, 准确]
+      text_rules:
+        - rule_id: fourfold_n_quarters_se
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [样本量四倍所以标准误是四分之一, B 的标准误是 0.3, B标准误为0.3, B的标准误应当是0.3]
+          negation_guards: [不是, 不能, 不会]
+          message_zh: 样本量扩大四倍时，标准误按平方根关系减半，不是缩为四分之一。
+          misconception_tag: fourfold_n_quarters_se
+        - rule_id: equal_sd_means_equal_se_for_bias_case
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [标准差相同所以标准误相同, 两项研究的标准误一样]
+          negation_guards: [不是, 不能, 不表示]
+          message_zh: 标准误还取决于样本量；相同标准差不能推出标准误相同。
+          misconception_tag: equal_sd_means_equal_se
+        - rule_id: standard_error_treated_as_individual_spread_for_bias_case
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标准误描述个体读数的离散, B 的个体读数更加集中, 标准误就是个体标准差, 标准误其实就是每个人测量值的起伏]
+          negation_guards: [不是, 不能, 不表示]
+          message_zh: 标准误描述均值统计量的抽样波动，不是个体读数的离散程度。
+          misconception_tag: standard_error_treated_as_individual_spread
+        - rule_id: large_sample_removes_systematic_bias
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [样本量大就会消除系统偏差, 固定偏移会被更多样本平均掉, 加 5 的偏差会消失, 加5其实只是随机误差, 加5这种影响属于偶然噪声, 多收些样本就会趋近于0, 随着 n 增大会自行归零, 系统性偏移会被增加的样本稀释掉]
+          negation_guards: [不会, 不能, 不是]
+          message_zh: 固定仪器偏移是系统误差，增加样本量不会让它围绕零随机抵消。
+          misconception_tag: large_sample_removes_systematic_bias
+        - rule_id: small_se_proves_unbiased_in_bias_case
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [B 标准误小所以一定无偏, 标准误更小就一定更准确, B 一定更接近总体真值, SE小足以说明B的估计更真实]
+          negation_guards: [不能, 不是, 不代表]
+          message_zh: 较小标准误只表示随机波动较小，不能证明估计无偏或必然更准确。
+          misconception_tag: small_se_proves_unbiased
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：随机抽样波动与每次都朝同一方向发生的系统误差是同一种问题吗？
+      method_cue: 方法提示：分别用 s/√n 比较均值的随机波动，再单独分析固定偏移是否会随样本量抵消。
+      partial_step: 步骤提示：分别计算 12/√100 与 12/√400；再思考每个读数都加同一个常数时样本均值会怎样。
+      complete_explanation:
+        concept: 标准误描述样本均值跨重复样本的随机波动；固定仪器偏移属于系统偏差，两者必须分开判断。
+        calculation: SE_A=12/10=1.2，SE_B=12/20=0.6；B 的随机波动尺度较小。
+        python: 受审参考计算可分别写 12/np.sqrt(100) 和 12/np.sqrt(400)；本题不执行学习者代码。
+        interpretation: 选择 A。B 的均值更精确但仍系统性偏高 5；较小标准误不能证明无偏、准确或个体观测更集中。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
 
   - id: confidence_interval_concept_01
     title: 正确理解 95% 置信水平
+    unit_id: estimation_confidence_interval
     concept_id: confidence_interval
+    knowledge_node_ids: [ec_interval_construction, ec_interval_interpretation]
     prerequisites: [sampling_standard_error]
     difficulty: 0.55
     question_type: concept
-    prompt: 对同一总体重复抽样，并用同一种方法构造许多 95% 置信区间。95% 的含义是什么？
+    prompt: >-
+      对同一总体按相同设计重复抽样，并用同一种有效方法构造许多 95% 置信区间。哪项解释正确？
+      A. 长期重复中，约 95% 的区间会覆盖固定但未知的总体参数；
+      B. 对已经算出的这一个区间，参数有 95% 的概率位于其中；
+      C. 每个区间都包含约 95% 的原始观测；
+      D. 任意连续 100 个区间都保证恰好 95 个覆盖参数。
+      答案栏选一项，并说明哪些对象会随重复抽样改变。
     dataset:
       confidence_level: 0.95
       repeated_sampling: true
     expected_answer: about_95_percent_of_intervals_cover_the_true_parameter
+    accepted_answers: [A, 选项A, 长期重复中约95%的区间覆盖真实参数]
     numeric_tolerance: null
     rubric:
-      - 从重复抽样和长期覆盖率角度解释
-      - 不声称固定参数有 95% 概率落在本次区间中
-    misconception_tags: [parameter_has_95_percent_probability, data_coverage_confusion]
+      - 说明在相同条件下重复抽样并反复构造区间
+      - 说明长期约 95% 的区间覆盖固定真实参数
+      - 不把覆盖率说成固定参数在本次区间中的概率
+      - 不把参数区间说成原始观测范围或有限批次的精确保证
+    misconception_tags:
+      - parameter_has_95_percent_probability
+      - data_coverage_confusion
+      - exact_coverage_guaranteed
+      - missing_repeated_sampling_condition
     dimension_weights:
-      concept: 0.75
+      concept: 0.65
       calculation: 0.00
       python: 0.00
-      interpretation: 0.25
+      interpretation: 0.35
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [重复抽样, 反复抽样, 长期重复, 多次抽样, 重新抽样, 每次重新抽样, 每回重新取一批样本, 换一批样本, 重抽数据, 重复进行同样的抽样]
+        - [约 95% 会覆盖真实参数, 约95%会覆盖真实参数, 约 95% 的区间覆盖参数, 约95%的区间覆盖参数, 约 95% 的区间覆盖真实参数, 约95%的区间覆盖真实参数, 长期覆盖率约为 95%, 长期覆盖率约为95%, 覆盖那个固定总体参数的比例大约是95%, 构造方法长期覆盖真参数的比例为 95%, 构造方法长期覆盖真参数的比例为95%, 跨过那个固定真值的区间占比会趋近95%, 覆盖固定真值的区间比例接近95%]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: missing_repeated_sampling_condition
+        message_zh: 还需同时说明相同条件下的重复抽样，以及长期约 95% 的区间覆盖固定参数。
+        misconception_tag: missing_repeated_sampling_condition
+      relevance_terms: [置信区间, 95%, 重复抽样, 覆盖, 参数, 长期]
+      text_rules:
+        - rule_id: parameter_has_95_percent_probability
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [参数有 95% 的概率在里面, 参数有 95% 概率落入, 参数仍然有 95% 概率, 参数有95%的概率在本次区间里, 参数在本次区间中的概率仍是95%, 真值仍有0.95的机会落在里面, 固定参数落进现有端点的几率仍为九成五, 眼前这一对端点给真值分配了0.95的机会, 真参数有95%的可能在本次区间, 这次区间包含参数的概率是95%, 参数随机落进当前区间]
+          negation_guards: [不能说, 不能理解为, 不表示, 不是, 并非, 不应]
+          message_zh: 频率学派置信区间不能解释为固定参数在本次区间中的概率。
+          misconception_tag: parameter_has_95_percent_probability
+        - rule_id: data_coverage_confusion
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [区间包含 95% 的原始数据, 区间包含95%的原始数据, 95% 的观测都在区间里, 95%的样本数据落在区间内, 这段范围圈住总体里95%的个体, 这是中间95%数据的范围]
+          negation_guards: [不能说, 不表示, 不是, 并非, 不应]
+          message_zh: 参数的置信区间不是原始观测值或未来个体值的覆盖范围。
+          misconception_tag: data_coverage_confusion
+        - rule_id: exact_coverage_guaranteed
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [每 100 个区间必有 95 个覆盖, 每100个区间必有95个覆盖, 任意 100 次都恰好覆盖 95 次, 做一百次时覆盖个数一定不多不少正好95, 随便做100遍都会准确命中95遍, 保证恰好95%的有限区间覆盖, 每一批都精确覆盖95%]
+          negation_guards: [不能说, 不保证, 不是, 并非]
+          message_zh: 95% 是长期覆盖率，不保证任意有限批次都恰好达到 95%。
+          misconception_tag: exact_coverage_guaranteed
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：重复研究时，是总体参数在变化，还是样本和由样本算出的区间在变化？
+      method_cue: 方法提示：从“同一抽样与构造程序长期重复后的覆盖比例”解释置信水平。
+      partial_step: 步骤提示：把固定总体参数画成一条竖线；每次新样本会产生一个新端点对，再统计哪些区间跨过这条线。
+      complete_explanation:
+        concept: 频率学派把总体参数视为固定而未知，把样本和区间视为随重复抽样变化的随机对象。
+        calculation: 若方法满足条件，长期大量重复构造的区间中约 95% 覆盖真实参数；有限 100 次不保证恰好 95 次。
+        python: Python 可以重复模拟并估计覆盖比例，但有限模拟比例不是对长期理论性质的证明。
+        interpretation: 选择 A；95% 不是本次参数概率，也不是区间包含原始数据的比例。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.2.0
 
   - id: confidence_interval_python_01
     title: 用 Python 公式计算置信区间
+    unit_id: estimation_confidence_interval
     concept_id: confidence_interval
+    knowledge_node_ids: [ec_interval_construction]
     prerequisites: [sampling_standard_error]
     difficulty: 0.65
     question_type: python
-    prompt: 代码使用 `mean + np.array([-1, 1]) * 1.96 * standard_error`。给定均值 50、标准误 2，返回的区间端点是什么？
+    prompt: >-
+      系统已提供 `mean=50`、`standard_error=2` 和 `critical_value=1.96`。
+      答案栏填写按“点估计 ± 临界值 × 标准误”得到的有序区间端点；Python 代码栏使用
+      `np.array` 构造下限和上限，必须引用系统变量，不能硬编码最终端点。代码只做 AST 静态检查，绝不执行。
     dataset:
       mean: 50
       standard_error: 2
       critical_value: 1.96
-      code: 'mean + np.array([-1, 1]) * 1.96 * standard_error'
     expected_answer: [46.08, 53.92]
     numeric_tolerance: 0.000001
     rubric:
       - 正确计算误差界限 1.96 × 2 = 3.92
       - 得到下限 46.08 和上限 53.92
-    misconception_tags: [adds_margin_both_sides, omits_critical_value]
+      - Python 最终结果连接点估计、临界值、标准误和有序双侧端点
+      - 不把 1.96 说成脱离条件的通用常数
+    misconception_tags:
+      - adds_margin_both_sides
+      - reversed_interval_endpoints
+      - omits_critical_value
+      - uses_standard_deviation_as_ci_scale
+      - hardcoded_result_not_implementation
     dimension_weights:
       concept: 0.10
       calculation: 0.30
       python: 0.60
       interpretation: 0.00
+    evidence_policy:
+      reasoning_required: false
+      reasoning_support_any: [误差界限, "3.92", 两侧加减, 下限, 上限]
+      relevance_terms: [mean, standard_error, "1.96", 置信区间, 端点]
+      text_rules:
+        - rule_id: critical_value_claimed_universal
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [任何样本量、任何分布都固定使用 1.96, 不需要检查构造区间的条件]
+          negation_guards: [不能, 不是]
+          message_zh: 临界值 1.96 不能脱离置信水平和适用条件无条件使用。
+          misconception_tag: critical_value_claimed_universal
+        - rule_id: parameter_has_95_percent_probability
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [真实均值有 95% 的概率, 参数有 95% 的概率, 参数仍然有 95% 概率]
+          negation_guards: [不能说, 不表示, 不是]
+          message_zh: 端点计算正确也不能把固定参数解释为以 95% 概率落在本次区间中。
+          misconception_tag: parameter_has_95_percent_probability
+      python_static_spec:
+        structure_kind: confidence_interval_formula
+        variants:
+          - required_calls: [np.array]
+            required_names: [mean, standard_error]
+            required_operators: [Add, Mult]
+            allowed_root_kinds: [BinOp, Call]
+            allowed_operators: [Add, Sub, Mult, USub]
+        mismatch_rules:
+          - rule_id: adds_confidence_margin_both_sides
+            kind: adds_confidence_margin_both_sides
+            message_zh: 两个端点都加上误差界限会丢失下限；偏移顺序应先负后正。
+            misconception_tag: adds_margin_both_sides
+          - rule_id: reverses_confidence_interval_endpoints
+            kind: reversed_confidence_interval_endpoints
+            message_zh: 端点顺序被反转；答案要求先给下限、再给上限。
+            misconception_tag: reversed_interval_endpoints
+          - rule_id: omits_confidence_critical_value
+            kind: omits_confidence_critical_value
+            message_zh: 区间只加减了一个标准误，没有乘题设临界值。
+            misconception_tag: omits_critical_value
+          - rule_id: uses_standard_deviation_as_ci_scale
+            kind: uses_standard_deviation_as_ci_scale
+            message_zh: 均值区间的尺度应使用题设标准误，不能把原始观测标准差直接代入。
+            misconception_tag: uses_standard_deviation_as_ci_scale
+        mismatch_rule_id: hardcoded_result_not_implementation
+        mismatch_message_zh: 静态代码没有体现均值、标准误、临界值和双侧区间运算，不能只硬编码端点。
+        misconception_tag: hardcoded_result_not_implementation
+    hints:
+      concept_cue: 概念提示：区间中心、误差界限和原始观测的离散程度分别由什么量表示？
+      method_cue: 方法提示：先计算“临界值 × 标准误”，再从点估计向相反的两个方向移动。
+      partial_step: 步骤提示：误差界限为 1.96×2；下限用均值减去它，上限用均值加上它，代码最终要连接这些变量。
+      complete_explanation:
+        concept: 双侧区间由点估计居中，以临界值乘标准误作为误差界限；标准误不是原始数据标准差。
+        calculation: 误差界限为 3.92，因此有序端点为 [46.08, 53.92]。
+        python: 可写 mean + np.array([-1, 1]) * critical_value * standard_error；系统只检查 AST 和结果依赖，不执行代码。
+        interpretation: 端点计算成立仍依赖所选区间方法的抽样、分布和标准误条件，1.96 不是所有问题的通用常数。
+    python_code_required: true
+    review_status: pending_teacher_review
+    version: 0.2.0
 
   - id: confidence_interval_interpretation_01
     title: 解读均值的置信区间
+    unit_id: estimation_confidence_interval
     concept_id: confidence_interval
+    knowledge_node_ids: [ec_interval_interpretation]
     prerequisites: [sampling_standard_error]
     difficulty: 0.70
     question_type: interpretation
@@ -269,9 +2995,291 @@ questions:
     rubric:
       - 回答不能这样断言
       - 说明区间反映抽样方法下与数据相容的估计范围，而不是绝对边界
-    misconception_tags: [outside_interval_impossible, interval_contains_data]
+      - 不把本次区间重新解释成固定参数的概率或原始数据范围
+    misconception_tags: [outside_interval_impossible, interval_contains_data, parameter_has_95_percent_probability, parameter_interval_treated_as_prediction_interval]
     dimension_weights:
       concept: 0.20
       calculation: 0.00
       python: 0.00
       interpretation: 0.80
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [不行, 不可以, 不能这样断言, 不能断言, 不能说小于 48 不可能, 不能说48以下不可能, 不能说 48 以下完全不可能, 不能说48以下完全不可能, 48 以下仍可能, 48以下仍可能, 回答是否定的]
+        - [区间不是绝对边界, 不是绝对边界, 与数据相容的估计范围, 当前证据不太相容却并未被逻辑排除, 不能视作从可能集合中被排除, 并未被逻辑排除, 没有被逻辑排除, 反映抽样不确定性, 区间会随样本变化, 重抽后会移动, 没有证明区间外绝对不可能]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: confidence_interval_boundary_unexplained
+        message_zh: 还需明确回答不能断言，并说明置信区间不是参数取值的绝对边界。
+        misconception_tag: confidence_interval_boundary_unexplained
+      relevance_terms: [置信区间, "48", "52", 总体均值, 绝对边界]
+      text_rules:
+        - rule_id: parameter_has_95_percent_probability
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [参数仍然有 95% 概率, 参数有 95% 概率, 区间外只有 5% 概率]
+          negation_guards: [不能说, 不表示, 不是]
+          message_zh: 不能把固定参数解释为以 95% 概率落在已经算出的区间中。
+          misconception_tag: parameter_has_95_percent_probability
+        - rule_id: outside_interval_impossible
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [区间外绝对不可能, 小于 48 完全不可能, 区间外的参数值概率就是零, 区间外参数概率为0, 低于48的参数概率为零, 低于48的候选已经彻底出局]
+          negation_guards: [不能说, 不是]
+          message_zh: 置信区间不是总体参数取值的绝对边界。
+          misconception_tag: outside_interval_impossible
+        - rule_id: interval_contains_data
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [48 到 52 包含 95% 的原始数据, 48到52包含95%的原始数据, 95%的观测值在48和52之间, 95%的个人均值都在48和52之间, 这是个体数据的正常范围]
+          negation_guards: [不能说, 不表示, 不是, 并非]
+          message_zh: 这是总体均值参数的置信区间，不是原始观测值或未来个体的范围。
+          misconception_tag: interval_contains_data
+        - rule_id: parameter_interval_treated_as_prediction_interval
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [未来个人观测的95%预测带, 未来个体的95%预测区间, 下一个个体有95%概率落在48到52, 这是未来观测的预测区间]
+          negation_guards: [不能说, 不表示, 不是, 并非]
+          message_zh: 总体均值的置信区间不是未来个体观测的预测区间。
+          misconception_tag: parameter_interval_treated_as_prediction_interval
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：区间是由这一份样本构造的；换一份样本时端点会不会改变？
+      method_cue: 方法提示：区分“当前数据下较相容”和“逻辑上绝对不可能”这两种强度完全不同的结论。
+      partial_step: 步骤提示：方法有长期覆盖率，但当前只观察到一个随机区间；区间外值与数据较不相容不等于被证明不可能。
+      complete_explanation:
+        concept: 总体均值是固定未知参数，区间端点随样本改变；单次区间不能成为参数的绝对边界。
+        calculation: "[48, 52] 是当前方法给出的估计范围，本题没有提供把 48 以下概率设为零的依据。"
+        python: Python 可复现端点计算，但计算程序不会自动验证抽样条件，也不会把参数变成随机变量。
+        interpretation: 不能断言总体均值绝不可能小于 48；区间外值较不相容，但不是逻辑上不可能，也不能把区间解释为包含 95% 原始数据。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.2.0
+
+  - id: estimation_bias_variability_concept_01
+    title: 比较估计量的偏差、方差与均方误差
+    unit_id: estimation_confidence_interval
+    concept_id: confidence_interval
+    knowledge_node_ids: [ec_point_estimation, ec_bias_variability]
+    prerequisites: [sampling_standard_error]
+    difficulty: 0.72
+    question_type: concept
+    prompt: >-
+      目标参数固定为 θ=100。按同一总体重复抽样时，估计量 A 的期望为 100、标准差为 6；
+      估计量 B 的期望为 103、标准差为 2。以下哪项正确？
+      A. A 无偏，所以 A 的均方误差一定更小；
+      B. Bias(A)=0、MSE(A)=36；Bias(B)=3、MSE(B)=13，所以 B 虽有偏但均方误差更小；
+      C. B 的标准差较小，所以 B 一定无偏；
+      D. 估计量就是某一次得到的估计值 103，不能讨论重复抽样分布。
+      答案栏选一项，并区分估计量与估计值，写出偏差、方差和 MSE 的计算。
+    dataset:
+      parameter: 100
+      estimator_a: {expectation: 100, standard_deviation: 6}
+      estimator_b: {expectation: 103, standard_deviation: 2}
+    expected_answer: B
+    accepted_answers: [选项B, B虽有偏但MSE为13且小于A的36]
+    numeric_tolerance: null
+    rubric:
+      - 估计量是跨可能样本定义的统计规则，估计值是一次样本上的实现
+      - 正确得到 Bias(A)=0、Var(A)=36、MSE(A)=36
+      - 正确得到 Bias(B)=3、Var(B)=4、MSE(B)=13
+      - 说明无偏不保证均方误差更小，低方差也不证明无偏
+    misconception_tags:
+      - estimator_confused_with_estimate
+      - unbiased_estimator_always_best
+      - mse_omits_squared_bias
+      - low_variance_proves_unbiased
+      - one_estimate_proves_bias
+      - bias_variability_boundary_unexplained
+    dimension_weights:
+      concept: 0.45
+      calculation: 0.35
+      python: 0.00
+      interpretation: 0.20
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [估计量是跨样本的统计规则, 估计量是由样本计算的规则, 估计量是由样本计算并在重复抽样中变化的统计规则, 估计量在重复抽样中会变化, 估计量是随机变量, 估计量是样本的函数, 估计量是把样本映射成数的函数, 估计量是一条从样本到数字的映射, 重抽数据会输出另一个数, 换一批样本输出会变, 估计值是一次样本的结果, 本次输出叫估计值, 估计值是估计量的一次实现, 估计值是某批数据下的输出]
+        - [A 的偏差为 0, A偏差为0, A偏差0, Bias(A)=0, A 的 Bias 为 0, A的Bias为0, A 是无偏的, A无偏]
+        - [A 的方差为 36, A方差为36, Var(A)=36, MSE(A)=36, A偏差0、方差36、MSE36, A的bias为0variance和MSE都是36, Var 和 MSE 均为 36, Var和MSE均为36, variance和MSE都是36, A 的均方误差为 36, A均方误差为36, A 的方差和 MSE 都是 36, A方差和MSE都是6平方等于36, 方差和MSE都是6平方等于36]
+        - [B 的偏差为 3, B偏差为3, B偏差3, Bias(B)=3, B 的 Bias 为 3, B的Bias为3, 103-100=3]
+        - [B 的方差为 4, B方差为4, Var(B)=4, Var 为 4, Var为4, B的bias为3variance为4MSE为13, B偏差3、方差4、MSE=4+9=13, MSE=4+9=13, 方差是2平方等于4, MSE(B)=13, B 的均方误差为 13, B均方误差为13, 4+3^2=13, 4+3²=13, MSE=4+3平方=13, MSE 是 4+3²=13]
+        - [B 虽有偏但均方误差更小, B有偏但MSE更小, 平方损失下B更小, 按均方误差B胜出, 不能仅凭A无偏就选A, 尽管它的中心偏离目标, 13 小于 36, 13小于36, 13<36, 无偏不保证 MSE 更小, 无偏不保证均方误差更小, 无偏不自动意味着平方误差风险最低]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: bias_variability_boundary_unexplained
+        message_zh: 还需区分估计量与估计值，并完整比较两者的偏差、方差和 MSE。
+        misconception_tag: bias_variability_boundary_unexplained
+      relevance_terms: [估计量, 估计值, 偏差, 方差, MSE, 均方误差, "100", "103", "36", "13"]
+      text_rules:
+        - rule_id: estimator_confused_with_estimate
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [估计量就是一次得到的 103, 估计量就是某个固定估计值, 估计量和估计值完全相同, 估计量不能有抽样分布]
+          negation_guards: [不能说, 不是, 并非, 不应]
+          message_zh: 估计量是样本的函数并在重复抽样中变化；估计值才是一次样本得到的具体数。
+          misconception_tag: estimator_confused_with_estimate
+        - rule_id: unbiased_estimator_always_best
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [A 无偏所以一定更好, A无偏所以MSE必然更小, 无偏估计量在任何标准下都最好, 只要无偏就无需看方差]
+          negation_guards: [不能说, 不是, 并非, 不应]
+          message_zh: 无偏只约束长期中心；比较均方误差还必须同时考虑方差。
+          misconception_tag: unbiased_estimator_always_best
+        - rule_id: mse_omits_squared_bias
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [MSE 等于方差加偏差, MSE=方差+偏差, B 的 MSE 是 7, B的MSE为7, 偏差不用平方]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: MSE=方差+偏差的平方，不能只加一次偏差。
+          misconception_tag: mse_omits_squared_bias
+        - rule_id: low_variance_proves_unbiased
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [B 方差小所以一定无偏, B标准差更小就没有偏差, 波动小证明中心等于参数]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 方差描述随机波动，不能单独证明估计量无偏。
+          misconception_tag: low_variance_proves_unbiased
+        - rule_id: one_estimate_proves_bias
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [一次估计高于 100 就证明有偏, 一次估计值等于100就证明无偏, 看一个样本就能确定偏差]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 偏差定义依赖估计量的重复抽样期望，不能由单次估计值判定。
+          misconception_tag: one_estimate_proves_bias
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：估计“规则”和把这条规则用于某一份样本后得到的“数值”是同一个层次吗？
+      method_cue: 方法提示：分别计算 Bias=E(估计量)-参数、Var=SD²，再使用 MSE=Var+Bias²。
+      partial_step: 步骤提示：A 的中心等于参数且方差为 6²；B 的中心偏高 3、方差为 2²，再把偏差平方加入方差。
+      complete_explanation:
+        concept: 估计量是随样本变化的统计规则，估计值是一次实现；无偏描述长期中心，不代表每次准确或 MSE 最小。
+        calculation: A 的 Bias=0、Var=36、MSE=36；B 的 Bias=3、Var=4、MSE=4+9=13。
+        python: 可用受控维护者计算复核平方与加法；本题不要求也不执行学习者代码。
+        interpretation: 选择 B；B 用较小波动换取少量系统偏移，在 MSE 标准下优于 A，但不能称为无偏。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0
+
+  - id: confidence_interval_width_bias_interpretation_01
+    title: 区分区间宽度、置信水平与系统偏差
+    unit_id: estimation_confidence_interval
+    concept_id: confidence_interval
+    knowledge_node_ids: [ec_bias_variability, ec_interval_construction, ec_interval_interpretation]
+    prerequisites: [sampling_standard_error]
+    difficulty: 0.78
+    question_type: interpretation
+    prompt: >-
+      四项研究都用同一种均值区间方法，样本标准差均为 20。A 为随机样本 n=100、95% 区间；
+      B 为随机样本 n=400、95% 区间；C 与 B 数据相同但改报 99% 区间；D 与 B 的 n、标准差和
+      置信水平相同，但来自会系统性高估总体均值的便利样本。哪项正确？
+      A. B 的标准误约为 A 的一半，故 B 通常更窄；C 为提高置信水平通常比 B 更宽；D 的公式宽度
+      可以与 B 相同，但窄区间不能消除选择偏差或保证有效覆盖；
+      B. 样本量四倍使标准误和区间宽度都变为四分之一；
+      C. 99% 比 95% 更有把握，所以 C 应更窄；
+      D. D 与 B 同样窄就证明 D 无偏且必然覆盖真值。
+      答案栏选一项，并分别说明样本量、置信水平和系统偏差的作用。
+    dataset:
+      sample_standard_deviation: 20
+      study_a: {sample_size: 100, confidence_level: 0.95, sampling: random}
+      study_b: {sample_size: 400, confidence_level: 0.95, sampling: random}
+      study_c: {sample_size: 400, confidence_level: 0.99, sampling: random}
+      study_d: {sample_size: 400, confidence_level: 0.95, sampling: convenience_biased_high}
+    expected_answer: A
+    accepted_answers: [选项A, B较窄C较宽且D的窄区间不能修复偏差]
+    numeric_tolerance: null
+    rubric:
+      - 在同标准差和方法下说明 n 从 100 到 400 使标准误约减半
+      - 说明同置信水平下 B 通常比 A 窄
+      - 说明同数据下 99% 临界值更大，因此 C 通常比 B 宽
+      - 说明公式宽度不诊断或消除便利抽样的系统偏差
+      - 不把窄区间或名义置信水平当作实际覆盖的保证
+    misconception_tags:
+      - fourfold_n_quarters_interval_width
+      - higher_confidence_narrower_interval
+      - narrow_interval_removes_bias
+      - equal_standard_deviation_means_equal_interval_width
+      - nominal_confidence_guarantees_coverage
+      - confidence_interval_width_boundary_unexplained
+    dimension_weights:
+      concept: 0.25
+      calculation: 0.20
+      python: 0.00
+      interpretation: 0.55
+    evidence_policy:
+      reasoning_required: true
+      reasoning_support_groups:
+        - [n 从 100 增加到 400, n从100增加到400, n由100变400, B 的样本量是 A 的四倍, B样本量是A的四倍, B的400是A的100的4倍, 样本量扩大四倍]
+        - [B 的标准误是 A 的一半, B标准误为A的一半, 标准误减半, 标准误从2降至1, 根号n翻倍, A的SE=20/10=2，B=20/20=1, B=20/20=1, 20/√100=2而20/√400=1, 同为95%时B半宽更小, B半宽更小, 同为95%的B范围更紧, B 的区间通常更窄, B区间比A窄]
+        - [99% 的临界值更大, 99%的临界值更大, 99%需更大分位点, 相同数据改99%需更大分位点, C报99%必须取更大的临界值, 必须取更大的临界值, C报99%必须取更大的临界值因此更宽, 更高置信水平需要更宽区间, C 通常比 B 更宽, C比B宽]
+        - [D 的便利样本有系统偏差, D便利样本存在选择偏差, D虽公式宽度同B却因便利样本中心偏高, D的便利样本会把中心向上带, 便利样本中心偏高, 便利抽样会系统性高估, 选择偏差不会被窄区间消除, 样本量不能消除选择偏差]
+        - [窄区间不能保证有效覆盖, 公式宽度相同不代表无偏, 扩大规模只减少偶然起伏纠正不了这种偏移, 增加n只能压低随机误差不能把中心搬回真值, 不能把中心搬回真值, 不能确保命中真值, 不承诺真实覆盖, 精度不等于准确, 名义 95% 不保证有偏设计实际覆盖, 名义95%不保证实际覆盖]
+      reasoning_support_negation_guards: [不, 没, 不能, 不是, 并非, 不应, 不对, 不知道, 不确定, 是否, 错误, 不成立]
+      reasoning_insufficient_rule:
+        rule_id: confidence_interval_width_boundary_unexplained
+        message_zh: 还需分别说明样本量、置信水平和系统偏差对区间宽度与有效性的不同作用。
+        misconception_tag: confidence_interval_width_boundary_unexplained
+      relevance_terms: [样本量, 标准误, 区间宽度, 95%, 99%, 临界值, 便利样本, 选择偏差, 覆盖]
+      text_rules:
+        - rule_id: fourfold_n_quarters_interval_width
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [样本量四倍所以标准误变为四分之一, n四倍区间宽度缩为四分之一, 宽度会缩为原来的25%, 宽度缩至25%, 400是100的四倍所以SE除以4]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 在其他条件相同时，标准误按样本量平方根缩放；样本量四倍使其约减半。
+          misconception_tag: fourfold_n_quarters_interval_width
+        - rule_id: higher_confidence_narrower_interval
+          source: reasoning
+          dimension: concept
+          verdict: contradicts
+          phrases: [99% 的区间更窄, 99% 的区间其实更窄, 99%区间比95%窄, 提高置信度其实会同时缩短区间, 提高置信水平会缩短区间, 置信水平越高区间越窄, 更有把握所以范围更小]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 数据和方法相同时，提高置信水平通常需要更大的临界值和更宽区间。
+          misconception_tag: higher_confidence_narrower_interval
+        - rule_id: narrow_interval_removes_bias
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [D 区间窄所以选择偏差消失, 窄区间证明 D 无偏, 样本量大就修复便利抽样, 便利抽样只要n足够大偏移也会被平均掉, 样本再多一点就能把便利抽样的方向错误稀释掉, 偏移也会被平均掉, 区间窄就一定更准确]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 区间宽度描述随机精度，不能诊断或消除系统性选择偏差。
+          misconception_tag: narrow_interval_removes_bias
+        - rule_id: equal_standard_deviation_means_equal_interval_width
+          source: reasoning
+          dimension: calculation
+          verdict: contradicts
+          phrases: [标准差相同所以四个区间同样宽, s相同就不必看样本量, 只要标准差相同标准误就相同]
+          negation_guards: [不能说, 不是, 并非]
+          message_zh: 标准误还取决于样本量，区间宽度还取决于置信水平和临界值。
+          misconception_tag: equal_standard_deviation_means_equal_interval_width
+        - rule_id: nominal_confidence_guarantees_coverage
+          source: reasoning
+          dimension: interpretation
+          verdict: contradicts
+          phrases: [标成 95% 就保证覆盖真值, 名义95%无论抽样偏差都有效, D 一定有95%概率覆盖参数, 公式同宽足以证明D也有95%的真实覆盖率]
+          negation_guards: [不能说, 不保证, 不是, 并非]
+          message_zh: 名义置信水平依赖抽样和模型条件，严重系统偏差会破坏实际覆盖表现。
+          misconception_tag: nominal_confidence_guarantees_coverage
+      python_static_spec: null
+    hints:
+      concept_cue: 概念提示：随机波动造成的区间宽度和数据收集造成的系统偏差，是同一种不确定性吗？
+      method_cue: 方法提示：固定其他条件后分别改变一个因素：样本量影响标准误，置信水平影响临界值，抽样偏差影响区间是否围绕正确目标。
+      partial_step: 步骤提示：同样的 s 下把 n 从 100 增到 400，会让 s/√n 的分母加倍；同一数据改成更高置信水平要使用更大的临界值。
+      complete_explanation:
+        concept: 区间宽度主要呈现随机精度；系统偏差会移动估计中心，不能靠窄区间修复。
+        calculation: A 的估计标准误为 20/10=2，B、C、D 的简单公式标准误为 20/20=1；B 的随机误差界限约为 A 的一半，而 C 因 99% 临界值更大而更宽。
+        python: 受审计算可分别比较 critical_value*standard_error；本题不执行学习者代码。
+        interpretation: 选择 A；D 可能与 B 公式同宽却围绕偏高中心，名义 95% 也不保证在错误抽样设计下实现有效覆盖。
+    python_code_required: false
+    review_status: pending_teacher_review
+    version: 0.1.0

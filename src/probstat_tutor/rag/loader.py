@@ -1,6 +1,8 @@
 """Safe, integrity-checking loader for trusted local RAG course sources."""
 
 import hashlib
+import re
+import unicodedata
 from collections.abc import Iterable, Mapping
 from enum import StrEnum
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -16,8 +18,55 @@ from probstat_tutor.rag.source_schemas import (
     RagSourceDocument,
     assess_chunking_eligibility,
 )
+from probstat_tutor.schemas import Question
 
 RAG_SOURCE_RELATIVE_DIRECTORY = PurePosixPath("data/rag/sources")
+_SOURCE_INJECTION_PATTERNS = (
+    (
+        "ignore_policy",
+        re.compile(
+            r"\b(?:ignore|disregard|bypass|override|forget)\b.{0,80}"
+            r"\b(?:instruction|instructions|rule|rules|policy|policies)\b",
+        ),
+    ),
+    (
+        "reveal_answer",
+        re.compile(
+            r"\b(?:reveal|print|output|show|disclose|return)\b.{0,80}"
+            r"\b(?:answer|answers|solution|solutions)\b",
+        ),
+    ),
+    (
+        "override_score",
+        re.compile(
+            r"\b(?:override|change|modify|set|replace)\b.{0,80}"
+            r"\b(?:score|scores|grade|grades|mark|marks)\b",
+        ),
+    ),
+    (
+        "ignore_policy",
+        re.compile(
+            r"(?:无视|忽略|绕过|覆盖|抛开).{0,40}"
+            r"(?:指令|规则|政策|策略|要求|系统要求)"
+        ),
+    ),
+    (
+        "reveal_answer",
+        re.compile(
+            r"(?:输出|泄露|显示|打印|透露|给出|回答).{0,40}"
+            r"(?:答案|解答|标准答案|隐藏答案|标准解)"
+        ),
+    ),
+    (
+        "override_score",
+        re.compile(r"(?:覆盖|修改|更改|改成|设为|设置).{0,40}(?:分数|成绩|评分|满分)"),
+    ),
+)
+_LOCAL_NEGATION_PATTERN = re.compile(
+    r"(?:不要|不得|不能|禁止|避免|切勿|do\s+not|does\s+not|did\s+not|"
+    r"don't|never|must\s+not|should\s+not)"
+)
+_CLAUSE_BOUNDARY_PATTERN = re.compile(r"[,.;:，。；：！？!?]\s*")
 
 
 class RagSourceLoadErrorCode(StrEnum):
@@ -56,6 +105,13 @@ def load_rag_source(
     """Load one source only after its real path has passed containment checks."""
 
     source = _validate_manifest_entry(manifest_entry)
+    title_attacks = find_source_instruction_attacks(_normalize_text(source.title))
+    if title_attacks:
+        raise RagSourceLoadError(
+            RagSourceLoadErrorCode.FORBIDDEN_CONTENT,
+            "RAG manifest 标题包含试图改变系统行为或泄露答案的指令："
+            f"{', '.join(title_attacks)}",
+        )
     relative_path = _validate_relative_path(source.file_path)
     root = _resolve_project_root(project_root)
     allowed_root = _resolve_allowed_source_root(root)
@@ -258,14 +314,24 @@ def _validate_content_boundaries(raw_document: dict[str, object]) -> None:
             f"{', '.join(forbidden_keys)}",
         )
 
+    all_text = _normalize_text("\n".join(_iter_text_values(raw_document)))
+    forbidden_instructions = find_source_instruction_attacks(all_text)
+    if forbidden_instructions:
+        raise RagSourceLoadError(
+            RagSourceLoadErrorCode.FORBIDDEN_CONTENT,
+            "RAG 课程资料包含试图改变系统行为或泄露答案的指令："
+            f"{', '.join(forbidden_instructions)}",
+        )
+
     normalized_texts = {
         _normalize_text(text)
         for text in _iter_text_values(raw_document)
         if text.strip()
     }
+    questions = load_default_question_bank().questions
     copied_question_ids = sorted(
         question.id
-        for question in load_default_question_bank().questions
+        for question in questions
         if _normalize_text(question.prompt) in normalized_texts
     )
     if copied_question_ids:
@@ -274,6 +340,54 @@ def _validate_content_boundaries(raw_document: dict[str, object]) -> None:
             "RAG 课程资料复制了完整题干，涉及题目："
             f"{', '.join(copied_question_ids)}",
         )
+
+    embedded_internal_ids = sorted(
+        question.id
+        for question in questions
+        if _normalize_text(question.id) in all_text
+    )
+    if embedded_internal_ids:
+        raise RagSourceLoadError(
+            RagSourceLoadErrorCode.FORBIDDEN_CONTENT,
+            "RAG 课程资料包含正式题内部 ID，涉及题目："
+            f"{', '.join(embedded_internal_ids)}",
+        )
+
+    copied_long_answer_ids = sorted(
+        question.id
+        for question in questions
+        if normalized_texts & _protected_long_answer_texts(question)
+    )
+    if copied_long_answer_ids:
+        raise RagSourceLoadError(
+            RagSourceLoadErrorCode.FORBIDDEN_CONTENT,
+            "RAG 课程资料复制了正式题的长答案或完整解释，涉及题目："
+            f"{', '.join(copied_long_answer_ids)}",
+        )
+
+
+def _protected_long_answer_texts(question: Question) -> set[str]:
+    protected: list[str] = []
+    expected_answer = question.expected_answer
+    if isinstance(expected_answer, str):
+        protected.append(expected_answer)
+    hints = question.hints
+    if hints is not None:
+        explanation = hints.complete_explanation
+        protected.extend(
+            (
+                explanation.concept,
+                explanation.calculation,
+                explanation.python,
+                explanation.interpretation,
+                explanation.render_zh(),
+            )
+        )
+    return {
+        _normalize_text(text)
+        for text in protected
+        if len(_normalize_text(text)) >= 80
+    }
 
 
 def _find_forbidden_keys(value: object) -> set[str]:
@@ -290,6 +404,19 @@ def _find_forbidden_keys(value: object) -> set[str]:
     return found
 
 
+def find_source_instruction_attacks(normalized_text: str) -> tuple[str, ...]:
+    found: set[str] = set()
+    for category, pattern in _SOURCE_INJECTION_PATTERNS:
+        for match in pattern.finditer(normalized_text):
+            prefix = normalized_text[max(0, match.start() - 100) : match.start()]
+            local_clause = _CLAUSE_BOUNDARY_PATTERN.split(prefix)[-1]
+            if _LOCAL_NEGATION_PATTERN.search(local_clause):
+                continue
+            found.add(category)
+            break
+    return tuple(sorted(found))
+
+
 def _iter_text_values(value: object) -> Iterable[str]:
     if isinstance(value, str):
         yield value
@@ -302,7 +429,7 @@ def _iter_text_values(value: object) -> Iterable[str]:
 
 
 def _normalize_text(value: str) -> str:
-    return " ".join(value.split()).casefold()
+    return " ".join(unicodedata.normalize("NFKC", value).split()).casefold()
 
 
 def _validate_document_identity(

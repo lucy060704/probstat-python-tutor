@@ -1,0 +1,277 @@
+schema_version: "1.0"
+coverage_level_semantics: target_only_not_implementation_status
+
+units:
+  - unit_id: data_quality
+    order: 1
+    title_zh: 数据加载、缺失值与数据质量
+    summary_zh: 在计算统计量前检查字段规则、缺失、类型、范围、重复和样本构成。
+    learning_objectives:
+      - 区分缺失值、合法的零、异常值、无效格式和重复记录。
+      - 用 Python 获取可观察的数据质量事实，并结合情境决定处理方式。
+      - 记录处理前后的样本量、分组构成和决策依据。
+    prerequisite_unit_ids: []
+    knowledge_node_ids:
+      - dq_field_rules
+      - dq_missing_values
+      - dq_python_audit
+      - dq_missingness_bias
+      - dq_decision_log
+    question_ids:
+      - data_quality_concept_01
+      - data_quality_python_01
+      - data_quality_interpretation_01
+    source_ids: [data_quality_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.1.0"
+
+  - unit_id: descriptive_statistics
+    order: 2
+    title_zh: 描述统计、异常值与稳健性
+    summary_zh: 用中心位置和离散程度描述数据，并识别异常值对结论的影响。
+    learning_objectives:
+      - 比较均值、中位数、方差和标准差的含义与适用情境。
+      - 把 Python 计算结果转化为有边界的数据解释。
+    prerequisite_unit_ids: [data_quality]
+    knowledge_node_ids: [ds_center, ds_spread, ds_outlier_robustness, ds_context_interpretation]
+    question_ids:
+      - mean_median_concept_01
+      - mean_median_python_01
+      - mean_median_interpretation_01
+      - variance_std_concept_01
+      - variance_std_python_01
+      - variance_std_interpretation_01
+    source_ids: [mean_median_core, variance_std_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.1.0"
+
+  - unit_id: probability_simulation
+    order: 3
+    title_zh: 概率规则与 NumPy 随机模拟
+    summary_zh: 从事件、条件概率和独立性出发，用重复随机试验理解概率和模拟误差。
+    learning_objectives:
+      - 正确使用加法、乘法和条件概率规则。
+      - 解释随机种子、重复次数和蒙特卡洛误差。
+    prerequisite_unit_ids: [data_quality]
+    knowledge_node_ids: [ps_probability_rules, ps_independence, ps_random_generation, ps_monte_carlo_error]
+    question_ids:
+      - probability_simulation_concept_01
+      - probability_simulation_python_01
+      - probability_simulation_interpretation_01
+    source_ids: [probability_rules_independence_core, numpy_random_simulation_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.1.0"
+
+  - unit_id: common_distributions
+    order: 4
+    title_zh: 常用分布及其 Python 表达
+    summary_zh: 根据随机变量类型、支持集和参数选择常用离散或连续分布。
+    learning_objectives:
+      - 区分常用离散分布和连续分布的建模对象。
+      - 将分布参数和 Python API 输出对应到实际含义。
+    prerequisite_unit_ids: [probability_simulation]
+    knowledge_node_ids: [cd_discrete, cd_continuous, cd_parameters_support, cd_python_representation]
+    question_ids:
+      - common_distributions_concept_01
+      - common_distributions_python_01
+      - common_distributions_interpretation_01
+    source_ids: [discrete_distributions_core, continuous_distributions_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.1.0"
+
+  - unit_id: joint_correlation
+    order: 5
+    title_zh: 联合分布、相关与分组分析
+    summary_zh: 连接联合与条件关系、协方差、相关系数和 pandas 分组汇总。
+    learning_objectives:
+      - 区分联合、边缘和条件信息。
+      - 解释相关的方向和强度，同时避免因果过度推断。
+    prerequisite_unit_ids: [descriptive_statistics, common_distributions]
+    knowledge_node_ids: [jc_joint_conditionals, jc_covariance, jc_correlation_causation, jc_grouping]
+    question_ids:
+      - joint_correlation_concept_01
+      - joint_correlation_python_01
+      - joint_correlation_interpretation_01
+    source_ids: [joint_conditionals_covariance_core, correlation_groupby_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.1.0"
+
+  - unit_id: sampling_inference
+    order: 6
+    title_zh: 抽样分布、中心极限定理与标准误
+    summary_zh: 区分样本内波动和统计量的抽样波动，解释样本量如何影响精度。
+    learning_objectives:
+      - 区分总体、样本、统计量和抽样分布。
+      - 计算并解释均值标准误及中心极限定理的使用条件。
+    prerequisite_unit_ids: [descriptive_statistics, probability_simulation, common_distributions]
+    knowledge_node_ids: [si_population_sample, si_sampling_distribution, si_clt, si_standard_error]
+    question_ids:
+      - sampling_standard_error_concept_01
+      - sampling_inference_clt_01
+      - sampling_standard_error_python_01
+      - sampling_standard_error_interpretation_01
+      - sampling_inference_bias_interpretation_01
+    source_ids: [sampling_standard_error_core, sampling_distribution_clt_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.1.0"
+
+  - unit_id: estimation_confidence_interval
+    order: 7
+    title_zh: 参数估计与置信区间
+    summary_zh: 从点估计、偏差和抽样波动出发构造并正确解释置信区间。
+    learning_objectives:
+      - 连接估计量、标准误、临界值和区间宽度。
+      - 避免把频率学派置信区间误解为参数的后验概率。
+    prerequisite_unit_ids: [sampling_inference]
+    knowledge_node_ids: [ec_point_estimation, ec_bias_variability, ec_interval_construction, ec_interval_interpretation]
+    question_ids:
+      - confidence_interval_concept_01
+      - confidence_interval_python_01
+      - confidence_interval_interpretation_01
+      - estimation_bias_variability_concept_01
+      - confidence_interval_width_bias_interpretation_01
+    source_ids: [point_estimation_bias_variability_core, confidence_interval_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.2.0"
+
+  - unit_id: hypothesis_testing
+    order: 8
+    title_zh: 假设检验与小型 A/B 数据分析
+    summary_zh: 把检验假设、p 值、两类错误、功效和 A/B 设计连成可解释的决策链。
+    learning_objectives:
+      - 根据研究问题写出原假设和备择假设。
+      - 正确解释 p 值、显著性、效应大小和实际意义。
+    prerequisite_unit_ids: [joint_correlation, estimation_confidence_interval]
+    knowledge_node_ids: [ht_hypotheses, ht_p_value, ht_errors_power, ht_ab_design]
+    question_ids:
+      - hypothesis_p_value_concept_01
+      - ab_welch_ttest_python_01
+      - hypothesis_errors_power_concept_01
+      - ab_effect_significance_interpretation_01
+      - ab_design_multiplicity_interpretation_01
+    source_ids: [hypothesis_testing_decisions_core, ab_experiment_analysis_core]
+    content_status: pending_teacher_review
+    minimum_question_count: 3
+    version: "0.2.0"
+
+knowledge_nodes:
+  - {node_id: dq_field_rules, unit_id: data_quality, title_zh: 字段规则与分析单位, learning_objective: 在读取数据前说明类型、单位、合法范围、唯一性和分析单位。, capability_dimensions: [concept, interpretation], key_terms: [字段规则, 单位, 合法范围], observable_success: 能指出字段规则缺失时不能直接把数值解释为有效观测。, version: "0.1.0"}
+  - {node_id: dq_missing_values, unit_id: data_quality, title_zh: 缺失值不等于零, learning_objective: 区分未观察到的缺失、合法零值和可疑异常值。, capability_dimensions: [concept, calculation], key_terms: [缺失, 零值, 缺失率], observable_success: 能依据字段规则正确计数缺失且不把合法零值计入。, version: "0.1.0"}
+  - {node_id: dq_python_audit, unit_id: data_quality, title_zh: Python 数据质量审计, learning_objective: 用安全的静态 Python 结构表达缺失、类型、范围和重复检查。, capability_dimensions: [python, calculation], key_terms: [isna, duplicated, dtypes], observable_success: 能写出与目标列相连的缺失判断和计数表达式。, version: "0.1.0"}
+  - {node_id: dq_missingness_bias, unit_id: data_quality, title_zh: 缺失机制与代表性, learning_objective: 比较分组缺失并限定完整案例结论的适用范围。, capability_dimensions: [concept, interpretation], key_terms: [分组缺失, 代表性, 选择偏差], observable_success: 能引用分组和分母证据说明代表性风险而不臆测偏差方向。, version: "0.1.0"}
+  - {node_id: dq_decision_log, unit_id: data_quality, title_zh: 数据处理决策记录, learning_objective: 记录处理理由、前后样本量和结论限制。, capability_dimensions: [python, interpretation], key_terms: [处理日志, 样本构成, 可复核], observable_success: 能说明删行或填补前后需要保留哪些审计信息。, version: "0.1.0"}
+
+  - {node_id: ds_center, unit_id: descriptive_statistics, title_zh: 中心位置, learning_objective: 比较均值和中位数。, capability_dimensions: [concept, calculation, python], key_terms: [均值, 中位数], observable_success: 能结合分布选择中心统计量并写出受审的 Python 表达式。, version: "0.1.0"}
+  - {node_id: ds_spread, unit_id: descriptive_statistics, title_zh: 离散程度, learning_objective: 解释方差和标准差。, capability_dimensions: [concept, calculation, python], key_terms: [方差, 标准差], observable_success: 能区分方差单位与标准差单位。, version: "0.1.0"}
+  - {node_id: ds_outlier_robustness, unit_id: descriptive_statistics, title_zh: 异常值与稳健性, learning_objective: 判断极端值如何影响统计量。, capability_dimensions: [concept, interpretation], key_terms: [异常值, 稳健性], observable_success: 能引用数据特征选择更稳健的统计量。, version: "0.1.0"}
+  - {node_id: ds_context_interpretation, unit_id: descriptive_statistics, title_zh: 描述性结论, learning_objective: 限定描述统计的情境含义。, capability_dimensions: [interpretation], key_terms: [典型, 波动, 单位], observable_success: 不把均值误解为多数人的实际取值。, version: "0.1.0"}
+
+  - {node_id: ps_probability_rules, unit_id: probability_simulation, title_zh: 概率基本规则, learning_objective: 使用事件运算和概率规则。, capability_dimensions: [concept, calculation], key_terms: [事件, 加法规则, 乘法规则], observable_success: 能根据事件关系选择正确公式。, version: "0.1.0"}
+  - {node_id: ps_independence, unit_id: probability_simulation, title_zh: 条件概率与独立性, learning_objective: 区分条件概率和独立性。, capability_dimensions: [concept, interpretation], key_terms: [条件概率, 独立性], observable_success: 不把互斥与独立混为一谈。, version: "0.1.0"}
+  - {node_id: ps_random_generation, unit_id: probability_simulation, title_zh: NumPy 随机生成, learning_objective: 连接随机生成 API 与概率模型。, capability_dimensions: [python], key_terms: [rng, seed, random], observable_success: 能说明随机种子和生成参数。, version: "0.1.0"}
+  - {node_id: ps_monte_carlo_error, unit_id: probability_simulation, title_zh: 蒙特卡洛误差, learning_objective: 解释重复次数与模拟误差。, capability_dimensions: [calculation, interpretation], key_terms: [重复次数, 模拟误差], observable_success: 能说明模拟比例不是精确理论概率。, version: "0.1.0"}
+
+  - {node_id: cd_discrete, unit_id: common_distributions, title_zh: 常用离散分布, learning_objective: 选择伯努利、二项等离散模型。, capability_dimensions: [concept, calculation], key_terms: [伯努利, 二项], observable_success: 能根据计数对象选择离散分布。, version: "0.1.0"}
+  - {node_id: cd_continuous, unit_id: common_distributions, title_zh: 常用连续分布, learning_objective: 选择正态等连续模型。, capability_dimensions: [concept, calculation], key_terms: [正态, 连续], observable_success: 能根据测量对象和假设选择连续分布。, version: "0.1.0"}
+  - {node_id: cd_parameters_support, unit_id: common_distributions, title_zh: 参数与支持集, learning_objective: 解释参数和可能取值范围。, capability_dimensions: [concept, interpretation], key_terms: [参数, 支持集], observable_success: 能检查观测值是否落在分布支持集内。, version: "0.1.0"}
+  - {node_id: cd_python_representation, unit_id: common_distributions, title_zh: 分布的 Python 表达, learning_objective: 区分 pmf、pdf、cdf 和随机抽样。, capability_dimensions: [python, interpretation], key_terms: [pmf, pdf, cdf], observable_success: 能根据问题选择正确 API 并解释输出。, version: "0.1.0"}
+
+  - {node_id: jc_joint_conditionals, unit_id: joint_correlation, title_zh: 联合边缘与条件关系, learning_objective: 在两个变量间转换联合、边缘和条件信息。, capability_dimensions: [concept, calculation], key_terms: [联合, 边缘, 条件], observable_success: 能说明分母和条件事件。, version: "0.1.0"}
+  - {node_id: jc_covariance, unit_id: joint_correlation, title_zh: 协方差, learning_objective: 解释共同变化的方向及量纲。, capability_dimensions: [concept, calculation], key_terms: [协方差, 共同变化], observable_success: 能区分协方差符号和强度解释。, version: "0.1.0"}
+  - {node_id: jc_correlation_causation, unit_id: joint_correlation, title_zh: 相关不等于因果, learning_objective: 限定相关系数的解释。, capability_dimensions: [interpretation], key_terms: [相关, 因果, 混杂], observable_success: 不从观察相关直接断言因果。, version: "0.1.0"}
+  - {node_id: jc_grouping, unit_id: joint_correlation, title_zh: pandas 分组分析, learning_objective: 用分组汇总比较变量关系。, capability_dimensions: [python, interpretation], key_terms: [groupby, agg, 分组], observable_success: 能核对分组口径和聚合后的分母。, version: "0.1.0"}
+
+  - {node_id: si_population_sample, unit_id: sampling_inference, title_zh: 总体样本与统计量, learning_objective: 区分总体参数和样本统计量。, capability_dimensions: [concept], key_terms: [总体, 样本, 统计量], observable_success: 能指出数值描述的是样本还是总体。, version: "0.1.0"}
+  - {node_id: si_sampling_distribution, unit_id: sampling_inference, title_zh: 抽样分布, learning_objective: 解释重复抽样下统计量的分布。, capability_dimensions: [concept, interpretation], key_terms: [重复抽样, 抽样分布], observable_success: 不把一次样本分布等同于抽样分布。, version: "0.1.0"}
+  - {node_id: si_clt, unit_id: sampling_inference, title_zh: 中心极限定理, learning_objective: 说明近似正态的对象与条件。, capability_dimensions: [concept, interpretation], key_terms: [中心极限定理, 近似], observable_success: 能指出近似对象和样本量条件。, version: "0.1.0"}
+  - {node_id: si_standard_error, unit_id: sampling_inference, title_zh: 标准误, learning_objective: 计算并解释统计量的抽样波动。, capability_dimensions: [calculation, python, interpretation], key_terms: [标准误, 样本量], observable_success: 能区分标准差与标准误。, version: "0.1.0"}
+
+  - {node_id: ec_point_estimation, unit_id: estimation_confidence_interval, title_zh: 点估计, learning_objective: 使用样本统计量估计总体参数。, capability_dimensions: [concept, calculation], key_terms: [估计量, 估计值], observable_success: 能区分估计规则和一次估计结果。, version: "0.1.0"}
+  - {node_id: ec_bias_variability, unit_id: estimation_confidence_interval, title_zh: 偏差与波动, learning_objective: 比较估计量的偏差和方差。, capability_dimensions: [concept, interpretation], key_terms: [偏差, 方差], observable_success: 能说明无偏不等于每次准确。, version: "0.1.0"}
+  - {node_id: ec_interval_construction, unit_id: estimation_confidence_interval, title_zh: 区间构造, learning_objective: 连接点估计、临界值和标准误。, capability_dimensions: [calculation, python], key_terms: [临界值, 标准误, 置信区间], observable_success: 能按正确结构计算区间。, version: "0.1.0"}
+  - {node_id: ec_interval_interpretation, unit_id: estimation_confidence_interval, title_zh: 区间解释, learning_objective: 正确解释置信水平和区间宽度。, capability_dimensions: [concept, interpretation], key_terms: [置信水平, 覆盖率], observable_success: 不把固定参数说成落入区间的随机概率。, version: "0.1.0"}
+
+  - {node_id: ht_hypotheses, unit_id: hypothesis_testing, title_zh: 原假设与备择假设, learning_objective: 根据问题定义可检验假设。, capability_dimensions: [concept], key_terms: [原假设, 备择假设], observable_success: 能写出方向和参数对象明确的假设。, version: "0.1.0"}
+  - {node_id: ht_p_value, unit_id: hypothesis_testing, title_zh: 检验统计量与 p 值, learning_objective: 在原假设条件下解释 p 值。, capability_dimensions: [calculation, interpretation], key_terms: [检验统计量, p值], observable_success: 不把 p 值解释为原假设为真的概率。, version: "0.1.0"}
+  - {node_id: ht_errors_power, unit_id: hypothesis_testing, title_zh: 两类错误与功效, learning_objective: 连接阈值、样本量和决策风险。, capability_dimensions: [concept, interpretation], key_terms: [一类错误, 二类错误, 功效], observable_success: 能区分两类错误并说明权衡。, version: "0.1.0"}
+  - {node_id: ht_ab_design, unit_id: hypothesis_testing, title_zh: A/B 设计与解释, learning_objective: 设计并解释小型随机对照分析。, capability_dimensions: [python, interpretation], key_terms: [随机分组, 效应大小, 实际意义], observable_success: 能同时报告统计显著性和实际意义。, version: "0.1.0"}
+
+edges:
+  - {source_node_id: dq_field_rules, target_node_id: dq_missing_values, relation: prerequisite, rationale_zh: 先知道字段规则，才能区分合法值和缺失。}
+  - {source_node_id: dq_missing_values, target_node_id: dq_python_audit, relation: prerequisite, rationale_zh: 缺失定义决定 Python 检查目标。}
+  - {source_node_id: dq_python_audit, target_node_id: dq_missingness_bias, relation: supports, rationale_zh: 分组缺失事实支持代表性判断。}
+  - {source_node_id: dq_missingness_bias, target_node_id: dq_decision_log, relation: supports, rationale_zh: 代表性风险必须记录在处理决策中。}
+  - {source_node_id: dq_decision_log, target_node_id: ds_center, relation: prerequisite, rationale_zh: 清晰处理口径是描述统计的前提。}
+  - {source_node_id: ds_center, target_node_id: ds_spread, relation: supports, rationale_zh: 中心与离散共同描述分布。}
+  - {source_node_id: ds_center, target_node_id: ds_outlier_robustness, relation: supports, rationale_zh: 比较中心统计量才能判断极端值对代表性的影响。}
+  - {source_node_id: ds_spread, target_node_id: ds_context_interpretation, relation: supports, rationale_zh: 离散程度为情境中的稳定性和波动解释提供证据。}
+  - {source_node_id: ds_outlier_robustness, target_node_id: ds_context_interpretation, relation: supports, rationale_zh: 异常值风险决定描述性结论需要限定的适用边界。}
+  - {source_node_id: ps_probability_rules, target_node_id: ps_independence, relation: prerequisite, rationale_zh: 条件概率规则是判断独立性的基础。}
+  - {source_node_id: ps_independence, target_node_id: ps_random_generation, relation: supports, rationale_zh: 独立重复试验的概率模型决定随机生成参数和模拟解释。}
+  - {source_node_id: ps_random_generation, target_node_id: ps_monte_carlo_error, relation: supports, rationale_zh: 重复随机生成用于观察模拟误差。}
+  - {source_node_id: ps_independence, target_node_id: cd_discrete, relation: prerequisite, rationale_zh: 概率规则支持离散分布建模。}
+  - {source_node_id: cd_discrete, target_node_id: cd_parameters_support, relation: supports, rationale_zh: 离散模型的参数决定成功次数等支持集和数字特征。}
+  - {source_node_id: cd_continuous, target_node_id: cd_parameters_support, relation: supports, rationale_zh: 连续模型的参数与形式共同决定支持集和密度尺度。}
+  - {source_node_id: cd_parameters_support, target_node_id: cd_python_representation, relation: supports, rationale_zh: 明确参数和支持集后才能选择 PMF、PDF 或 CDF API。}
+  - {source_node_id: cd_parameters_support, target_node_id: jc_joint_conditionals, relation: prerequisite, rationale_zh: 联合模型仍需明确变量支持集。}
+  - {source_node_id: jc_joint_conditionals, target_node_id: jc_covariance, relation: prerequisite, rationale_zh: 联合分布和边缘期望决定 E(XY)、E(X) 与 E(Y)，是协方差计算基础。}
+  - {source_node_id: jc_covariance, target_node_id: jc_correlation_causation, relation: prerequisite, rationale_zh: 相关系数通过标准差对协方差标准化，之后才能讨论解释边界。}
+  - {source_node_id: jc_joint_conditionals, target_node_id: jc_grouping, relation: supports, rationale_zh: 分组汇总是在样本中观察条件分布与条件统计量的一种方式。}
+  - {source_node_id: jc_grouping, target_node_id: jc_correlation_causation, relation: supports, rationale_zh: 分组构成和有效分母有助于识别相关解释中的混杂与聚合风险。}
+  - {source_node_id: ds_spread, target_node_id: jc_covariance, relation: prerequisite, rationale_zh: 理解方差、标准差和量纲后才能区分协方差与相关系数。}
+  - {source_node_id: ds_spread, target_node_id: si_standard_error, relation: prerequisite, rationale_zh: 区分样本波动后才能理解标准误。}
+  - {source_node_id: ds_outlier_robustness, target_node_id: si_clt, relation: supports, rationale_zh: 偏度、重尾和极端值会影响有限样本下的正态近似质量。}
+  - {source_node_id: ps_independence, target_node_id: si_sampling_distribution, relation: prerequisite, rationale_zh: 简单抽样分布与标准误公式需要明确观测之间的独立或依赖结构。}
+  - {source_node_id: ps_monte_carlo_error, target_node_id: si_sampling_distribution, relation: supports, rationale_zh: 重复模拟帮助形成抽样分布直觉。}
+  - {source_node_id: si_population_sample, target_node_id: si_sampling_distribution, relation: prerequisite, rationale_zh: 先区分总体、样本和统计量，才能定义统计量在重复抽样下的分布。}
+  - {source_node_id: si_sampling_distribution, target_node_id: si_clt, relation: prerequisite, rationale_zh: 中心极限定理描述统计量的抽样分布。}
+  - {source_node_id: si_sampling_distribution, target_node_id: si_standard_error, relation: prerequisite, rationale_zh: 标准误是目标统计量抽样分布的标准差或其估计。}
+  - {source_node_id: si_clt, target_node_id: si_standard_error, relation: supports, rationale_zh: 中心极限定理使用标准误标准化样本均值，并为近似推断提供分布基础。}
+  - {source_node_id: si_population_sample, target_node_id: ec_point_estimation, relation: prerequisite, rationale_zh: 先区分总体参数和样本统计量，才能定义估计量及其一次估计值。}
+  - {source_node_id: ec_point_estimation, target_node_id: ec_bias_variability, relation: prerequisite, rationale_zh: 明确估计量和目标参数后，才能在重复抽样下评价偏差与方差。}
+  - {source_node_id: ec_point_estimation, target_node_id: ec_interval_construction, relation: prerequisite, rationale_zh: 置信区间围绕一次样本得到的点估计展开。}
+  - {source_node_id: ec_bias_variability, target_node_id: ec_interval_construction, relation: supports, rationale_zh: 估计量的随机波动和偏差边界决定区间尺度与适用限制。}
+  - {source_node_id: si_standard_error, target_node_id: ec_interval_construction, relation: prerequisite, rationale_zh: 标准误决定区间的随机波动尺度。}
+  - {source_node_id: ec_interval_construction, target_node_id: ec_interval_interpretation, relation: supports, rationale_zh: 构造过程决定区间的正确解释。}
+  - {source_node_id: ec_bias_variability, target_node_id: ec_interval_interpretation, relation: supports, rationale_zh: 区间较窄只表示随机精度，系统偏差仍会破坏围绕真参数的实际覆盖。}
+  - {source_node_id: jc_correlation_causation, target_node_id: ht_ab_design, relation: supports, rationale_zh: 因果限制促使 A/B 分析重视随机设计。}
+  - {source_node_id: ec_interval_interpretation, target_node_id: ht_p_value, relation: supports, rationale_zh: 区间和检验共享抽样推断基础。}
+  - {source_node_id: ht_hypotheses, target_node_id: ht_p_value, relation: prerequisite, rationale_zh: p 值必须在明确的原假设下解释。}
+  - {source_node_id: ht_p_value, target_node_id: ht_errors_power, relation: prerequisite, rationale_zh: 先理解检验决策，才能区分两类错误与功效。}
+  - {source_node_id: ht_hypotheses, target_node_id: ht_ab_design, relation: prerequisite, rationale_zh: A/B 设计必须在看结果前定义参数对象和检验方向。}
+  - {source_node_id: ht_p_value, target_node_id: ht_ab_design, relation: supports, rationale_zh: A/B 决策需要把 p 值与效应量、区间和实际阈值一起解释。}
+  - {source_node_id: ht_errors_power, target_node_id: ht_ab_design, relation: supports, rationale_zh: 错误率、功效和最小关心效应共同约束实验设计。}
+  - {source_node_id: jc_grouping, target_node_id: ht_ab_design, relation: supports, rationale_zh: 受审的分组与分母汇总为 A/B 效应比较提供数据基础。}
+  - {source_node_id: dq_decision_log, target_node_id: ht_ab_design, relation: supports, rationale_zh: 分配、排除、缺失、流失和停止规则必须留下可复核记录。}
+
+chapter_mappings:
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 1, chapter_title: 随机事件与概率, coverage_level: deep, unit_ids: [probability_simulation], knowledge_node_ids: [ps_probability_rules, ps_independence], mapping_rationale_zh: 概率规则和条件关系对应本单元主干。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 2, chapter_title: 随机变量及其分布, coverage_level: deep, unit_ids: [common_distributions], knowledge_node_ids: [cd_discrete, cd_continuous], mapping_rationale_zh: 随机变量类型和常用分布对应本单元主干。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 3, chapter_title: 多维随机变量及其分布, coverage_level: deep, unit_ids: [joint_correlation], knowledge_node_ids: [jc_joint_conditionals, jc_covariance], mapping_rationale_zh: 联合和条件关系连接协方差与相关。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 4, chapter_title: 随机变量的数字特征, coverage_level: deep, unit_ids: [descriptive_statistics, joint_correlation], knowledge_node_ids: [ds_center, ds_spread, jc_covariance], mapping_rationale_zh: 数字特征连接中心、离散与共同变化。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 5, chapter_title: 大数定律与中心极限定理, coverage_level: deep, unit_ids: [sampling_inference], knowledge_node_ids: [si_clt, si_sampling_distribution], mapping_rationale_zh: 作为抽样分布近似的理论主线。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 6, chapter_title: 样本及抽样分布, coverage_level: deep, unit_ids: [sampling_inference], knowledge_node_ids: [si_population_sample, si_standard_error], mapping_rationale_zh: 对应总体样本、统计量和标准误。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 7, chapter_title: 参数估计, coverage_level: deep, unit_ids: [estimation_confidence_interval], knowledge_node_ids: [ec_point_estimation, ec_bias_variability, ec_interval_construction, ec_interval_interpretation], mapping_rationale_zh: 对应点估计、偏差与波动、区间构造和频率学派解释。, verification_status: pending_teacher_review}
+  - {textbook_id: probability_statistics, edition: 学校发放版（待教师核对目录）, chapter_number: 8, chapter_title: 假设检验, coverage_level: deep, unit_ids: [hypothesis_testing], knowledge_node_ids: [ht_hypotheses, ht_p_value, ht_errors_power], mapping_rationale_zh: 对应检验决策主线。, verification_status: pending_teacher_review}
+
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 1, chapter_title: 准备工作, coverage_level: directory_only, unit_ids: [data_quality], knowledge_node_ids: [], mapping_rationale_zh: 只登记工具和工作流前置，不声称深度诊断。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 2, chapter_title: Python 语法基础、IPython 和 Jupyter, coverage_level: supporting, unit_ids: [data_quality, probability_simulation], knowledge_node_ids: [dq_python_audit, ps_random_generation], mapping_rationale_zh: 为数据检查和模拟提供编程前置。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 3, chapter_title: Python 的数据结构、函数和文件, coverage_level: supporting, unit_ids: [data_quality, probability_simulation], knowledge_node_ids: [dq_field_rules, ps_random_generation], mapping_rationale_zh: 支持文件数据和函数表达，但不是独立深度单元。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 4, chapter_title: NumPy 基础, coverage_level: supporting, unit_ids: [probability_simulation, common_distributions, sampling_inference, estimation_confidence_interval, hypothesis_testing], knowledge_node_ids: [ps_random_generation, cd_python_representation, si_standard_error, ec_interval_construction, ht_ab_design], mapping_rationale_zh: 数组和随机数 API 支持多个统计单元。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 5, chapter_title: pandas 入门, coverage_level: supporting, unit_ids: [data_quality, descriptive_statistics, joint_correlation], knowledge_node_ids: [dq_python_audit, ds_center, jc_grouping], mapping_rationale_zh: Series 和 DataFrame 操作连接数据质量、描述与分组。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 6, chapter_title: 数据加载、存储与文件格式, coverage_level: deep, unit_ids: [data_quality], knowledge_node_ids: [dq_field_rules, dq_python_audit], mapping_rationale_zh: 对应数据加载和解析质量检查。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 7, chapter_title: 数据清洗和准备, coverage_level: deep, unit_ids: [data_quality], knowledge_node_ids: [dq_missing_values, dq_missingness_bias, dq_decision_log], mapping_rationale_zh: 对应缺失、有效性和处理决策记录。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 8, chapter_title: 数据规整：聚合、合并和重塑, coverage_level: supporting, unit_ids: [joint_correlation], knowledge_node_ids: [jc_grouping], mapping_rationale_zh: 支持联合变量和分组数据的规整。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 9, chapter_title: 绘图和可视化, coverage_level: supporting, unit_ids: [descriptive_statistics, common_distributions, joint_correlation, hypothesis_testing], knowledge_node_ids: [ds_outlier_robustness, cd_parameters_support, jc_correlation_causation, ht_ab_design], mapping_rationale_zh: 图形用于检查分布、关系和实验结果。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 10, chapter_title: 数据聚合与分组运算, coverage_level: deep, unit_ids: [joint_correlation, hypothesis_testing], knowledge_node_ids: [jc_grouping, ht_ab_design], mapping_rationale_zh: 分组聚合支持关系比较和 A/B 汇总。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 11, chapter_title: 时间序列, coverage_level: directory_only, unit_ids: [descriptive_statistics], knowledge_node_ids: [], mapping_rationale_zh: 仅建立目录链接，当前 8 单元不承诺时间序列深度诊断。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 12, chapter_title: pandas 高级应用, coverage_level: supporting, unit_ids: [data_quality, joint_correlation], knowledge_node_ids: [dq_python_audit, jc_grouping], mapping_rationale_zh: 高级索引和类型操作支持质量检查与分组。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 13, chapter_title: Python 建模库介绍, coverage_level: supporting, unit_ids: [hypothesis_testing], knowledge_node_ids: [ht_ab_design], mapping_rationale_zh: 仅支持检验工作流，不声称覆盖完整建模课程。, verification_status: pending_teacher_review}
+  - {textbook_id: python_data_analysis, edition: 原书第 2 版（待教师核对目录）, chapter_number: 14, chapter_title: 数据分析案例, coverage_level: supporting, unit_ids: [data_quality, descriptive_statistics, joint_correlation, hypothesis_testing], knowledge_node_ids: [dq_decision_log, ds_context_interpretation, jc_grouping, ht_ab_design], mapping_rationale_zh: 案例章作为跨单元综合应用目录。, verification_status: pending_teacher_review}

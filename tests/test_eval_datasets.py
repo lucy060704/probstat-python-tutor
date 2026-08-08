@@ -22,6 +22,12 @@ V1_CASES_PATH = ROOT / "evals" / "cases.jsonl"
 DEV_CASES_PATH = ROOT / "evals" / "development" / "cases_v0.2_dev.jsonl"
 BLIND_CASES_PATH = ROOT / "evals" / "blind" / "cases_v0.2_blind.jsonl"
 FROZEN_V1_SHA256 = "0c761826f86e4c8fbf1d716b796574ec2f96230c422e1f0c1568c6ecc918e4a6"
+FROZEN_V2_CONCEPTS = {
+    ConceptId.MEAN_MEDIAN,
+    ConceptId.VARIANCE_STD,
+    ConceptId.SAMPLING_STANDARD_ERROR,
+    ConceptId.CONFIDENCE_INTERVAL,
+}
 
 
 @pytest.fixture
@@ -70,7 +76,7 @@ def test_knowledge_points_and_capability_dimensions_are_legal(v2_cases) -> None:
     development, blind = v2_cases
     all_cases = [*development, *blind]
 
-    assert {case.concept_id for case in all_cases} == set(ConceptId)
+    assert {case.concept_id for case in all_cases} == FROZEN_V2_CONCEPTS
     assert {case.capability_dimension for case in all_cases} == set(
         CapabilityDimension
     )

@@ -1,0 +1,26 @@
+schema_version: "1.0"
+dataset_id: ab_session_duration_v1
+title: 独立随机 A/B 会话时长教学合成数据
+language: zh-CN
+source_type: project_authored_synthetic
+contains_personal_data: false
+represents_real_experiment: false
+analysis_unit: one_fictional_randomized_unit_per_row
+columns:
+  synthetic_id: 仅用于数据完整性检查的虚构唯一标识
+  variant: 随机分配的 A 或 B 版本
+  session_duration_minutes: 用于教学的连续时长指标
+design_notes:
+  - 全部数值由项目团队为教学目的人工构造，不对应任何真实个人或产品。
+  - 两组各有 8 个虚构单位，无缺失、无重复标识，题目指定将两组作为独立样本。
+  - 小样本仅用于可重现的 Welch t 检验教学，不是现实效果或一般化结论的证据。
+expected_maintainer_checks:
+  row_count: 16
+  unique_id_count: 16
+  group_counts: {A: 8, B: 8}
+  mean_a: 71.0
+  mean_b: 74.875
+  mean_difference_b_minus_a: 3.875
+  welch_two_sided_p_value: 0.002948258250101697
+review_status: pending_teacher_review
+updated_at: 2026-08-08T18:00:00+08:00

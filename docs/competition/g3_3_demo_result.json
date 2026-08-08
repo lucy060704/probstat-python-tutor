@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "run_count": 5,
+  "serious_fault_count": 0,
+  "journeys": [
+    {
+      "run_number": 1,
+      "hint_levels_verified": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "wrong_answer_detected": true,
+      "correction_accepted": true,
+      "recommendation_present": true,
+      "next_question_available": true,
+      "history_count": 2
+    },
+    {
+      "run_number": 2,
+      "hint_levels_verified": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "wrong_answer_detected": true,
+      "correction_accepted": true,
+      "recommendation_present": true,
+      "next_question_available": true,
+      "history_count": 2
+    },
+    {
+      "run_number": 3,
+      "hint_levels_verified": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "wrong_answer_detected": true,
+      "correction_accepted": true,
+      "recommendation_present": true,
+      "next_question_available": true,
+      "history_count": 2
+    },
+    {
+      "run_number": 4,
+      "hint_levels_verified": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "wrong_answer_detected": true,
+      "correction_accepted": true,
+      "recommendation_present": true,
+      "next_question_available": true,
+      "history_count": 2
+    },
+    {
+      "run_number": 5,
+      "hint_levels_verified": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "wrong_answer_detected": true,
+      "correction_accepted": true,
+      "recommendation_present": true,
+      "next_question_available": true,
+      "history_count": 2
+    }
+  ],
+  "teacher_status": "ready",
+  "teacher_profile_count": 5,
+  "teacher_attempt_count": 10,
+  "teacher_raw_answer_fields_present": false,
+  "offline_core_available": true,
+  "model_failure_fallback_verified": true,
+  "fault_event_count": 1,
+  "passed": true
+}

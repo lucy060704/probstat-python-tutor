@@ -1,0 +1,1320 @@
+{
+  "components": {
+    "schemas": {
+      "ApiErrorCode": {
+        "description": "Stable categories clients may handle without parsing prose.",
+        "enum": [
+          "invalid_json",
+          "invalid_request",
+          "payload_too_large",
+          "unsupported_media_type",
+          "not_found",
+          "method_not_allowed",
+          "state_conflict",
+          "service_unavailable",
+          "internal_error"
+        ],
+        "title": "ApiErrorCode",
+        "type": "string"
+      },
+      "ApiErrorDetail": {
+        "additionalProperties": false,
+        "description": "Safe structured error; invalid values and exception messages are excluded.",
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/ApiErrorCode"
+          },
+          "invalid_fields": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Invalid Fields",
+            "type": "array"
+          },
+          "message_zh": {
+            "title": "Message Zh",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message_zh",
+          "retryable"
+        ],
+        "title": "ApiErrorDetail",
+        "type": "object"
+      },
+      "ApiErrorResponse": {
+        "additionalProperties": false,
+        "description": "Versioned error envelope returned for every non-2xx API response.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ApiErrorDetail"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "error"
+        ],
+        "title": "ApiErrorResponse",
+        "type": "object"
+      },
+      "CapabilityDimension": {
+        "description": "The four separately tracked learner capabilities.",
+        "enum": [
+          "concept",
+          "calculation",
+          "python",
+          "interpretation"
+        ],
+        "title": "CapabilityDimension",
+        "type": "string"
+      },
+      "ConceptId": {
+        "description": "Published, deterministically graded knowledge points.",
+        "enum": [
+          "data_quality",
+          "mean_median",
+          "variance_std",
+          "probability_simulation",
+          "common_distributions",
+          "joint_correlation",
+          "sampling_standard_error",
+          "confidence_interval",
+          "hypothesis_testing"
+        ],
+        "title": "ConceptId",
+        "type": "string"
+      },
+      "ContentReviewStatus": {
+        "description": "Human review state; only a teacher may move content to approved.",
+        "enum": [
+          "draft",
+          "pending_teacher_review",
+          "approved"
+        ],
+        "title": "ContentReviewStatus",
+        "type": "string"
+      },
+      "DeliveryMode": {
+        "description": "How the learner-facing explanation was delivered for this submission.",
+        "enum": [
+          "deterministic_offline",
+          "model_enhanced",
+          "model_fallback",
+          "safety_isolated"
+        ],
+        "title": "DeliveryMode",
+        "type": "string"
+      },
+      "DiagnoseRequest": {
+        "additionalProperties": false,
+        "description": "One deterministic learning submission.",
+        "properties": {
+          "anonymous_profile_id": {
+            "pattern": "^(?:local|api)_anon_[0-9a-f]{16,64}$",
+            "title": "Anonymous Profile Id",
+            "type": "string"
+          },
+          "hint_level": {
+            "maximum": 4,
+            "minimum": 0,
+            "title": "Hint Level",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "question_id": {
+            "pattern": "^[a-z0-9_]{3,100}$",
+            "title": "Question Id",
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "submission": {
+            "$ref": "#/components/schemas/LearnerSubmission"
+          }
+        },
+        "required": [
+          "schema_version",
+          "request_id",
+          "idempotency_key",
+          "anonymous_profile_id",
+          "question_id",
+          "submission",
+          "hint_level"
+        ],
+        "title": "DiagnoseRequest",
+        "type": "object"
+      },
+      "DiagnoseResponse": {
+        "additionalProperties": false,
+        "description": "Versioned deterministic report envelope.",
+        "properties": {
+          "idempotency_key": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "report": {
+            "$ref": "#/components/schemas/DiagnosticReport"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "idempotency_key",
+          "report"
+        ],
+        "title": "DiagnoseResponse",
+        "type": "object"
+      },
+      "DiagnosticReport": {
+        "additionalProperties": false,
+        "description": "Structured tutor output whose factual fields come from deterministic tools.",
+        "properties": {
+          "delivery_message_zh": {
+            "default": "本次使用确定性本地诊断。",
+            "title": "Delivery Message Zh",
+            "type": "string"
+          },
+          "delivery_mode": {
+            "$ref": "#/components/schemas/DeliveryMode",
+            "default": "deterministic_offline"
+          },
+          "dimension_scores": {
+            "$ref": "#/components/schemas/MasteryScores"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "feedback": {
+            "title": "Feedback",
+            "type": "string"
+          },
+          "grader_findings": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceFinding"
+            },
+            "title": "Grader Findings",
+            "type": "array"
+          },
+          "hint_level": {
+            "maximum": 4,
+            "minimum": 0,
+            "title": "Hint Level",
+            "type": "integer"
+          },
+          "knowledge_citations": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeCitation"
+            },
+            "title": "Knowledge Citations",
+            "type": "array"
+          },
+          "knowledge_context_message": {
+            "default": "尚未检索本地知识库。",
+            "title": "Knowledge Context Message",
+            "type": "string"
+          },
+          "knowledge_context_status": {
+            "$ref": "#/components/schemas/KnowledgeContextStatus",
+            "default": "no_match"
+          },
+          "learner_evidence": {
+            "items": {
+              "$ref": "#/components/schemas/LearnerEvidence"
+            },
+            "title": "Learner Evidence",
+            "type": "array"
+          },
+          "misconception_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Misconception Tags",
+            "type": "array"
+          },
+          "next_question_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Question Id"
+          },
+          "overall_correctness": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Overall Correctness",
+            "type": "number"
+          },
+          "question_id": {
+            "title": "Question Id",
+            "type": "string"
+          },
+          "recommendation_dimension": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CapabilityDimension"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "recommendation_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecommendationKind"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "recommendation_rule_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Recommendation Rule Id"
+          },
+          "recommended_action": {
+            "title": "Recommended Action",
+            "type": "string"
+          },
+          "uncertainty": {
+            "title": "Uncertainty",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question_id",
+          "overall_correctness",
+          "dimension_scores",
+          "evidence",
+          "misconception_tags",
+          "feedback",
+          "hint_level",
+          "recommended_action",
+          "next_question_id",
+          "uncertainty"
+        ],
+        "title": "DiagnosticReport",
+        "type": "object"
+      },
+      "EvidenceFinding": {
+        "additionalProperties": false,
+        "description": "One rule-backed finding tied to an exact learner-authored source.",
+        "properties": {
+          "dimension": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CapabilityDimension"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "message_zh": {
+            "minLength": 1,
+            "title": "Message Zh",
+            "type": "string"
+          },
+          "misconception_tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Misconception Tag"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Quote"
+          },
+          "rule_id": {
+            "minLength": 1,
+            "pattern": "^[a-z0-9_]+$",
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SubmissionField"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/EvidenceVerdict"
+          }
+        },
+        "required": [
+          "rule_id",
+          "source",
+          "verdict",
+          "message_zh"
+        ],
+        "title": "EvidenceFinding",
+        "type": "object"
+      },
+      "EvidenceVerdict": {
+        "description": "Deterministic interpretation of one observable submission fragment.",
+        "enum": [
+          "supports",
+          "contradicts",
+          "insufficient",
+          "irrelevant",
+          "unsafe"
+        ],
+        "title": "EvidenceVerdict",
+        "type": "string"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "description": "Minimal health data safe to expose through a future HTTPS edge.",
+        "properties": {
+          "local_knowledge_base_available": {
+            "title": "Local Knowledge Base Available",
+            "type": "boolean"
+          },
+          "offline_core_available": {
+            "const": true,
+            "default": true,
+            "title": "Offline Core Available",
+            "type": "boolean"
+          },
+          "optional_model_status": {
+            "$ref": "#/components/schemas/OptionalModelStatus"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "service_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Service Version",
+            "type": "string"
+          },
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "service_version",
+          "optional_model_status",
+          "local_knowledge_base_available"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "HintRequest": {
+        "additionalProperties": false,
+        "description": "Request exactly one progressive hint level.",
+        "properties": {
+          "hint_level": {
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Hint Level",
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "question_id": {
+            "pattern": "^[a-z0-9_]{3,100}$",
+            "title": "Question Id",
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "request_id",
+          "idempotency_key",
+          "question_id",
+          "hint_level"
+        ],
+        "title": "HintRequest",
+        "type": "object"
+      },
+      "HintResponse": {
+        "additionalProperties": false,
+        "description": "One progressive hint without hidden answer fields.",
+        "properties": {
+          "complete_explanation_revealed": {
+            "title": "Complete Explanation Revealed",
+            "type": "boolean"
+          },
+          "hint_level": {
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Hint Level",
+            "type": "integer"
+          },
+          "hint_zh": {
+            "title": "Hint Zh",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "question_id": {
+            "pattern": "^[a-z0-9_]{3,100}$",
+            "title": "Question Id",
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "idempotency_key",
+          "question_id",
+          "hint_level",
+          "hint_zh",
+          "complete_explanation_revealed"
+        ],
+        "title": "HintResponse",
+        "type": "object"
+      },
+      "KnowledgeCitation": {
+        "additionalProperties": false,
+        "description": "One auditable citation produced by the deterministic local retriever.",
+        "properties": {
+          "chunk_id": {
+            "pattern": "^[a-z][a-z0-9_.:@-]*$",
+            "title": "Chunk Id",
+            "type": "string"
+          },
+          "citation_id": {
+            "pattern": "^R[1-5]$",
+            "title": "Citation Id",
+            "type": "string"
+          },
+          "content_checksum": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Content Checksum",
+            "type": "string"
+          },
+          "min_hint_level": {
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Min Hint Level",
+            "type": "integer"
+          },
+          "quote": {
+            "anyOf": [
+              {
+                "maxLength": 600,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Quote"
+          },
+          "review_status": {
+            "$ref": "#/components/schemas/ContentReviewStatus"
+          },
+          "section": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Section",
+            "type": "string"
+          },
+          "source_checksum": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Source Checksum",
+            "type": "string"
+          },
+          "source_id": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source Title",
+            "type": "string"
+          },
+          "source_version": {
+            "pattern": "^\\d+\\.\\d+\\.\\d+$",
+            "title": "Source Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "source_version",
+          "source_title",
+          "citation_id",
+          "chunk_id",
+          "section",
+          "content_checksum",
+          "source_checksum",
+          "min_hint_level",
+          "review_status"
+        ],
+        "title": "KnowledgeCitation",
+        "type": "object"
+      },
+      "KnowledgeContextStatus": {
+        "description": "Whether the deterministic local knowledge base found usable context.",
+        "enum": [
+          "matched",
+          "no_match",
+          "index_unavailable",
+          "policy_blocked"
+        ],
+        "title": "KnowledgeContextStatus",
+        "type": "string"
+      },
+      "LearnerEvidence": {
+        "additionalProperties": false,
+        "description": "One exact, source-labelled excerpt from a learner submission.",
+        "properties": {
+          "quote": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Quote",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SubmissionField"
+          }
+        },
+        "required": [
+          "source",
+          "quote"
+        ],
+        "title": "LearnerEvidence",
+        "type": "object"
+      },
+      "LearnerSubmission": {
+        "additionalProperties": false,
+        "description": "Validated learner-authored text; Python code is never executed.",
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "python_code": {
+            "default": "",
+            "title": "Python Code",
+            "type": "string"
+          },
+          "reasoning": {
+            "default": "",
+            "title": "Reasoning",
+            "type": "string"
+          }
+        },
+        "required": [
+          "answer"
+        ],
+        "title": "LearnerSubmission",
+        "type": "object"
+      },
+      "MasteryScores": {
+        "additionalProperties": false,
+        "description": "Mastery scores for one knowledge point.",
+        "properties": {
+          "calculation": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Calculation",
+            "type": "number"
+          },
+          "concept": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Concept",
+            "type": "number"
+          },
+          "interpretation": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Interpretation",
+            "type": "number"
+          },
+          "python": {
+            "default": 0.5,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Python",
+            "type": "number"
+          }
+        },
+        "title": "MasteryScores",
+        "type": "object"
+      },
+      "OptionalModelStatus": {
+        "description": "Whether optional online explanation is configured, without exposing secrets.",
+        "enum": [
+          "disabled",
+          "enabled",
+          "degraded"
+        ],
+        "title": "OptionalModelStatus",
+        "type": "string"
+      },
+      "PublicQuestion": {
+        "additionalProperties": false,
+        "description": "Question fields allowed across the API; answers and grading rules are absent.",
+        "properties": {
+          "concept_id": {
+            "$ref": "#/components/schemas/ConceptId"
+          },
+          "dataset": {
+            "additionalProperties": true,
+            "title": "Dataset",
+            "type": "object"
+          },
+          "difficulty": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Difficulty",
+            "type": "number"
+          },
+          "id": {
+            "pattern": "^[a-z0-9_]{3,100}$",
+            "title": "Id",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "question_type": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "concept_id",
+          "question_type",
+          "difficulty",
+          "prompt",
+          "dataset"
+        ],
+        "title": "PublicQuestion",
+        "type": "object"
+      },
+      "QuestionType": {
+        "description": "The learning dimension primarily observed by a question.",
+        "enum": [
+          "concept",
+          "python",
+          "interpretation"
+        ],
+        "title": "QuestionType",
+        "type": "string"
+      },
+      "RecommendRequest": {
+        "additionalProperties": false,
+        "description": "Request a safe public question for one anonymous profile and concept.",
+        "properties": {
+          "anonymous_profile_id": {
+            "pattern": "^(?:local|api)_anon_[0-9a-f]{16,64}$",
+            "title": "Anonymous Profile Id",
+            "type": "string"
+          },
+          "concept_id": {
+            "$ref": "#/components/schemas/ConceptId"
+          },
+          "idempotency_key": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "request_id",
+          "idempotency_key",
+          "anonymous_profile_id",
+          "concept_id"
+        ],
+        "title": "RecommendRequest",
+        "type": "object"
+      },
+      "RecommendResponse": {
+        "additionalProperties": false,
+        "description": "Public next-question envelope.",
+        "properties": {
+          "idempotency_key": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "question": {
+            "$ref": "#/components/schemas/PublicQuestion"
+          },
+          "request_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "1.0.0",
+            "default": "1.0.0",
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "idempotency_key",
+          "question"
+        ],
+        "title": "RecommendResponse",
+        "type": "object"
+      },
+      "RecommendationKind": {
+        "description": "Deterministic category for the learner's immediate next action.",
+        "enum": [
+          "next_question",
+          "complete",
+          "blocked",
+          "retry_contradiction",
+          "retry_insufficient",
+          "retry_irrelevant",
+          "retry_unsafe",
+          "retry_answer"
+        ],
+        "title": "RecommendationKind",
+        "type": "string"
+      },
+      "SubmissionField": {
+        "description": "Learner-authored fields that may be cited as observable evidence.",
+        "enum": [
+          "answer",
+          "reasoning",
+          "python_code"
+        ],
+        "title": "SubmissionField",
+        "type": "string"
+      }
+    }
+  },
+  "info": {
+    "description": "本地验证的、平台无关的 JSON 契约。当前实现只允许回环地址；公网部署必须另加 HTTPS、鉴权、限流和密钥管理。",
+    "title": "概率统计 × Python 学习诊断 API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "parameters": [
+          {
+            "description": "用于健康检查及请求正文校验前错误的可选追踪标识；有效 POST 请求以正文 request_id 为准。",
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "服务健康"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "安全内部错误"
+          }
+        }
+      },
+      "head": {
+        "operationId": "healthHead",
+        "parameters": [
+          {
+            "description": "用于健康检查及请求正文校验前错误的可选追踪标识；有效 POST 请求以正文 request_id 为准。",
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "服务健康；响应不含正文"
+          },
+          "500": {
+            "description": "安全内部错误；响应不含正文"
+          }
+        }
+      }
+    },
+    "/v1/diagnose": {
+      "post": {
+        "operationId": "diagnose",
+        "parameters": [
+          {
+            "description": "用于健康检查及请求正文校验前错误的可选追踪标识；有效 POST 请求以正文 request_id 为准。",
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiagnoseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiagnoseResponse"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "JSON 无效"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "操作未完成"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "操作未完成"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "请求过大"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "媒体类型不支持"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "字段校验失败"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "安全内部错误"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "操作未完成"
+          }
+        }
+      }
+    },
+    "/v1/hint": {
+      "post": {
+        "operationId": "hint",
+        "parameters": [
+          {
+            "description": "用于健康检查及请求正文校验前错误的可选追踪标识；有效 POST 请求以正文 request_id 为准。",
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HintRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HintResponse"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "JSON 无效"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "操作未完成"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "请求过大"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "媒体类型不支持"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "字段校验失败"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "安全内部错误"
+          }
+        }
+      }
+    },
+    "/v1/recommend": {
+      "post": {
+        "operationId": "recommend",
+        "parameters": [
+          {
+            "description": "用于健康检查及请求正文校验前错误的可选追踪标识；有效 POST 请求以正文 request_id 为准。",
+            "in": "header",
+            "name": "X-Request-ID",
+            "required": false,
+            "schema": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendResponse"
+                }
+              }
+            },
+            "description": "成功"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "JSON 无效"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "操作未完成"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "请求过大"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "媒体类型不支持"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "字段校验失败"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "安全内部错误"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "操作未完成"
+          }
+        }
+      }
+    }
+  },
+  "x-public-deployment-ready": false,
+  "x-service-version": "0.1.0"
+}
