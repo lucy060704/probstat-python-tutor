@@ -68,7 +68,7 @@ def recommend_from_findings(
 ) -> RecommendationDecision:
     """Choose one immediate action from deterministic findings and policy output."""
 
-    if grade.is_correct:
+    if grade.answer_is_correct:
         return _correct_recommendation(next_question)
 
     primary_dimension = _primary_dimension(question)

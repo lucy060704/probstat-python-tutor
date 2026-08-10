@@ -15,6 +15,7 @@ from probstat_tutor.schemas import (
     DiagnosticReport,
     EvidenceVerdict,
     QuestionType,
+    SubmissionField,
 )
 from probstat_tutor.service import LearningService, LearningServiceError
 
@@ -221,11 +222,30 @@ with student_tab:
             st.button("下一题", disabled=True, width="stretch")
         else:
             if report.overall_correctness == 1.0:
-                st.success("回答正确")
+                st.success("答案正确")
             elif report.overall_correctness > 0:
-                st.warning(f"部分证据成立：{report.overall_correctness:.2f}")
+                st.warning(f"答案部分正确：{report.overall_correctness:.2f}")
             else:
-                st.error("暂未答对，已自动开启一级提示")
+                st.error("答案暂未答对，已自动开启一级提示")
+
+            reasoning_assessment = report.reasoning_assessment
+            if reasoning_assessment.verdict == EvidenceVerdict.SUPPORTS:
+                st.success(f"理由判断：{reasoning_assessment.message_zh}")
+            elif reasoning_assessment.verdict in {
+                EvidenceVerdict.CONTRADICTS,
+                EvidenceVerdict.INSUFFICIENT,
+            }:
+                st.warning(
+                    "理由单独判断（不改变答案正确性）："
+                    f"{reasoning_assessment.message_zh}"
+                )
+            elif reasoning_assessment.verdict in {
+                EvidenceVerdict.IRRELEVANT,
+                EvidenceVerdict.UNSAFE,
+            }:
+                st.error(f"理由判断：{reasoning_assessment.message_zh}")
+            elif reasoning_assessment.required or reasoning_assessment.provided:
+                st.caption(f"理由判断：{reasoning_assessment.message_zh}")
 
             if report.delivery_mode == DeliveryMode.MODEL_FALLBACK:
                 st.warning(report.delivery_message_zh)
@@ -249,12 +269,13 @@ with student_tab:
                 finding
                 for finding in report.grader_findings
                 if finding.verdict != EvidenceVerdict.SUPPORTS
+                and finding.source != SubmissionField.REASONING
             ]
             if blocking_findings:
                 for finding in blocking_findings:
                     st.write(f"- {finding.message_zh}")
             elif report.misconception_tags:
-                st.caption("已记录可核查的误区标签，请结合诊断证据订正。")
+                st.caption("理由相关问题已在上方单独展示。")
             else:
                 st.caption("当前没有确定的误区标签。")
 
