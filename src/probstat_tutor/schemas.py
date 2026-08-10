@@ -284,10 +284,31 @@ class GradeResult(BaseModel):
 
     score: float = Field(ge=0.0, le=1.0)
     is_correct: bool
+    answer_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    answer_is_correct: bool | None = None
     evidence: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
     misconception_candidates: list[str] = Field(default_factory=list)
     findings: list[EvidenceFinding] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def answer_channel_defaults_to_base_grade(self) -> Self:
+        if self.answer_score is None:
+            self.answer_score = self.score
+        if self.answer_is_correct is None:
+            self.answer_is_correct = self.is_correct
+        return self
+
+
+class ReasoningAssessment(BaseModel):
+    """Reasoning quality reported separately from answer correctness."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    required: bool = False
+    provided: bool = False
+    verdict: EvidenceVerdict | None = None
+    message_zh: str = "本题未配置单独的理由判断。"
 
 
 class TextEvidenceRule(BaseModel):
@@ -587,6 +608,9 @@ class DiagnosticReport(BaseModel):
     evidence: list[str] = Field(min_length=1)
     learner_evidence: list[LearnerEvidence] = Field(default_factory=list)
     grader_findings: list[EvidenceFinding] = Field(default_factory=list)
+    reasoning_assessment: ReasoningAssessment = Field(
+        default_factory=ReasoningAssessment
+    )
     misconception_tags: list[str]
     feedback: str
     hint_level: int = Field(ge=0, le=4)

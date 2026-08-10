@@ -9,6 +9,7 @@ from pydantic import SecretStr
 from probstat_tutor.config import Settings
 from probstat_tutor.curriculum import load_default_question_bank
 from probstat_tutor.graders import (
+    assess_reasoning,
     combine_submission_evidence,
     grade_multiple_choice,
     grade_numeric,
@@ -47,11 +48,38 @@ def test_correct_answer_and_reasoning_produce_support_finding() -> None:
 
     assert result.is_correct is True
     assert result.score == 1.0
+    assert result.answer_is_correct is True
+    assert result.answer_score == 1.0
     assert result.misconception_candidates == []
     assert any(finding.verdict == EvidenceVerdict.SUPPORTS for finding in result.findings)
 
 
-def test_correct_answer_with_wrong_reasoning_is_incorrect() -> None:
+def test_screenshot_answer_and_paraphrased_reason_are_accepted() -> None:
+    question = _question("mean_median_concept_01")
+    submission = LearnerSubmission(
+        answer="中位数",
+        reasoning="均值不可以作为标准",
+    )
+
+    result = combine_submission_evidence(
+        question,
+        submission,
+        grade_multiple_choice(
+            submission.answer,
+            question.expected_answer,
+            accepted_answers=question.accepted_answers,
+        ),
+    )
+    reasoning = assess_reasoning(question, submission, result.findings)
+
+    assert result.is_correct is True
+    assert result.score == 1.0
+    assert result.answer_is_correct is True
+    assert result.answer_score == 1.0
+    assert reasoning.verdict == EvidenceVerdict.SUPPORTS
+
+
+def test_correct_answer_with_wrong_reasoning_is_reported_separately() -> None:
     question = _question("variance_std_python_01")
     submission = LearnerSubmission(
         answer="2",
@@ -66,7 +94,9 @@ def test_correct_answer_with_wrong_reasoning_is_incorrect() -> None:
     )
 
     assert result.is_correct is False
+    assert result.answer_is_correct is True
     assert result.score == 0.0
+    assert result.answer_score == 1.0
     assert result.misconception_candidates == ["larger_std_more_stable"]
     contradiction = next(
         finding
@@ -75,6 +105,8 @@ def test_correct_answer_with_wrong_reasoning_is_incorrect() -> None:
     )
     assert contradiction.source == SubmissionField.REASONING
     assert contradiction.quote == submission.reasoning
+    reasoning = assess_reasoning(question, submission, result.findings)
+    assert reasoning.verdict == EvidenceVerdict.CONTRADICTS
 
 
 def test_correct_answer_with_wrong_python_structure_is_incorrect() -> None:
@@ -97,7 +129,7 @@ def test_correct_answer_with_wrong_python_structure_is_incorrect() -> None:
     assert result.findings[-1].source == SubmissionField.PYTHON_CODE
 
 
-def test_required_reasoning_cannot_be_replaced_by_correct_choice() -> None:
+def test_missing_required_reasoning_does_not_override_correct_answer() -> None:
     question = _question("variance_std_concept_01")
     submission = LearnerSubmission(answer="group_b")
 
@@ -108,9 +140,15 @@ def test_required_reasoning_cannot_be_replaced_by_correct_choice() -> None:
     )
 
     assert result.is_correct is False
+    assert result.score == 0.0
+    assert result.answer_is_correct is True
+    assert result.answer_score == 1.0
     assert result.misconception_candidates == ["insufficient_evidence"]
     assert result.findings[0].source == SubmissionField.REASONING
     assert result.findings[0].quote is None
+    reasoning = assess_reasoning(question, submission, result.findings)
+    assert reasoning.verdict == EvidenceVerdict.INSUFFICIENT
+    assert reasoning.provided is False
 
 
 def test_correct_reasoning_does_not_override_wrong_answer() -> None:
@@ -164,6 +202,7 @@ def test_unrelated_negation_does_not_hide_later_misconception() -> None:
     )
 
     assert result.is_correct is False
+    assert result.answer_is_correct is True
     assert result.misconception_candidates == [
         "parameter_has_95_percent_probability"
     ]
@@ -269,6 +308,7 @@ def test_question_owned_missing_reasoning_rules_replace_generic_tag() -> None:
         )
 
         assert result.is_correct is False
+        assert result.answer_is_correct is True
         assert result.misconception_candidates == [expected_tag]
         assert result.findings[-1].verdict == EvidenceVerdict.INSUFFICIENT
 

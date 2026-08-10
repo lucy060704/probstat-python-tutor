@@ -37,6 +37,23 @@ def test_wrong_answer_automatically_opens_first_hint() -> None:
     assert any(expander.label == "本地知识依据与引用" for expander in app.expander)
 
 
+def test_correct_answer_and_reasoning_are_displayed_separately() -> None:
+    app_path = Path(__file__).resolve().parents[1] / "app.py"
+    app = AppTest.from_file(str(app_path)).run(timeout=20)
+
+    app.selectbox[0].select("均值与中位数")
+    app.run(timeout=20)
+    app.text_input[0].set_value("中位数")
+    app.text_area[0].set_value("均值不可以作为标准")
+    next(button for button in app.button if button.label == "提交").click()
+    app.run(timeout=20)
+
+    assert not app.exception
+    assert any("答案正确" in success.value for success in app.success)
+    assert any("理由判断" in success.value for success in app.success)
+    assert not any("答案暂未答对" in error.value for error in app.error)
+
+
 def test_probability_simulation_concept_renders_without_exception() -> None:
     app_path = Path(__file__).resolve().parents[1] / "app.py"
     app = AppTest.from_file(str(app_path)).run(timeout=20)

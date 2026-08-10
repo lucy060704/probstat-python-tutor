@@ -23,6 +23,7 @@ from probstat_tutor.schemas import (
     PythonStaticVariant,
     PythonStructureKind,
     Question,
+    ReasoningAssessment,
     SubmissionField,
     TextEvidenceRule,
 )
@@ -119,6 +120,15 @@ _EVIDENCE_CANONICAL_REPLACEMENTS = (
     ("一百", "100"),
     ("采样", "抽样"),
     ("平均数", "均值"),
+    ("不可以作为标准", "不适合代表"),
+    ("不能作为标准", "不适合代表"),
+    ("不适合作为标准", "不适合代表"),
+    ("不具有代表性", "不适合代表"),
+    ("不太敏感", "不容易受影响"),
+    ("不敏感", "不容易受影响"),
+    ("带偏", "受影响"),
+    ("拖高", "拉高"),
+    ("抬高", "拉高"),
     ("取样", "抽样"),
     ("根号", "√"),
     ("除以", "/"),
@@ -446,6 +456,53 @@ def combine_submission_evidence(
     return _finalize_evidence_grade(answer_result, findings)
 
 
+def assess_reasoning(
+    question: Question,
+    submission: LearnerSubmission,
+    findings: Sequence[EvidenceFinding],
+) -> ReasoningAssessment:
+    """Summarize reasoning quality without changing answer correctness."""
+
+    provided = bool(submission.reasoning.strip())
+    reasoning_findings = [
+        finding
+        for finding in findings
+        if finding.source == SubmissionField.REASONING
+    ]
+    if reasoning_findings:
+        verdict_priority = {
+            EvidenceVerdict.UNSAFE: 0,
+            EvidenceVerdict.IRRELEVANT: 1,
+            EvidenceVerdict.CONTRADICTS: 2,
+            EvidenceVerdict.INSUFFICIENT: 3,
+            EvidenceVerdict.SUPPORTS: 4,
+        }
+        selected = min(
+            enumerate(reasoning_findings),
+            key=lambda item: (verdict_priority[item[1].verdict], item[0]),
+        )[1]
+        return ReasoningAssessment(
+            required=question.evidence_policy.reasoning_required,
+            provided=provided,
+            verdict=selected.verdict,
+            message_zh=selected.message_zh,
+        )
+
+    if not provided:
+        message = (
+            "题目要求说明理由，但本次没有提供思考过程。"
+            if question.evidence_policy.reasoning_required
+            else "本题未要求提供理由。"
+        )
+    else:
+        message = "已记录思考过程；本题未配置可单独判定的理由规则。"
+    return ReasoningAssessment(
+        required=question.evidence_policy.reasoning_required,
+        provided=provided,
+        message_zh=message,
+    )
+
+
 def contains_model_attack_text(submission: LearnerSubmission) -> bool:
     """Conservatively isolate any raw attack phrase from the optional model."""
 
@@ -589,7 +646,9 @@ def _finalize_evidence_grade(
         for finding in findings
         if finding.verdict != EvidenceVerdict.SUPPORTS
     ]
+    answer_blocking = [finding for finding in findings if _finding_blocks_answer(finding)]
     is_correct = answer_result.is_correct and not blocking
+    answer_is_correct = bool(answer_result.answer_is_correct) and not answer_blocking
     tags = _unique_strings(
         finding.misconception_tag
         for finding in findings
@@ -612,10 +671,24 @@ def _finalize_evidence_grade(
     return GradeResult(
         score=1.0 if is_correct else 0.0,
         is_correct=is_correct,
+        answer_score=1.0 if answer_is_correct else 0.0,
+        answer_is_correct=answer_is_correct,
         evidence=evidence,
         errors=errors,
         misconception_candidates=tags,
         findings=findings,
+    )
+
+
+def _finding_blocks_answer(finding: EvidenceFinding) -> bool:
+    """Keep pedagogical reasoning feedback separate from the answer verdict."""
+
+    if finding.verdict == EvidenceVerdict.SUPPORTS:
+        return False
+    return not (
+        finding.source == SubmissionField.REASONING
+        and finding.verdict
+        in {EvidenceVerdict.CONTRADICTS, EvidenceVerdict.INSUFFICIENT}
     )
 
 

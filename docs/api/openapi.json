@@ -298,6 +298,9 @@
             "title": "Question Id",
             "type": "string"
           },
+          "reasoning_assessment": {
+            "$ref": "#/components/schemas/ReasoningAssessment"
+          },
           "recommendation_dimension": {
             "anyOf": [
               {
@@ -820,6 +823,40 @@
         ],
         "title": "QuestionType",
         "type": "string"
+      },
+      "ReasoningAssessment": {
+        "additionalProperties": false,
+        "description": "Reasoning quality reported separately from answer correctness.",
+        "properties": {
+          "message_zh": {
+            "default": "本题未配置单独的理由判断。",
+            "title": "Message Zh",
+            "type": "string"
+          },
+          "provided": {
+            "default": false,
+            "title": "Provided",
+            "type": "boolean"
+          },
+          "required": {
+            "default": false,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EvidenceVerdict"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "title": "ReasoningAssessment",
+        "type": "object"
       },
       "RecommendRequest": {
         "additionalProperties": false,

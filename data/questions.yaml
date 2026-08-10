@@ -1831,7 +1831,19 @@ questions:
       interpretation: 0.30
     evidence_policy:
       reasoning_required: true
-      reasoning_support_any: [异常值, 极端值, 异常高值, 拉高均值, 中位数更能]
+      reasoning_support_any:
+        - 异常值
+        - 极端值
+        - 异常高值
+        - 拉高均值
+        - 均值受影响
+        - 均值容易受影响
+        - 均值不适合代表
+        - 中位数更能
+        - 中位数更合适
+        - 中位数更稳健
+        - 不容易受影响
+        - 排序中间
       relevance_terms: [均值, 中位数, 异常值, 极端值, "50000"]
       text_rules:
         - rule_id: mean_always_best
@@ -1870,7 +1882,7 @@ questions:
         interpretation: 本例应选中位数描述这五个家庭的典型收入；这一选择不会改变收入，也不能直接外推到更大人群。
     python_code_required: false
     review_status: pending_teacher_review
-    version: 0.1.0
+    version: 0.1.1
 
   - id: mean_median_python_01
     title: 用 Pandas 计算中位数

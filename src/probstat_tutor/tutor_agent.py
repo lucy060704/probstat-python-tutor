@@ -13,6 +13,7 @@ from pydantic import ValidationError
 from probstat_tutor.config import Settings, get_settings
 from probstat_tutor.curriculum import load_default_question_bank
 from probstat_tutor.graders import (
+    assess_reasoning,
     combine_submission_evidence,
     contains_model_attack_text,
     grade_dataframe_result,
@@ -412,7 +413,7 @@ class TutorAgent:
             text=f"{question.title}\n{question.prompt}",
             concept_id=question.concept_id,
             knowledge_node_ids=question.knowledge_node_ids,
-            disclosure_level=4 if grade.is_correct else max(1, hint_level),
+            disclosure_level=4 if grade.answer_is_correct else max(1, hint_level),
             purpose=RetrievalPurpose.DIAGNOSTIC,
         )
         deterministic_report = _build_deterministic_report(
@@ -424,7 +425,7 @@ class TutorAgent:
             hint_level=hint_level,
             knowledge_result=knowledge_result,
         )
-        first_wrong = not grade.is_correct and previous_wrong_attempts == 0
+        first_wrong = not grade.answer_is_correct and previous_wrong_attempts == 0
 
         unsafe_submission = any(
             finding.verdict == EvidenceVerdict.UNSAFE for finding in grade.findings
@@ -571,12 +572,25 @@ def _build_deterministic_report(
         )
 
     recommendation = recommend_from_findings(question, grade, decision)
-    if grade.is_correct:
+    reasoning_assessment = assess_reasoning(question, submission, grade.findings)
+    if grade.answer_is_correct:
+        if reasoning_assessment.verdict == EvidenceVerdict.SUPPORTS:
+            reasoning_feedback = "理由也包含了与正确依据一致的统计关系。"
+        elif reasoning_assessment.verdict in {
+            EvidenceVerdict.CONTRADICTS,
+            EvidenceVerdict.INSUFFICIENT,
+        }:
+            reasoning_feedback = (
+                "答案判定不受影响；理由仍需要根据单独诊断继续完善。"
+            )
+        else:
+            reasoning_feedback = reasoning_assessment.message_zh
         feedback = (
-            "确定性判题显示回答正确。"
+            "确定性判题显示答案正确。"
+            f"{reasoning_feedback}"
             f"本题主要观察{CAPABILITY_LABELS_ZH[primary_dimension]}维度。"
         )
-        uncertainty = "无：本次正确性由确定性规则判定。"
+        uncertainty = "无：答案正确性只由答案通道的确定性规则判定。"
     else:
         feedback = _guiding_feedback(primary_dimension)
         if isinstance(question.expected_answer, str):
@@ -586,11 +600,14 @@ def _build_deterministic_report(
 
     return DiagnosticReport(
         question_id=question.id,
-        overall_correctness=grade.score,
+        overall_correctness=(
+            grade.answer_score if grade.answer_score is not None else grade.score
+        ),
         dimension_scores=state.mastery[question.concept_id],
         evidence=evidence,
         learner_evidence=_learner_evidence(submission),
         grader_findings=grade.findings,
+        reasoning_assessment=reasoning_assessment,
         misconception_tags=grade.misconception_candidates,
         feedback=feedback,
         hint_level=hint_level,

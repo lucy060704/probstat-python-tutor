@@ -37,7 +37,13 @@ def apply_attempt(
     if hint_level not in HINT_CONFIDENCE:
         raise ValueError("hint_level 必须是 0、1、2、3 或 4。")
 
-    adjusted_evidence = _clip(grade.score * HINT_CONFIDENCE[hint_level])
+    answer_score = grade.answer_score if grade.answer_score is not None else grade.score
+    answer_is_correct = (
+        grade.answer_is_correct
+        if grade.answer_is_correct is not None
+        else grade.is_correct
+    )
+    adjusted_evidence = _clip(answer_score * HINT_CONFIDENCE[hint_level])
     old_scores = state.mastery[question.concept_id]
     new_values: dict[str, float] = {}
 
@@ -53,13 +59,13 @@ def apply_attempt(
         question_id=question.id,
         concept_id=question.concept_id,
         difficulty=question.difficulty,
-        score=grade.score,
+        score=answer_score,
         adjusted_evidence=adjusted_evidence,
-        is_correct=grade.is_correct,
+        is_correct=answer_is_correct,
         hint_level=hint_level,
     )
     completed = state.completed_question_ids
-    if grade.is_correct:
+    if answer_is_correct:
         completed = completed | {question.id}
 
     return LearningState(
