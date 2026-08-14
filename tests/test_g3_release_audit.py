@@ -43,6 +43,7 @@ def test_release_manifest_excludes_private_runtime_and_invalid_eval_data() -> No
     assert "data/questions.yaml" in paths
     assert "data/curriculum_catalog.yaml" in paths
     assert "docs/api/openapi.json" in paths
+    assert "docs/competition/adp_upload/code/deterministic_grader.py" in paths
     assert "evals/rag/development.jsonl" in paths
     assert "data/learning_state.sqlite3" not in paths
     assert "data/sessions.sqlite3" not in paths
