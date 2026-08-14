@@ -66,6 +66,7 @@ RELEASE_GLOBS = (
     "docs/competition/g*.md",
     "docs/competition/g*.json",
     "docs/competition/assets/g3_3/*",
+    "docs/competition/adp_upload/code/*.py",
     "evals/*.py",
     "evals/cases.jsonl",
     "evals/development/*.jsonl",
